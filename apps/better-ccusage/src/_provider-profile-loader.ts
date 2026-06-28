@@ -1,5 +1,5 @@
 import type { Database, SqlJsStatic, SqlValue } from 'sql.js';
-import type { ProviderProfile } from './_types.ts';
+import type { ProviderProfile, ProviderScheduleEntry } from './_types.ts';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import initSqlJs from 'sql.js';
@@ -207,6 +207,58 @@ export async function loadProviderProfiles(options: LoadProviderProfileOptions =
 // `getSqlEngine` keeps sql.js live for bundlers; the lazy memo ensures the WASM
 // init runs once per process.
 
+// ─── Usage → Provider temporal mapping ──────────────────────────────────────
+//
+// JSONL has no base_url and cc-switch stores no switch history, so we map each
+// usage entry (by timestamp) to a providerId via a priority chain. The model
+// *supplier* is NOT resolved here — it lives in the per-entry model_id string.
+
+export type ProviderResolutionContext = {
+	profiles: ProviderProfile[];
+	schedule?: ProviderScheduleEntry[];
+};
+
+/**
+ * Resolve the providerId for a usage entry at `timestampMs` (epoch millis).
+ *
+ * Priority:
+ *  1. User-declared `schedule` range containing the timestamp (most reliable —
+ *     explicit historical disambiguation).
+ *  2. The `is_current` profile snapshot (accurate for recent entries, i.e. the
+ *     period since the last switch).
+ *  3. `undefined` — caller should treat the entry as `unknown` (model_id still
+ *     resolves via static USD pricing, preserving current behavior).
+ */
+export function resolveProviderId(
+	timestampMs: number,
+	ctx: ProviderResolutionContext,
+): string | undefined {
+	if (Number.isNaN(timestampMs)) {
+		return undefined;
+	}
+	const ts = timestampMs;
+
+	// 1. Explicit schedule override.
+	if (ctx.schedule != null && ctx.schedule.length > 0) {
+		for (const entry of ctx.schedule) {
+			const from = new Date(entry.from).getTime();
+			const to = new Date(entry.to).getTime();
+			if (ts >= from && ts <= to) {
+				return entry.providerId;
+			}
+		}
+	}
+
+	// 2. is_current snapshot.
+	const current = ctx.profiles.find(p => p.isCurrent === true);
+	if (current != null) {
+		return current.id;
+	}
+
+	// 3. Unmapped.
+	return undefined;
+}
+
 // ─── In-source tests ─────────────────────────────────────────────────────────
 
 if (import.meta.vitest != null) {
@@ -214,6 +266,35 @@ if (import.meta.vitest != null) {
 		it('returns empty when DB path does not exist', async () => {
 			const profiles = await loadProviderProfiles({ ccSwitchDbPath: '/nonexistent/cc-switch.db' });
 			expect(profiles).toEqual([]);
+		});
+	});
+
+	describe('resolveProviderId', () => {
+		const profiles = [
+			{ id: 'bailian-aliyun-singapore', name: 'Bailian SG', appType: 'claude', isCurrent: true } as never,
+			{ id: 'claude-official', name: 'Official', appType: 'claude', isCurrent: false } as never,
+		];
+
+		it('schedule override wins when timestamp falls in range', () => {
+			const schedule = [
+				{ from: '2026-01-01T00:00:00.000Z' as never, to: '2026-01-31T23:59:59.000Z' as never, providerId: 'claude-official' } as never,
+			];
+			const ts = new Date('2026-01-15T00:00:00.000Z').getTime();
+			expect(resolveProviderId(ts, { profiles, schedule })).toBe('claude-official');
+		});
+
+		it('falls back to is_current snapshot outside schedule ranges', () => {
+			const ts = new Date('2026-06-01T00:00:00.000Z').getTime();
+			expect(resolveProviderId(ts, { profiles })).toBe('bailian-aliyun-singapore');
+		});
+
+		it('returns undefined when no profiles and no schedule', () => {
+			const ts = new Date('2026-06-01T00:00:00.000Z').getTime();
+			expect(resolveProviderId(ts, { profiles: [] })).toBeUndefined();
+		});
+
+		it('returns undefined for invalid timestamp', () => {
+			expect(resolveProviderId(Number.NaN, { profiles })).toBeUndefined();
 		});
 	});
 }

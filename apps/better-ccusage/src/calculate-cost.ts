@@ -31,6 +31,7 @@ type TokenData = AggregatedTokenCounts;
  */
 type TokenTotals = TokenData & {
 	totalCost: number;
+	costByCurrency: Record<string, number>;
 };
 
 /**
@@ -41,9 +42,31 @@ type TotalsObject = TokenTotals & {
 };
 
 /**
+ * Merge a per-item cost-by-currency map into the accumulator. When an item
+ * lacks `costByCurrency`, fall back to `{ USD: item.totalCost }` so legacy
+ * rows (and codex/opencode) remain representable. Sums amounts per currency.
+ */
+function mergeCostByCurrency(
+	acc: Record<string, number>,
+	item: { totalCost: number; costByCurrency?: Record<string, number> },
+): Record<string, number> {
+	const source = item.costByCurrency ?? { USD: item.totalCost };
+	for (const [currency, amount] of Object.entries(source)) {
+		acc[currency] = (acc[currency] ?? 0) + amount;
+	}
+	return acc;
+}
+
+/**
  * Calculates total token usage and cost across multiple usage data entries
  * @param data - Array of daily, monthly, or session usage data
  * @returns Aggregated token totals and cost
+ *
+ * Invariant: `totalCost === sum(costByCurrency.values)` while every item's
+ * costs are denominated in USD (the legacy default). Multi-currency items
+ * (step 6) populate `costByCurrency` with their billing currency; the display
+ * layer converts to the statistics currency, at which point `totalCost`
+ * becomes the statistics-currency projection of `costByCurrency`.
  */
 export function calculateTotals(
 	data: Array<DailyUsage | MonthlyUsage | WeeklyUsage | SessionUsage>,
@@ -55,6 +78,7 @@ export function calculateTotals(
 			cacheCreationTokens: acc.cacheCreationTokens + item.cacheCreationTokens,
 			cacheReadTokens: acc.cacheReadTokens + item.cacheReadTokens,
 			totalCost: acc.totalCost + item.totalCost,
+			costByCurrency: mergeCostByCurrency(acc.costByCurrency, item),
 		}),
 		{
 			inputTokens: 0,
@@ -62,6 +86,7 @@ export function calculateTotals(
 			cacheCreationTokens: 0,
 			cacheReadTokens: 0,
 			totalCost: 0,
+			costByCurrency: {},
 		},
 	);
 }
@@ -254,6 +279,7 @@ if (import.meta.vitest != null) {
 				cacheCreationTokens: 25,
 				cacheReadTokens: 10,
 				totalCost: 0.01,
+				costByCurrency: { USD: 0.01 },
 			};
 
 			const totalsObject = createTotalsObject(totals);
@@ -264,6 +290,7 @@ if (import.meta.vitest != null) {
 				cacheReadTokens: 10,
 				totalTokens: 185,
 				totalCost: 0.01,
+				costByCurrency: { USD: 0.01 },
 			});
 		});
 
@@ -275,7 +302,41 @@ if (import.meta.vitest != null) {
 				cacheCreationTokens: 0,
 				cacheReadTokens: 0,
 				totalCost: 0,
+				costByCurrency: {},
 			});
+		});
+
+		it('calculateTotals should merge costByCurrency across items', () => {
+			const dailyData: DailyUsage[] = [
+				{
+					date: createDailyDate('2024-01-01'),
+					inputTokens: 100,
+					outputTokens: 50,
+					cacheCreationTokens: 0,
+					cacheReadTokens: 0,
+					totalCost: 0.01,
+					costByCurrency: { USD: 0.01 },
+					modelsUsed: [createModelName('claude-sonnet-4-20250514')],
+					modelBreakdowns: [],
+				},
+				{
+					date: createDailyDate('2024-01-02'),
+					inputTokens: 0,
+					outputTokens: 0,
+					cacheCreationTokens: 0,
+					cacheReadTokens: 0,
+					totalCost: 0.02,
+					costByCurrency: { CNY: 0.14 },
+					modelsUsed: [createModelName('glm-4.5')],
+					modelBreakdowns: [],
+				},
+			];
+
+			const totals = calculateTotals(dailyData);
+			// Invariant: USD-only items sum to totalCost; multi-currency items
+			// carry their own currency bucket.
+			expect(totals.costByCurrency).toEqual({ USD: 0.01, CNY: 0.14 });
+			expect(totals.totalCost).toBeCloseTo(0.03);
 		});
 	});
 }
