@@ -15,6 +15,8 @@ import type {
 	Bucket,
 	CostMode,
 	ModelName,
+	ProviderProfile,
+	ProviderScheduleEntry,
 	SortOrder,
 	Version,
 } from './_types.ts';
@@ -764,6 +766,18 @@ export type LoadOptions = {
 	startOfWeek?: WeekDay; // Start of week for weekly aggregation
 	timezone?: string; // Timezone for date grouping (e.g., 'UTC', 'America/New_York'). Defaults to system timezone
 	locale?: string; // Locale for date/time formatting (e.g., 'en-US', 'ja-JP'). Defaults to 'en-US'
+	// ─── Multi-currency & provider options ─────────────────────────────────
+	statsCurrency?: string; // Statistics currency (ISO 4217) to project costs into
+	paymentCurrency?: string; // Payment currency for the payable column
+	costColumns?: string; // Comma-separated cost columns: billing,payable,stats
+	paymentsPath?: string; // Path to per-transaction payment log
+	pricingPath?: string; // Path to per-platform user pricing overrides
+	ccSwitchDbPath?: string; // Path to cc-switch SQLite DB (provider profiles)
+	provider?: string; // Filter to a specific provider id
+	rates?: Record<string, number>; // User-supplied FX rates ("FROM/TO" -> rate)
+	providerOverrides?: Record<string, Partial<ProviderProfile>>; // override cc-switch profile fields
+	providerProfiles?: ProviderProfile[]; // manually-supplied profiles (no cc-switch)
+	providerSchedule?: ProviderScheduleEntry[]; // temporal provider mapping
 } & DateFilter;
 
 /**
@@ -822,7 +836,7 @@ export async function loadDailyUsageData(
 	const mode = options?.mode ?? 'auto';
 
 	// Use CcusagePricingFetcher with try/finally for cleanup
-	const fetcher = mode === 'display' ? null : new CcusagePricingFetcher();
+	const fetcher = mode === 'display' ? null : new CcusagePricingFetcher({ pricingPath: options?.pricingPath });
 
 	// Track processed message+request combinations for deduplication
 	const processedHashes = new Set<string>();
@@ -1055,7 +1069,7 @@ export async function loadSessionData(
 	const mode = options?.mode ?? 'auto';
 
 	// Use CcusagePricingFetcher with try/finally for cleanup
-	const fetcher = mode === 'display' ? null : new CcusagePricingFetcher();
+	const fetcher = mode === 'display' ? null : new CcusagePricingFetcher({ pricingPath: options?.pricingPath });
 
 	// Track processed message+request combinations for deduplication
 	const processedHashes = new Set<string>();
@@ -1563,7 +1577,7 @@ export async function loadSessionBlockData(
 	const mode = options?.mode ?? 'auto';
 
 	// Use CcusagePricingFetcher with try/finally for cleanup
-	const fetcher = mode === 'display' ? null : new CcusagePricingFetcher();
+	const fetcher = mode === 'display' ? null : new CcusagePricingFetcher({ pricingPath: options?.pricingPath });
 
 	// Track processed message+request combinations for deduplication
 	const processedHashes = new Set<string>();

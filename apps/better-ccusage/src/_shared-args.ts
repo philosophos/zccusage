@@ -101,6 +101,39 @@ export const sharedArgs = {
 		description: 'Force compact mode for narrow displays (better for screenshots)',
 		default: false,
 	},
+	// ─── Multi-currency & provider args ─────────────────────────────────────
+	statsCurrency: {
+		type: 'string',
+		description: 'Statistics currency (ISO 4217) to project usage costs into, e.g. "CNY". Default: USD.',
+	},
+	paymentCurrency: {
+		type: 'string',
+		description: 'Payment currency (ISO 4217) for the payable column, e.g. "CNY". Default: USD.',
+	},
+	costColumns: {
+		type: 'string',
+		description: 'Comma-separated cost columns to show: billing,payable,stats. Default: billing.',
+	},
+	paymentsPath: {
+		type: 'string',
+		description: 'Path to the per-transaction payment log (better-ccusage-payments.json).',
+	},
+	pricingPath: {
+		type: 'string',
+		description: 'Path to the per-platform user pricing overrides (better-ccusage-pricing.json).',
+	},
+	ccSwitchDbPath: {
+		type: 'string',
+		description: 'Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.',
+	},
+	rate: {
+		type: 'string',
+		description: 'Exchange rate override as "FROM/TO=rate" (comma-separated for multiple), e.g. "USD/CNY=7.0".',
+	},
+	provider: {
+		type: 'string',
+		description: 'Filter/report only the given provider id (e.g. "bailian-aliyun-singapore").',
+	},
 } as const satisfies Args;
 
 /**

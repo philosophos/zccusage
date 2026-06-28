@@ -98,6 +98,46 @@
 							"description": "Force compact mode for narrow displays (better for screenshots)",
 							"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
 							"default": false
+						},
+						"statsCurrency": {
+							"type": "string",
+							"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
+							"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
+						},
+						"paymentCurrency": {
+							"type": "string",
+							"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
+							"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
+						},
+						"costColumns": {
+							"type": "string",
+							"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
+							"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
+						},
+						"paymentsPath": {
+							"type": "string",
+							"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
+							"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
+						},
+						"pricingPath": {
+							"type": "string",
+							"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
+							"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
+						},
+						"ccSwitchDbPath": {
+							"type": "string",
+							"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
+							"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
+						},
+						"rate": {
+							"type": "string",
+							"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
+							"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
+						},
+						"provider": {
+							"type": "string",
+							"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
+							"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
 						}
 					},
 					"additionalProperties": false,
@@ -196,6 +236,46 @@
 									"description": "Force compact mode for narrow displays (better for screenshots)",
 									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
 									"default": false
+								},
+								"statsCurrency": {
+									"type": "string",
+									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
+								},
+								"paymentCurrency": {
+									"type": "string",
+									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
+								},
+								"costColumns": {
+									"type": "string",
+									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
+									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
+								},
+								"paymentsPath": {
+									"type": "string",
+									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
+									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
+								},
+								"pricingPath": {
+									"type": "string",
+									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
+									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
+								},
+								"ccSwitchDbPath": {
+									"type": "string",
+									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
+									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
+								},
+								"rate": {
+									"type": "string",
+									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
+									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
+								},
+								"provider": {
+									"type": "string",
+									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
+									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
 								},
 								"instances": {
 									"type": "boolean",
@@ -305,6 +385,46 @@
 									"description": "Force compact mode for narrow displays (better for screenshots)",
 									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
 									"default": false
+								},
+								"statsCurrency": {
+									"type": "string",
+									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
+								},
+								"paymentCurrency": {
+									"type": "string",
+									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
+								},
+								"costColumns": {
+									"type": "string",
+									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
+									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
+								},
+								"paymentsPath": {
+									"type": "string",
+									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
+									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
+								},
+								"pricingPath": {
+									"type": "string",
+									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
+									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
+								},
+								"ccSwitchDbPath": {
+									"type": "string",
+									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
+									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
+								},
+								"rate": {
+									"type": "string",
+									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
+									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
+								},
+								"provider": {
+									"type": "string",
+									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
+									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
 								}
 							},
 							"additionalProperties": false
@@ -398,6 +518,46 @@
 									"description": "Force compact mode for narrow displays (better for screenshots)",
 									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
 									"default": false
+								},
+								"statsCurrency": {
+									"type": "string",
+									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
+								},
+								"paymentCurrency": {
+									"type": "string",
+									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
+								},
+								"costColumns": {
+									"type": "string",
+									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
+									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
+								},
+								"paymentsPath": {
+									"type": "string",
+									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
+									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
+								},
+								"pricingPath": {
+									"type": "string",
+									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
+									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
+								},
+								"ccSwitchDbPath": {
+									"type": "string",
+									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
+									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
+								},
+								"rate": {
+									"type": "string",
+									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
+									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
+								},
+								"provider": {
+									"type": "string",
+									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
+									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
 								},
 								"startOfWeek": {
 									"type": "string",
@@ -497,6 +657,46 @@
 									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
 									"default": false
 								},
+								"statsCurrency": {
+									"type": "string",
+									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
+								},
+								"paymentCurrency": {
+									"type": "string",
+									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
+								},
+								"costColumns": {
+									"type": "string",
+									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
+									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
+								},
+								"paymentsPath": {
+									"type": "string",
+									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
+									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
+								},
+								"pricingPath": {
+									"type": "string",
+									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
+									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
+								},
+								"ccSwitchDbPath": {
+									"type": "string",
+									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
+									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
+								},
+								"rate": {
+									"type": "string",
+									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
+									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
+								},
+								"provider": {
+									"type": "string",
+									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
+									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
+								},
 								"id": {
 									"type": "string",
 									"description": "Load usage data for a specific session ID",
@@ -594,6 +794,46 @@
 									"description": "Force compact mode for narrow displays (better for screenshots)",
 									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
 									"default": false
+								},
+								"statsCurrency": {
+									"type": "string",
+									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
+								},
+								"paymentCurrency": {
+									"type": "string",
+									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
+								},
+								"costColumns": {
+									"type": "string",
+									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
+									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
+								},
+								"paymentsPath": {
+									"type": "string",
+									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
+									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
+								},
+								"pricingPath": {
+									"type": "string",
+									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
+									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
+								},
+								"ccSwitchDbPath": {
+									"type": "string",
+									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
+									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
+								},
+								"rate": {
+									"type": "string",
+									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
+									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
+								},
+								"provider": {
+									"type": "string",
+									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
+									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
 								},
 								"active": {
 									"type": "boolean",
