@@ -26,6 +26,15 @@ export type ConfigMergeContext<T extends Record<string, unknown>> = {
  * @param tokens - Command tokens from ctx.tokens
  * @returns Object with keys as argument names and values as boolean (true if explicitly provided)
  */
+/**
+ * Convert a kebab-case string to camelCase (e.g. `stats-currency` → `statsCurrency`).
+ * Gunshi emits option token names in kebab-case under `toKebab`, while
+ * `ctx.values` keys are camelCase — so we normalize before using as a lookup key.
+ */
+function kebabToCamel(kebab: string): string {
+	return kebab.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
+}
+
 function extractExplicitArgs(tokens: unknown[]): Record<string, boolean> {
 	const explicit: Record<string, boolean> = {};
 
@@ -33,7 +42,10 @@ function extractExplicitArgs(tokens: unknown[]): Record<string, boolean> {
 		if (typeof token === 'object' && token !== null) {
 			const t = token as { kind?: string; name?: string };
 			if (t.kind === 'option' && typeof t.name === 'string') {
+				// Store under both the raw token name and its camelCase form so
+				// callers can look up by either convention.
 				explicit[t.name] = true;
+				explicit[kebabToCamel(t.name)] = true;
 			}
 		}
 	}
@@ -349,6 +361,21 @@ if (import.meta.vitest != null) {
 		it('should handle empty tokens array', () => {
 			const result = extractExplicitArgs([]);
 			expect(result).toEqual({});
+		});
+
+		it('normalizes kebab-case token names to camelCase (gunshi toKebab)', () => {
+			const tokens = [
+				{ kind: 'option', name: 'stats-currency' },
+				{ kind: 'option', name: 'payments-path' },
+				{ kind: 'option', name: 'mode' },
+			];
+			const result = extractExplicitArgs(tokens);
+			// Both the raw kebab name and the camelCase form are flagged so the
+			// merge loop (which iterates camelCase ctx.values keys) can match.
+			expect(result['stats-currency']).toBe(true);
+			expect(result['statsCurrency']).toBe(true);
+			expect(result['paymentsPath']).toBe(true);
+			expect(result['mode']).toBe(true);
 		});
 
 		it('should handle invalid token structures', () => {
