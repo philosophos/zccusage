@@ -1,8 +1,8 @@
 import type { Args } from 'gunshi';
-import type { CostMode, SortOrder } from './_types.ts';
+import type { CostMode, OutputFormat, SortOrder } from './_types.ts';
 import * as v from 'valibot';
 import { DEFAULT_LOCALE } from './_consts.ts';
-import { CostModes, filterDateSchema, SortOrders } from './_types.ts';
+import { CostModes, filterDateSchema, OutputFormats, SortOrders } from './_types.ts';
 
 /**
  * Parses and validates a date argument in YYYYMMDD format
@@ -32,8 +32,24 @@ export const sharedArgs = {
 	json: {
 		type: 'boolean',
 		short: 'j',
-		description: 'Output in JSON format',
+		description: 'Output in JSON format (shorthand for --format json)',
 		default: false,
+	},
+	format: {
+		type: 'enum',
+		short: 'f',
+		description: 'Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.',
+		default: 'table' as const satisfies OutputFormat,
+		choices: OutputFormats,
+	},
+	tree: {
+		type: 'boolean',
+		description: 'Output in hierarchical tree view (shorthand for --format tree)',
+		default: false,
+	},
+	treeGroup: {
+		type: 'string',
+		description: 'Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).',
 	},
 	mode: {
 		type: 'enum',
@@ -143,3 +159,24 @@ export const sharedCommandConfig = {
 	args: sharedArgs,
 	toKebab: true,
 } as const;
+
+/**
+ * Resolve the effective output format from CLI/config options.
+ *
+ * Priority: an explicit non-table `--format` wins; otherwise the `--json` and
+ * `--tree` boolean shorthands take effect (json before tree); otherwise the
+ * default `table` is used. This keeps `--json`/`--tree` as drop-in shorthands
+ * for `--format json`/`--format tree` while letting `--format` override them.
+ */
+export function resolveFormat(opts: { format?: string; json?: boolean; tree?: boolean }): OutputFormat {
+	if (opts.format != null && opts.format !== 'table') {
+		return opts.format as OutputFormat;
+	}
+	if (opts.json) {
+		return 'json';
+	}
+	if (opts.tree) {
+		return 'tree';
+	}
+	return 'table';
+}

@@ -224,6 +224,26 @@ export const CostColumns = ['billing', 'payable', 'stats'] as const;
 export type CostColumn = TupleToUnion<typeof CostColumns>;
 
 /**
+ * Output formats for usage reports.
+ * - table: cli-table3 tabular view (default)
+ * - json:  structured JSON for programmatic consumption
+ * - tree:  hierarchical Unicode tree view (per `--tree-group` dimensions)
+ */
+export const OutputFormats = ['table', 'json', 'tree'] as const;
+export type OutputFormat = TupleToUnion<typeof OutputFormats>;
+
+/**
+ * Nesting dimensions for the tree output format. `--tree-group` accepts a
+ * comma-separated subset of these in any order.
+ * - time:     the report period (date / week / month / sessionId)
+ * - project:  project directory
+ * - provider: sales platform id (providerId)
+ * - model:    model name (exploded from modelBreakdowns; recommended last)
+ */
+export const TreeDimensions = ['time', 'project', 'provider', 'model'] as const;
+export type TreeDimension = TupleToUnion<typeof TreeDimensions>;
+
+/**
  * A provider profile — the *sales platform* that bills for API usage.
  * Identified by BASE_URL. The model *supplier* is NOT a profile field:
  * it is encoded in the per-entry `model_id` string (e.g. `glm-5.2` vs
