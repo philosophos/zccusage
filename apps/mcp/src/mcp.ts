@@ -318,6 +318,48 @@ if (import.meta.vitest != null) {
 				await server.close();
 			}, 30000);
 
+			it('should forward multi-currency params to the CLI without error', async () => {
+				await using fixture = await createFixture({
+					'projects/test-project/session1.jsonl': JSON.stringify({
+						timestamp: '2024-01-01T12:00:00Z',
+						costUSD: 0.001,
+						version: '1.0.0',
+						message: {
+							model: 'claude-sonnet-4-20250514',
+							usage: { input_tokens: 50, output_tokens: 10 },
+						},
+					}),
+				});
+
+				const client = new Client({ name: 'test-client', version: '1.0.0' });
+				const server = createMcpServer({ claudePath: fixture.path });
+
+				const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+
+				await Promise.all([
+					client.connect(clientTransport),
+					server.connect(serverTransport),
+				]);
+
+				// Forward multi-currency flags; the CLI must accept them and return
+				// a valid daily payload rather than an argument-parsing error.
+				const result = await client.callTool({
+					name: 'daily',
+					arguments: {
+						mode: 'auto',
+						statsCurrency: 'USD',
+						costColumns: 'billing',
+					},
+				});
+
+				expect(result.isError).toBeFalsy();
+				const data = JSON.parse((result.content as any).at(0).text as string);
+				expect(data).toHaveProperty('daily');
+
+				await client.close();
+				await server.close();
+			}, 30000);
+
 			it('should call daily tool successfully with Sonnet 4.5', async () => {
 				await using fixture = await createFixture({
 					'projects/test-project/session1.jsonl': JSON.stringify({

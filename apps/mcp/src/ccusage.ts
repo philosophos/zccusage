@@ -13,6 +13,15 @@ export const ccusageParametersShape = {
 	mode: z.enum(['auto', 'calculate', 'display']).default('auto').optional(),
 	timezone: z.string().optional(),
 	locale: z.string().optional(),
+	// Multi-currency & provider (forwarded to the better-ccusage CLI)
+	statsCurrency: z.string().optional(),
+	paymentCurrency: z.string().optional(),
+	costColumns: z.string().optional(),
+	paymentsPath: z.string().optional(),
+	pricingPath: z.string().optional(),
+	ccSwitchDbPath: z.string().optional(),
+	provider: z.string().optional(),
+	rate: z.string().optional(),
 } as const satisfies Record<string, z.ZodTypeAny>;
 
 export const ccusageParametersSchema = z.object(ccusageParametersShape);
@@ -56,6 +65,23 @@ async function runCcusageCliJson(
 	const locale = parameters.locale;
 	if (locale != null && locale !== '') {
 		cliArgs.push('--locale', locale);
+	}
+
+	// Multi-currency & provider flags (forwarded verbatim to the CLI)
+	const stringFlags: Array<[string, string | undefined]> = [
+		['--stats-currency', parameters.statsCurrency],
+		['--payment-currency', parameters.paymentCurrency],
+		['--cost-columns', parameters.costColumns],
+		['--payments-path', parameters.paymentsPath],
+		['--pricing-path', parameters.pricingPath],
+		['--cc-switch-db-path', parameters.ccSwitchDbPath],
+		['--provider', parameters.provider],
+		['--rate', parameters.rate],
+	];
+	for (const [flag, value] of stringFlags) {
+		if (value != null && value !== '') {
+			cliArgs.push(flag, value);
+		}
 	}
 
 	return executeCliCommand(executable, cliArgs, {
