@@ -6,6 +6,7 @@ import { define } from 'gunshi';
 import { loadConfig, mergeConfigWithArgs } from '../_config-loader-tokens.ts';
 import { DEFAULT_LOCALE } from '../_consts.ts';
 import { formatDateCompact } from '../_date-utils.ts';
+import { queryMonthlyUsage } from '../_duckdb-query.ts';
 import { processWithJq } from '../_jq-processor.ts';
 import { resolveFormat, sharedCommandConfig } from '../_shared-args.ts';
 import { buildTree, parseTreeGroup, renderTree } from '../_tree-renderer.ts';
@@ -33,7 +34,9 @@ export const monthlyCommand = define({
 			logger.level = 0;
 		}
 
-		const monthlyData = await loadMonthlyUsageData(mergedOptions);
+		const monthlyData = mergedOptions.noDuckdb === true
+			? await loadMonthlyUsageData(mergedOptions)
+			: await queryMonthlyUsage(mergedOptions);
 
 		if (monthlyData.length === 0) {
 			if (useJson) {
@@ -82,7 +85,7 @@ export const monthlyCommand = define({
 				costByCurrency: d.costByCurrency,
 				modelBreakdowns: d.modelBreakdowns,
 			}));
-			const nodes = buildTree(items, parseTreeGroup(mergedOptions.treeGroup, 'monthly', Boolean(mergedOptions.instances)));
+			const nodes = buildTree(items, parseTreeGroup(mergedOptions.treeGroup, 'monthly', false));
 			log(renderTree(nodes, {
 				statsCurrency: mergedOptions.statsCurrency,
 				paymentsPath: mergedOptions.paymentsPath,

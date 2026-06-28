@@ -6,6 +6,7 @@ import { define } from 'gunshi';
 import { loadConfig, mergeConfigWithArgs } from '../_config-loader-tokens.ts';
 import { WEEK_DAYS } from '../_consts.ts';
 import { formatDateCompact } from '../_date-utils.ts';
+import { queryWeeklyUsage } from '../_duckdb-query.ts';
 import { processWithJq } from '../_jq-processor.ts';
 import { resolveFormat, sharedArgs } from '../_shared-args.ts';
 import { buildTree, parseTreeGroup, renderTree } from '../_tree-renderer.ts';
@@ -43,7 +44,9 @@ export const weeklyCommand = define({
 			logger.level = 0;
 		}
 
-		const weeklyData = await loadWeeklyUsageData(mergedOptions);
+		const weeklyData = mergedOptions.noDuckdb === true
+			? await loadWeeklyUsageData(mergedOptions)
+			: await queryWeeklyUsage(mergedOptions);
 
 		if (weeklyData.length === 0) {
 			if (useJson) {
@@ -92,7 +95,7 @@ export const weeklyCommand = define({
 				costByCurrency: d.costByCurrency,
 				modelBreakdowns: d.modelBreakdowns,
 			}));
-			const nodes = buildTree(items, parseTreeGroup(mergedOptions.treeGroup, 'weekly', Boolean(mergedOptions.instances)));
+			const nodes = buildTree(items, parseTreeGroup(mergedOptions.treeGroup, 'weekly', false));
 			log(renderTree(nodes, {
 				statsCurrency: mergedOptions.statsCurrency,
 				paymentsPath: mergedOptions.paymentsPath,

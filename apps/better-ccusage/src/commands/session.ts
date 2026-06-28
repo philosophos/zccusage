@@ -6,6 +6,7 @@ import { define } from 'gunshi';
 import { loadConfig, mergeConfigWithArgs } from '../_config-loader-tokens.ts';
 import { DEFAULT_LOCALE } from '../_consts.ts';
 import { formatDateCompact } from '../_date-utils.ts';
+import { querySessionUsage } from '../_duckdb-query.ts';
 import { processWithJq } from '../_jq-processor.ts';
 import { resolveFormat, sharedCommandConfig } from '../_shared-args.ts';
 import { buildTree, parseTreeGroup, renderTree } from '../_tree-renderer.ts';
@@ -60,11 +61,17 @@ export const sessionCommand = define({
 		}
 
 		// Original session listing logic
-		const sessionData = await loadSessionData({
-			...mergedOptions,
-			since: ctx.values.since,
-			until: ctx.values.until,
-		});
+		const sessionData = mergedOptions.noDuckdb === true
+			? await loadSessionData({
+					...mergedOptions,
+					since: ctx.values.since,
+					until: ctx.values.until,
+				})
+			: await querySessionUsage({
+					...mergedOptions,
+					since: ctx.values.since,
+					until: ctx.values.until,
+				});
 
 		if (sessionData.length === 0) {
 			if (useJson) {
@@ -102,7 +109,7 @@ export const sessionCommand = define({
 				costByCurrency: d.costByCurrency,
 				modelBreakdowns: d.modelBreakdowns,
 			}));
-			const nodes = buildTree(items, parseTreeGroup(mergedOptions.treeGroup, 'session', Boolean(mergedOptions.instances)));
+			const nodes = buildTree(items, parseTreeGroup(mergedOptions.treeGroup, 'session', false));
 			log(renderTree(nodes, {
 				statsCurrency: mergedOptions.statsCurrency,
 				paymentsPath: mergedOptions.paymentsPath,

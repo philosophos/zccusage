@@ -7,6 +7,7 @@ import pc from 'picocolors';
 import { loadConfig, mergeConfigWithArgs } from '../_config-loader-tokens.ts';
 import { groupByProject, groupDataByProject } from '../_daily-grouping.ts';
 import { formatDateCompact } from '../_date-utils.ts';
+import { queryDailyUsage } from '../_duckdb-query.ts';
 import { processWithJq } from '../_jq-processor.ts';
 import { formatProjectName } from '../_project-names.ts';
 import { resolveFormat, sharedCommandConfig } from '../_shared-args.ts';
@@ -70,10 +71,15 @@ export const dailyCommand = define({
 			logger.level = 0;
 		}
 
-		const dailyData = await loadDailyUsageData({
-			...mergedOptions,
-			groupByProject: mergedOptions.instances,
-		});
+		const dailyData = mergedOptions.noDuckdb === true
+			? await loadDailyUsageData({
+					...mergedOptions,
+					groupByProject: mergedOptions.instances,
+				})
+			: await queryDailyUsage({
+					...mergedOptions,
+					groupByProject: mergedOptions.instances,
+				});
 
 		if (dailyData.length === 0) {
 			if (useJson) {
