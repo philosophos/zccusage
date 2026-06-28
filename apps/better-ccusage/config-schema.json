@@ -923,6 +923,11 @@
 									"description": "Show pricing mismatch information for debugging",
 									"markdownDescription": "Show pricing mismatch information for debugging",
 									"default": false
+								},
+								"pricingPath": {
+									"type": "string",
+									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
+									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
 								}
 							},
 							"additionalProperties": false
