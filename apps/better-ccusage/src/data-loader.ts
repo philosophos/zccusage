@@ -717,12 +717,17 @@ export async function sortFilesByTimestamp(files: string[]): Promise<string[]> {
  * @param data - Usage data entry
  * @param mode - Cost calculation mode (auto, calculate, or display)
  * @param fetcher - Pricing fetcher instance for calculating costs from tokens
- * @returns Calculated cost as a {@link Money} value (USD when using costUSD)
+ * @param providerId - Optional provider id for provider-aware pricing lookup
+ *   (`{providerId}/{model_id}` user pricing overrides; falls back to model-based)
+ * @returns Calculated cost as a {@link Money} value; currency follows the matched
+ *   pricing entry (USD for costUSD / static fallback, the platform's billing
+ *   currency when a user pricing override matches)
  */
 export async function calculateCostForEntry(
 	data: UsageData,
 	mode: CostMode,
 	fetcher: CcusagePricingFetcher,
+	providerId?: string,
 ): Promise<Money> {
 	if (mode === 'display') {
 		// Always use costUSD, even if undefined
@@ -731,11 +736,7 @@ export async function calculateCostForEntry(
 
 	if (mode === 'calculate') {
 		// Always calculate from tokens
-		if (data.message.model != null) {
-			// Use standard cost calculation for both Claude and droid entries
-			return Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), { amount: 0, currency: 'USD' });
-		}
-		return { amount: 0, currency: 'USD' };
+		return calculateProviderAwareCost(data, fetcher, providerId);
 	}
 
 	if (mode === 'auto') {
@@ -744,15 +745,31 @@ export async function calculateCostForEntry(
 			return { amount: data.costUSD, currency: 'USD' };
 		}
 
-		if (data.message.model != null) {
-			// Use standard cost calculation for both Claude and droid entries
-			return Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), { amount: 0, currency: 'USD' });
-		}
-
-		return { amount: 0, currency: 'USD' };
+		return calculateProviderAwareCost(data, fetcher, providerId);
 	}
 
 	unreachable(mode);
+}
+
+/**
+ * Resolve pricing for the entry's (providerId, model) pair and compute a
+ * {@link Money} cost. Falls back to model-based static pricing (USD) when no
+ * provider-qualified user pricing entry exists.
+ */
+async function calculateProviderAwareCost(
+	data: UsageData,
+	fetcher: CcusagePricingFetcher,
+	providerId?: string,
+): Promise<Money> {
+	const model = data.message.model;
+	if (model == null) {
+		return { amount: 0, currency: 'USD' };
+	}
+	const pricingResult = await fetcher.getModelPricingForProvider(providerId, model);
+	if (Result.isSuccess(pricingResult) && pricingResult.value != null) {
+		return fetcher.calculateCostFromPricing(data.message.usage, pricingResult.value);
+	}
+	return { amount: 0, currency: 'USD' };
 }
 
 /**
@@ -1001,17 +1018,16 @@ export async function loadDailyUsageData(
 
 				// Always use DEFAULT_LOCALE for date grouping to ensure YYYY-MM-DD format
 				const date = formatDate(data.timestamp, options?.timezone, DEFAULT_LOCALE);
+				// Resolve the provider (sales platform) for this entry's timestamp
+				const providerId = resolveProviderId(new Date(data.timestamp).getTime(), providerCtx) ?? undefined;
 				// If fetcher is available, calculate cost based on mode and tokens
 				// If fetcher is null, use pre-calculated costUSD or default to 0
 				const cost = fetcher == null
 					? { amount: data.costUSD ?? 0, currency: 'USD' }
-					: await calculateCostForEntry(data, mode, fetcher);
+					: await calculateCostForEntry(data, mode, fetcher, providerId);
 
 				// Extract project name from file path
 				const project = extractProjectFromPath(file);
-
-				// Resolve the provider (sales platform) for this entry's timestamp
-				const providerId = resolveProviderId(new Date(data.timestamp).getTime(), providerCtx) ?? undefined;
 
 				allEntries.push({ data, date, cost, model: data.message.model, project, providerId });
 			}
@@ -1040,11 +1056,12 @@ export async function loadDailyUsageData(
 
 		// Always use DEFAULT_LOCALE for date grouping to ensure YYYY-MM-DD format
 		const date = formatDate(droidData.timestamp, options?.timezone, DEFAULT_LOCALE);
+		const providerId = resolveProviderId(new Date(droidData.timestamp).getTime(), providerCtx) ?? undefined;
 		// If fetcher is available, calculate cost based on mode and tokens
 		// If fetcher is null, use pre-calculated costUSD or default to 0
 		const cost = fetcher == null
 			? { amount: droidData.costUSD ?? 0, currency: 'USD' }
-			: await calculateCostForEntry(droidData, mode, fetcher);
+			: await calculateCostForEntry(droidData, mode, fetcher, providerId);
 
 		allEntries.push({
 			data: droidData,
@@ -1052,7 +1069,7 @@ export async function loadDailyUsageData(
 			cost,
 			model: droidData.message.model,
 			project: droidData.cwd ?? path.join('droid', 'unknown'),
-			providerId: resolveProviderId(new Date(droidData.timestamp).getTime(), providerCtx) ?? undefined,
+			providerId,
 		});
 	}
 
@@ -1257,9 +1274,10 @@ export async function loadSessionData(
 				markAsProcessed(uniqueHash, processedHashes);
 
 				const sessionKey = `${projectPath}${path.sep}${sessionId}`;
+				const providerId = resolveProviderId(new Date(data.timestamp).getTime(), providerCtx) ?? undefined;
 				const cost = fetcher == null
 					? { amount: data.costUSD ?? 0, currency: 'USD' }
-					: await calculateCostForEntry(data, mode, fetcher);
+					: await calculateCostForEntry(data, mode, fetcher, providerId);
 
 				allEntries.push({
 					data,
@@ -1269,7 +1287,7 @@ export async function loadSessionData(
 					cost,
 					timestamp: data.timestamp,
 					model: data.message.model,
-					providerId: resolveProviderId(new Date(data.timestamp).getTime(), providerCtx) ?? undefined,
+					providerId,
 				});
 			}
 			catch {
@@ -1285,9 +1303,10 @@ export async function loadSessionData(
 
 		// Set default source for Claude data (will be added later during processing)
 		const sessionKey = path.join('droid', droidData.sessionId ?? 'unknown-session');
+		const providerId = resolveProviderId(new Date(droidData.timestamp).getTime(), providerCtx) ?? undefined;
 		const cost = fetcher == null
 			? { amount: droidData.costUSD ?? 0, currency: 'USD' }
-			: await calculateCostForEntry(droidData, mode, fetcher);
+			: await calculateCostForEntry(droidData, mode, fetcher, providerId);
 
 		allEntries.push({
 			data: droidData,
@@ -1297,7 +1316,7 @@ export async function loadSessionData(
 			cost,
 			timestamp: droidData.timestamp,
 			model: droidData.message.model,
-			providerId: resolveProviderId(new Date(droidData.timestamp).getTime(), providerCtx) ?? undefined,
+			providerId,
 		});
 	}
 

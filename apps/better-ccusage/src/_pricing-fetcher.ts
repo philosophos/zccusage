@@ -199,6 +199,29 @@ export class CcusagePricingFetcher extends PricingFetcher {
 			...rest,
 		});
 	}
+
+	/**
+	 * Resolve pricing for a (provider, model) pair.
+	 *
+	 * Looks up the exact user-pricing key `{providerId}/{model_id}` first
+	 * (model_id is the raw JSONL string, may itself carry a supplier `/`
+	 * segment). On miss, falls back to the base {@link getModelPricing}
+	 * exact/suffix/fuzzy matching (bundled USD static pricing).
+	 *
+	 * @param providerId - sales platform id (e.g. `bailian-aliyun-singapore`), or undefined
+	 * @param modelName - raw model_id from the usage entry
+	 * @returns pricing for the pair, or null if neither qualified nor base match
+	 */
+	async getModelPricingForProvider(providerId: string | undefined, modelName: string): Promise<Result.Result<ModelPricing | null, Error>> {
+		if (providerId != null && providerId !== '') {
+			const map = await Result.unwrap(this.fetchModelPricing(), new Map<string, ModelPricing>());
+			const qualified = map.get(`${providerId}/${modelName}`);
+			if (qualified != null) {
+				return Result.succeed(qualified);
+			}
+		}
+		return this.getModelPricing(modelName);
+	}
 }
 
 if (import.meta.vitest != null) {
