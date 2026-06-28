@@ -303,12 +303,38 @@ export function formatNumber(num: number): string {
 }
 
 /**
- * Formats a number as USD currency with dollar sign and 2 decimal places
+ * Formats a monetary amount in the given currency.
+ *
+ * USD preserves the legacy exact format (`$X.XX`, no grouping, sign after
+ * the `$`) so existing single-currency output is byte-identical. Non-USD
+ * currencies use `Intl.NumberFormat` with 2 fraction digits.
+ *
+ * @param amount - The amount to format
+ * @param currency - ISO 4217 code (default `'USD'`)
+ * @param locale - Locale for non-USD formatting (default `'en-US'`)
+ * @returns Formatted currency string (e.g., `"$12.34"`, `"¥85.00 CNY"`)
+ */
+export function formatMoney(amount: number, currency: string = 'USD', locale?: string): string {
+	if (currency.toUpperCase() === 'USD') {
+		// Preserve the legacy format exactly: no grouping, sign after `$`.
+		return `$${amount.toFixed(2)}`;
+	}
+	return new Intl.NumberFormat(locale ?? 'en-US', {
+		style: 'currency',
+		currency: currency.toUpperCase(),
+		minimumFractionDigits: 2,
+		maximumFractionDigits: 2,
+	}).format(amount);
+}
+
+/**
+ * Formats a number as USD currency with dollar sign and 2 decimal places.
+ * @deprecated Use {@link formatMoney} with an explicit currency.
  * @param amount - The amount to format
  * @returns Formatted currency string (e.g., "$12.34")
  */
 export function formatCurrency(amount: number): string {
-	return `$${amount.toFixed(2)}`;
+	return formatMoney(amount, 'USD');
 }
 
 /**
@@ -960,6 +986,23 @@ if (import.meta.vitest != null) {
 		it('handles large numbers', () => {
 			expect(formatCurrency(1000000)).toBe('$1000000.00');
 			expect(formatCurrency(9999999.99)).toBe('$9999999.99');
+		});
+	});
+
+	describe('formatMoney', () => {
+		it('USD matches the legacy formatCurrency output exactly', () => {
+			expect(formatMoney(10)).toBe('$10.00');
+			expect(formatMoney(1234.56)).toBe('$1234.56');
+			expect(formatMoney(-10)).toBe('$-10.00');
+			expect(formatMoney(1000000)).toBe('$1000000.00');
+			// currency is case-insensitive
+			expect(formatMoney(10, 'usd')).toBe('$10.00');
+		});
+
+		it('formats non-USD via Intl with 2 fraction digits', () => {
+			const cny = formatMoney(85, 'CNY');
+			expect(cny).toContain('85');
+			expect(cny).not.toContain('$');
 		});
 	});
 
