@@ -360,6 +360,49 @@ if (import.meta.vitest != null) {
 				await server.close();
 			}, 30000);
 
+			it('should forward format=tree + treeGroup and return tree text', async () => {
+				await using fixture = await createFixture({
+					'projects/test-project/session1.jsonl': JSON.stringify({
+						timestamp: '2024-01-01T12:00:00Z',
+						costUSD: 0.001,
+						version: '1.0.0',
+						message: {
+							model: 'claude-sonnet-4-20250514',
+							usage: { input_tokens: 50, output_tokens: 10 },
+						},
+					}),
+				});
+
+				const client = new Client({ name: 'test-client', version: '1.0.0' });
+				const server = createMcpServer({ claudePath: fixture.path });
+
+				const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+
+				await Promise.all([
+					client.connect(clientTransport),
+					server.connect(serverTransport),
+				]);
+
+				// format=tree overrides the MCP-default --json; the CLI returns a
+				// hierarchical tree string rather than JSON.
+				const result = await client.callTool({
+					name: 'daily',
+					arguments: {
+						mode: 'auto',
+						format: 'tree',
+						treeGroup: 'time,model',
+					},
+				});
+
+				expect(result.isError).toBeFalsy();
+				const text = (result.content as any).at(0).text as string;
+				expect(text).toContain('Claude Code Token Usage Report - Daily (Tree)');
+				expect(text).toContain('└──');
+
+				await client.close();
+				await server.close();
+			}, 30000);
+
 			it('should call daily tool successfully with Sonnet 4.5', async () => {
 				await using fixture = await createFixture({
 					'projects/test-project/session1.jsonl': JSON.stringify({

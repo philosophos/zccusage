@@ -13,6 +13,12 @@ export const ccusageParametersShape = {
 	mode: z.enum(['auto', 'calculate', 'display']).default('auto').optional(),
 	timezone: z.string().optional(),
 	locale: z.string().optional(),
+	// Output format. MCP always passes --json to the CLI subprocess; an explicit
+	// `format: 'tree'` overrides that (resolveFormat gives explicit --format priority
+	// over the --json shorthand), so MCP consumers can request a hierarchical tree
+	// string via `format: 'tree'` + `treeGroup`.
+	format: z.enum(['table', 'json', 'tree']).optional(),
+	treeGroup: z.string().optional(),
 	// Multi-currency & provider (forwarded to the better-ccusage CLI)
 	statsCurrency: z.string().optional(),
 	paymentCurrency: z.string().optional(),
@@ -69,6 +75,8 @@ async function runCcusageCliJson(
 
 	// Multi-currency & provider flags (forwarded verbatim to the CLI)
 	const stringFlags: Array<[string, string | undefined]> = [
+		['--format', parameters.format === 'table' ? undefined : parameters.format],
+		['--tree-group', parameters.treeGroup],
 		['--stats-currency', parameters.statsCurrency],
 		['--payment-currency', parameters.paymentCurrency],
 		['--cost-columns', parameters.costColumns],
@@ -105,6 +113,9 @@ async function runCcusageCliJson(
 export async function getCcusageDaily(parameters: z.infer<typeof ccusageParametersSchema>, claudePath: string): Promise<unknown> {
 	try {
 		const raw = await runCcusageCliJson('daily', parameters, claudePath);
+		if (parameters.format === 'tree') {
+			return raw;
+		}
 		const parsed = JSON.parse(raw) as unknown;
 		// If the parsed result is an empty array, convert to expected structure
 		if (Array.isArray(parsed) && parsed.length === 0) {
@@ -139,6 +150,9 @@ export async function getCcusageDaily(parameters: z.infer<typeof ccusageParamete
 export async function getCcusageMonthly(parameters: z.infer<typeof ccusageParametersSchema>, claudePath: string): Promise<unknown> {
 	try {
 		const raw = await runCcusageCliJson('monthly', parameters, claudePath);
+		if (parameters.format === 'tree') {
+			return raw;
+		}
 		const parsed = JSON.parse(raw) as unknown;
 		// If the parsed result is an empty array, convert to expected structure
 		if (Array.isArray(parsed) && parsed.length === 0) {
@@ -173,6 +187,9 @@ export async function getCcusageMonthly(parameters: z.infer<typeof ccusageParame
 export async function getCcusageSession(parameters: z.infer<typeof ccusageParametersSchema>, claudePath: string): Promise<unknown> {
 	try {
 		const raw = await runCcusageCliJson('session', parameters, claudePath);
+		if (parameters.format === 'tree') {
+			return raw;
+		}
 		const parsed = JSON.parse(raw) as unknown;
 		// If the parsed result is an empty array, convert to expected structure
 		if (Array.isArray(parsed) && parsed.length === 0) {
@@ -207,6 +224,9 @@ export async function getCcusageSession(parameters: z.infer<typeof ccusageParame
 export async function getCcusageBlocks(parameters: z.infer<typeof ccusageParametersSchema>, claudePath: string): Promise<unknown> {
 	try {
 		const raw = await runCcusageCliJson('blocks', parameters, claudePath);
+		if (parameters.format === 'tree') {
+			return raw;
+		}
 		const parsed = JSON.parse(raw) as unknown;
 		// If the parsed result is an empty array, convert to expected structure
 		if (Array.isArray(parsed) && parsed.length === 0) {
