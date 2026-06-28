@@ -8,6 +8,7 @@
  * @module data-loader
  */
 
+import type { Money } from '@better-ccusage/internal/pricing';
 import type { WeekDay } from './_consts.ts';
 import type { LoadedUsageEntry, SessionBlock } from './_session-blocks.ts';
 import type {
@@ -375,7 +376,10 @@ export const bucketUsageSchema = v.object({
 export type BucketUsage = v.InferOutput<typeof bucketUsageSchema>;
 
 /**
- * Internal type for aggregating token statistics and costs
+ * Internal type for aggregating token statistics and costs.
+ * `cost` is the raw sum of `Money.amount` across currencies (preserves the
+ * legacy USD-only invariant; for mixed currencies the display layer converts
+ * per-bucket via `costByCurrency`). `costByCurrency` buckets amounts by currency.
  */
 type TokenStats = {
 	inputTokens: number;
@@ -383,7 +387,15 @@ type TokenStats = {
 	cacheCreationTokens: number;
 	cacheReadTokens: number;
 	cost: number;
+	costByCurrency: Record<string, number>;
 };
+
+/**
+ * Merge a {@link Money} amount into a `costByCurrency` accumulator.
+ */
+function mergeMoney(acc: Record<string, number>, money: Money): void {
+	acc[money.currency] = (acc[money.currency] ?? 0) + money.amount;
+}
 
 /**
  * Aggregates token counts and costs by model name
@@ -392,7 +404,7 @@ function aggregateByModel<T>(
 	entries: T[],
 	getModel: (entry: T) => string | undefined,
 	getUsage: (entry: T) => UsageData['message']['usage'],
-	getCost: (entry: T) => number,
+	getCost: (entry: T) => Money,
 ): Map<string, TokenStats> {
 	const modelAggregates = new Map<string, TokenStats>();
 	const defaultStats: TokenStats = {
@@ -401,6 +413,7 @@ function aggregateByModel<T>(
 		cacheCreationTokens: 0,
 		cacheReadTokens: 0,
 		cost: 0,
+		costByCurrency: {},
 	};
 
 	for (const entry of entries) {
@@ -414,13 +427,16 @@ function aggregateByModel<T>(
 		const cost = getCost(entry);
 
 		const existing = modelAggregates.get(modelName) ?? defaultStats;
+		const costByCurrency = { ...existing.costByCurrency };
+		mergeMoney(costByCurrency, cost);
 
 		modelAggregates.set(modelName, {
 			inputTokens: existing.inputTokens + (usage.input_tokens ?? 0),
 			outputTokens: existing.outputTokens + (usage.output_tokens ?? 0),
 			cacheCreationTokens: existing.cacheCreationTokens + (usage.cache_creation_input_tokens ?? 0),
 			cacheReadTokens: existing.cacheReadTokens + (usage.cache_read_input_tokens ?? 0),
-			cost: existing.cost + cost,
+			cost: existing.cost + cost.amount,
+			costByCurrency,
 		});
 	}
 
@@ -440,6 +456,7 @@ function aggregateModelBreakdowns(
 		cacheCreationTokens: 0,
 		cacheReadTokens: 0,
 		cost: 0,
+		costByCurrency: {},
 	};
 
 	for (const breakdown of breakdowns) {
@@ -449,6 +466,15 @@ function aggregateModelBreakdowns(
 		}
 
 		const existing = modelAggregates.get(breakdown.modelName) ?? defaultStats;
+		const costByCurrency = { ...existing.costByCurrency };
+		if (breakdown.costByCurrency != null) {
+			for (const [currency, amount] of Object.entries(breakdown.costByCurrency)) {
+				costByCurrency[currency] = (costByCurrency[currency] ?? 0) + amount;
+			}
+		}
+		else {
+			costByCurrency.USD = (costByCurrency.USD ?? 0) + breakdown.cost;
+		}
 
 		modelAggregates.set(breakdown.modelName, {
 			inputTokens: existing.inputTokens + breakdown.inputTokens,
@@ -456,6 +482,7 @@ function aggregateModelBreakdowns(
 			cacheCreationTokens: existing.cacheCreationTokens + breakdown.cacheCreationTokens,
 			cacheReadTokens: existing.cacheReadTokens + breakdown.cacheReadTokens,
 			cost: existing.cost + breakdown.cost,
+			costByCurrency,
 		});
 	}
 
@@ -467,11 +494,13 @@ function aggregateModelBreakdowns(
  */
 function createModelBreakdowns(
 	modelAggregates: Map<string, TokenStats>,
+	providerId?: string,
 ): ModelBreakdown[] {
 	return Array.from(modelAggregates.entries())
 		.map(([modelName, stats]) => ({
 			modelName: modelName as ModelName,
 			...stats,
+			...(providerId != null ? { providerId } : {}),
 		}))
 		.sort((a, b) => b.cost - a.cost); // Sort by cost descending
 }
@@ -482,20 +511,23 @@ function createModelBreakdowns(
 function calculateTotals<T>(
 	entries: T[],
 	getUsage: (entry: T) => UsageData['message']['usage'],
-	getCost: (entry: T) => number,
+	getCost: (entry: T) => Money,
 ): TokenStats & { totalCost: number } {
 	return entries.reduce(
 		(acc, entry) => {
 			const usage = getUsage(entry);
 			const cost = getCost(entry);
+			const costByCurrency = { ...acc.costByCurrency };
+			mergeMoney(costByCurrency, cost);
 
 			return {
 				inputTokens: acc.inputTokens + (usage.input_tokens ?? 0),
 				outputTokens: acc.outputTokens + (usage.output_tokens ?? 0),
 				cacheCreationTokens: acc.cacheCreationTokens + (usage.cache_creation_input_tokens ?? 0),
 				cacheReadTokens: acc.cacheReadTokens + (usage.cache_read_input_tokens ?? 0),
-				cost: acc.cost + cost,
-				totalCost: acc.totalCost + cost,
+				cost: acc.cost + cost.amount,
+				costByCurrency,
+				totalCost: acc.totalCost + cost.amount,
 			};
 		},
 		{
@@ -504,6 +536,7 @@ function calculateTotals<T>(
 			cacheCreationTokens: 0,
 			cacheReadTokens: 0,
 			cost: 0,
+			costByCurrency: {},
 			totalCost: 0,
 		},
 	);
@@ -656,41 +689,39 @@ export async function sortFilesByTimestamp(files: string[]): Promise<string[]> {
  * @param data - Usage data entry
  * @param mode - Cost calculation mode (auto, calculate, or display)
  * @param fetcher - Pricing fetcher instance for calculating costs from tokens
- * @returns Calculated cost in USD
+ * @returns Calculated cost as a {@link Money} value (USD when using costUSD)
  */
 export async function calculateCostForEntry(
 	data: UsageData,
 	mode: CostMode,
 	fetcher: CcusagePricingFetcher,
-): Promise<number> {
+): Promise<Money> {
 	if (mode === 'display') {
 		// Always use costUSD, even if undefined
-		return data.costUSD ?? 0;
+		return { amount: data.costUSD ?? 0, currency: 'USD' };
 	}
 
 	if (mode === 'calculate') {
 		// Always calculate from tokens
 		if (data.message.model != null) {
 			// Use standard cost calculation for both Claude and droid entries
-			const cost = await Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), { amount: 0, currency: 'USD' });
-			return cost.amount;
+			return Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), { amount: 0, currency: 'USD' });
 		}
-		return 0;
+		return { amount: 0, currency: 'USD' };
 	}
 
 	if (mode === 'auto') {
 		// Auto mode: use costUSD if available, otherwise calculate
 		if (data.costUSD != null) {
-			return data.costUSD;
+			return { amount: data.costUSD, currency: 'USD' };
 		}
 
 		if (data.message.model != null) {
 			// Use standard cost calculation for both Claude and droid entries
-			const cost = await Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), { amount: 0, currency: 'USD' });
-			return cost.amount;
+			return Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), { amount: 0, currency: 'USD' });
 		}
 
-		return 0;
+		return { amount: 0, currency: 'USD' };
 	}
 
 	unreachable(mode);
@@ -842,7 +873,7 @@ export async function loadDailyUsageData(
 	const processedHashes = new Set<string>();
 
 	// Collect all valid data entries first
-	const allEntries: { data: UsageData; date: string; cost: number; model: string | undefined; project: string }[] = [];
+	const allEntries: { data: UsageData; date: string; cost: Money; model: string | undefined; project: string }[] = [];
 
 	for (const file of sortedFiles) {
 		const content = await readFile(file, 'utf-8');
@@ -878,7 +909,7 @@ export async function loadDailyUsageData(
 				// If fetcher is available, calculate cost based on mode and tokens
 				// If fetcher is null, use pre-calculated costUSD or default to 0
 				const cost = fetcher == null
-					? data.costUSD ?? 0
+					? { amount: data.costUSD ?? 0, currency: 'USD' }
 					: await calculateCostForEntry(data, mode, fetcher);
 
 				// Extract project name from file path
@@ -914,7 +945,7 @@ export async function loadDailyUsageData(
 		// If fetcher is available, calculate cost based on mode and tokens
 		// If fetcher is null, use pre-calculated costUSD or default to 0
 		const cost = fetcher == null
-			? droidData.costUSD ?? 0
+			? { amount: droidData.costUSD ?? 0, currency: 'USD' }
 			: await calculateCostForEntry(droidData, mode, fetcher);
 
 		allEntries.push({
@@ -1080,7 +1111,7 @@ export async function loadSessionData(
 		sessionKey: string;
 		sessionId: string;
 		projectPath: string;
-		cost: number;
+		cost: Money;
 		timestamp: string;
 		model: string | undefined;
 	}> = [];
@@ -1120,7 +1151,7 @@ export async function loadSessionData(
 
 				const sessionKey = `${projectPath}${path.sep}${sessionId}`;
 				const cost = fetcher == null
-					? data.costUSD ?? 0
+					? { amount: data.costUSD ?? 0, currency: 'USD' }
 					: await calculateCostForEntry(data, mode, fetcher);
 
 				allEntries.push({
@@ -1147,7 +1178,7 @@ export async function loadSessionData(
 		// Set default source for Claude data (will be added later during processing)
 		const sessionKey = path.join('droid', droidData.sessionId ?? 'unknown-session');
 		const cost = fetcher == null
-			? droidData.costUSD ?? 0
+			? { amount: droidData.costUSD ?? 0, currency: 'USD' }
 			: await calculateCostForEntry(droidData, mode, fetcher);
 
 		allEntries.push({
@@ -1320,10 +1351,10 @@ export async function loadSessionUsageById(
 			const data = result.output;
 
 			const cost = fetcher == null
-				? data.costUSD ?? 0
+				? { amount: data.costUSD ?? 0, currency: 'USD' }
 				: await calculateCostForEntry(data, mode, fetcher);
 
-			totalCost += cost;
+			totalCost += cost.amount;
 			entries.push(data);
 		}
 		catch {
@@ -1421,6 +1452,7 @@ export async function loadBucketUsageData(
 		let totalCacheCreationTokens = 0;
 		let totalCacheReadTokens = 0;
 		let totalCost = 0;
+		const costByCurrency: Record<string, number> = {};
 
 		for (const daily of dailyEntries) {
 			totalInputTokens += daily.inputTokens;
@@ -1428,6 +1460,10 @@ export async function loadBucketUsageData(
 			totalCacheCreationTokens += daily.cacheCreationTokens;
 			totalCacheReadTokens += daily.cacheReadTokens;
 			totalCost += daily.totalCost;
+			const dailyByCurrency = daily.costByCurrency ?? { USD: daily.totalCost };
+			for (const [currency, amount] of Object.entries(dailyByCurrency)) {
+				costByCurrency[currency] = (costByCurrency[currency] ?? 0) + amount;
+			}
 		}
 		const bucketUsage: BucketUsage = {
 			bucket,
@@ -1437,6 +1473,7 @@ export async function loadBucketUsageData(
 			cacheCreationTokens: totalCacheCreationTokens,
 			cacheReadTokens: totalCacheReadTokens,
 			totalCost,
+			costByCurrency,
 			modelsUsed: [...new Set(models)] as ModelName[],
 			modelBreakdowns,
 			...(project == null ? {} : { project }),
@@ -1613,7 +1650,7 @@ export async function loadSessionBlockData(
 					markAsProcessed(uniqueHash, processedHashes);
 
 					const cost = fetcher == null
-						? data.costUSD ?? 0
+						? { amount: data.costUSD ?? 0, currency: 'USD' }
 						: await calculateCostForEntry(data, mode, fetcher);
 
 					// Get Claude Code/Droid Usage limit expiration date
@@ -1627,7 +1664,7 @@ export async function loadSessionBlockData(
 							cacheCreationInputTokens: data.message.usage.cache_creation_input_tokens ?? 0,
 							cacheReadInputTokens: data.message.usage.cache_read_input_tokens ?? 0,
 						},
-						costUSD: cost,
+						costUSD: cost.amount,
 						model: data.message.model ?? 'unknown',
 						version: data.version,
 						usageLimitResetTime: usageLimitResetTime ?? undefined,
@@ -2297,6 +2334,7 @@ invalid json line
 				cacheCreationTokens: 0,
 				cacheReadTokens: 0,
 				totalCost: 0.015,
+				costByCurrency: { USD: 0.015 },
 				modelsUsed: [],
 				modelBreakdowns: [{
 					modelName: 'unknown',
@@ -2305,6 +2343,7 @@ invalid json line
 					cacheCreationTokens: 0,
 					cacheReadTokens: 0,
 					cost: 0.015,
+					costByCurrency: { USD: 0.015 },
 				}],
 			});
 			expect(result[1]).toEqual({
@@ -2315,6 +2354,7 @@ invalid json line
 				cacheCreationTokens: 0,
 				cacheReadTokens: 0,
 				totalCost: 0.03,
+				costByCurrency: { USD: 0.03 },
 				modelsUsed: [],
 				modelBreakdowns: [{
 					modelName: 'unknown',
@@ -2323,6 +2363,7 @@ invalid json line
 					cacheCreationTokens: 0,
 					cacheReadTokens: 0,
 					cost: 0.03,
+					costByCurrency: { USD: 0.03 },
 				}],
 			});
 		});
@@ -2371,6 +2412,7 @@ invalid json line
 				cacheCreationTokens: 0,
 				cacheReadTokens: 0,
 				totalCost: 0.03,
+				costByCurrency: { USD: 0.03 },
 				modelsUsed: [],
 				modelBreakdowns: [{
 					modelName: 'unknown',
@@ -2379,6 +2421,7 @@ invalid json line
 					cacheCreationTokens: 0,
 					cacheReadTokens: 0,
 					cost: 0.03,
+					costByCurrency: { USD: 0.03 },
 				}],
 			});
 		});
@@ -2646,6 +2689,7 @@ invalid json line
 				cacheCreationTokens: 0,
 				cacheReadTokens: 0,
 				totalCost: 0.015,
+				costByCurrency: { USD: 0.015 },
 				modelsUsed: [],
 				modelBreakdowns: [{
 					modelName: 'unknown',
@@ -2654,6 +2698,7 @@ invalid json line
 					cacheCreationTokens: 0,
 					cacheReadTokens: 0,
 					cost: 0.015,
+					costByCurrency: { USD: 0.015 },
 				}],
 			});
 			expect(result[1]).toEqual({
@@ -2664,6 +2709,7 @@ invalid json line
 				cacheCreationTokens: 0,
 				cacheReadTokens: 0,
 				totalCost: 0.03,
+				costByCurrency: { USD: 0.03 },
 				modelsUsed: [],
 				modelBreakdowns: [{
 					modelName: 'unknown',
@@ -2672,6 +2718,7 @@ invalid json line
 					cacheCreationTokens: 0,
 					cacheReadTokens: 0,
 					cost: 0.03,
+					costByCurrency: { USD: 0.03 },
 				}],
 			});
 		});
@@ -2720,6 +2767,7 @@ invalid json line
 				cacheCreationTokens: 0,
 				cacheReadTokens: 0,
 				totalCost: 0.03,
+				costByCurrency: { USD: 0.03 },
 				modelsUsed: [],
 				modelBreakdowns: [{
 					modelName: 'unknown',
@@ -2728,6 +2776,7 @@ invalid json line
 					cacheCreationTokens: 0,
 					cacheReadTokens: 0,
 					cost: 0.03,
+					costByCurrency: { USD: 0.03 },
 				}],
 			});
 		});
@@ -3985,7 +4034,7 @@ invalid json line
 			it('should return costUSD when available', async () => {
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(mockUsageData, 'display', fetcher);
-				expect(result).toBe(0.05);
+				expect(result.amount).toBe(0.05);
 			});
 
 			it('should return 0 when costUSD is undefined', async () => {
@@ -3994,14 +4043,14 @@ invalid json line
 
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(dataWithoutCost, 'display', fetcher);
-				expect(result).toBe(0);
+				expect(result.amount).toBe(0);
 			});
 
 			it('should not use model pricing in display mode', async () => {
 				// Even with model pricing available, should use costUSD
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(mockUsageData, 'display', fetcher);
-				expect(result).toBe(0.05);
+				expect(result.amount).toBe(0.05);
 			});
 		});
 
@@ -4022,7 +4071,7 @@ invalid json line
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(testData, 'calculate', fetcher);
 
-				expect(result).toBeGreaterThan(0);
+				expect(result.amount).toBeGreaterThan(0);
 			});
 
 			it('should ignore costUSD in calculate mode', async () => {
@@ -4034,8 +4083,8 @@ invalid json line
 					fetcher,
 				);
 
-				expect(result).toBeGreaterThan(0);
-				expect(result).toBeLessThan(1); // Much less than 99.99
+				expect(result.amount).toBeGreaterThan(0);
+				expect(result.amount).toBeLessThan(1); // Much less than 99.99
 			});
 
 			it('should return 0 when model not available', async () => {
@@ -4044,7 +4093,7 @@ invalid json line
 
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(dataWithoutModel, 'calculate', fetcher);
-				expect(result).toBe(0);
+				expect(result.amount).toBe(0);
 			});
 
 			it('should return 0 when model pricing not found', async () => {
@@ -4059,7 +4108,7 @@ invalid json line
 					'calculate',
 					fetcher,
 				);
-				expect(result).toBe(0);
+				expect(result.amount).toBe(0);
 			});
 
 			it('should handle missing cache tokens', async () => {
@@ -4081,7 +4130,7 @@ invalid json line
 					fetcher,
 				);
 
-				expect(result).toBeGreaterThan(0);
+				expect(result.amount).toBeGreaterThan(0);
 			});
 		});
 
@@ -4089,7 +4138,7 @@ invalid json line
 			it('should use costUSD when available', async () => {
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(mockUsageData, 'auto', fetcher);
-				expect(result).toBe(0.05);
+				expect(result.amount).toBe(0.05);
 			});
 
 			it('should calculate from tokens when costUSD undefined', async () => {
@@ -4110,7 +4159,7 @@ invalid json line
 					'auto',
 					fetcher,
 				);
-				expect(result).toBeGreaterThan(0);
+				expect(result.amount).toBeGreaterThan(0);
 			});
 
 			it('should return 0 when no costUSD and no model', async () => {
@@ -4120,7 +4169,7 @@ invalid json line
 
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(dataWithoutCostOrModel, 'auto', fetcher);
-				expect(result).toBe(0);
+				expect(result.amount).toBe(0);
 			});
 
 			it('should return 0 when no costUSD and model pricing not found', async () => {
@@ -4129,14 +4178,14 @@ invalid json line
 
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(dataWithoutCost, 'auto', fetcher);
-				expect(result).toBe(0);
+				expect(result.amount).toBe(0);
 			});
 
 			it('should prefer costUSD over calculation even when both available', async () => {
 				// Both costUSD and model pricing available, should use costUSD
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(mockUsageData, 'auto', fetcher);
-				expect(result).toBe(0.05);
+				expect(result.amount).toBe(0.05);
 			});
 		});
 
@@ -4158,21 +4207,21 @@ invalid json line
 
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(dataWithZeroTokens, 'calculate', fetcher);
-				expect(result).toBe(0);
+				expect(result.amount).toBe(0);
 			});
 
 			it('should handle costUSD of 0', async () => {
 				const dataWithZeroCost = { ...mockUsageData, costUSD: 0 };
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(dataWithZeroCost, 'display', fetcher);
-				expect(result).toBe(0);
+				expect(result.amount).toBe(0);
 			});
 
 			it('should handle negative costUSD', async () => {
 				const dataWithNegativeCost = { ...mockUsageData, costUSD: -0.01 };
 				const fetcher = new CcusagePricingFetcher();
 				const result = await calculateCostForEntry(dataWithNegativeCost, 'display', fetcher);
-				expect(result).toBe(-0.01);
+				expect(result.amount).toBe(-0.01);
 			});
 		});
 

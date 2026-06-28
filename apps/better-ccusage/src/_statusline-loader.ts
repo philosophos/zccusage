@@ -143,13 +143,13 @@ export async function loadStatuslineData(
 
 					// Session cost (only from session file)
 					if (isSessionFile) {
-						sessionCost += cost;
+						sessionCost += cost.amount;
 					}
 
 					// Daily cost (entries from today)
 					const entryDate = new Date(data.timestamp);
 					if (entryDate >= todayStart) {
-						todayCost += cost;
+						todayCost += cost.amount;
 					}
 
 					// Block entries (entries within block window)
@@ -163,7 +163,7 @@ export async function loadStatuslineData(
 								cacheCreationInputTokens: data.message.usage.cache_creation_input_tokens ?? 0,
 								cacheReadInputTokens: data.message.usage.cache_read_input_tokens ?? 0,
 							},
-							costUSD: cost,
+							costUSD: cost.amount,
 							model: data.message.model ?? 'unknown',
 							version: data.version,
 							usageLimitResetTime: usageLimitResetTime ?? undefined,

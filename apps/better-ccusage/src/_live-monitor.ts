@@ -157,13 +157,13 @@ async function processFileContent(
 		}
 
 		// Calculate cost if needed
-		const costUSD: number = await (config.mode === 'display'
-			? Promise.resolve(data.costUSD ?? 0)
-			: calculateCostForEntry(
+		const costUSD: number = config.mode === 'display'
+			? data.costUSD ?? 0
+			: (await calculateCostForEntry(
 					data,
 					config.mode,
 					state.fetcher!,
-				));
+				)).amount;
 
 		const usageLimitResetTime = getUsageLimitResetTime(data);
 
