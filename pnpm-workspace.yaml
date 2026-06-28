@@ -4,6 +4,8 @@ packages:
   - packages/*
 
 catalog:
+  '@types/sql.js': ^1.4.11
+  sql.js: ^1.14.1
   tsdown: 0.16.8
 
 catalogMode: strict

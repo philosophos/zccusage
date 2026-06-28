@@ -191,3 +191,99 @@ export type StatuslineHookJson = v.InferOutput<typeof statuslineHookJsonSchema>;
 /**
  * Type definition for transcript usage data from Claude messages
  */
+
+// ─── Multi-currency & provider types ────────────────────────────────────────
+
+/**
+ * Branded ISO 4217 currency code (e.g. "USD", "CNY").
+ */
+export const currencyCodeSchema = v.pipe(
+	v.string(),
+	v.minLength(3, 'Currency code must be 3 letters'),
+	v.maxLength(3, 'Currency code must be 3 letters'),
+	v.transform(value => value.toUpperCase()),
+	v.brand('CurrencyCode'),
+);
+export type CurrencyCode = v.InferOutput<typeof currencyCodeSchema>;
+export const createCurrencyCode = (value: string): CurrencyCode => v.parse(currencyCodeSchema, value);
+
+/**
+ * Subscription / billing plan types offered by sales platforms.
+ * Finite set per user spec; `custom` allows manual free-form entry.
+ */
+export const PlanTypes = ['coding plan', 'saving plan', 'token plan', 'agent plan', 'pay-as-you-go', 'custom'] as const;
+export type PlanType = TupleToUnion<typeof PlanTypes>;
+
+/**
+ * Cost display dimensions ("口径") shown as parallel columns in reports.
+ * - billing: per-token list price in the platform's billing currency
+ * - payable: actual money paid, from the per-transaction payment log
+ * - stats:   usage costs converted to a single user-chosen statistics currency
+ */
+export const CostColumns = ['billing', 'payable', 'stats'] as const;
+export type CostColumn = TupleToUnion<typeof CostColumns>;
+
+/**
+ * A provider profile — the *sales platform* that bills for API usage.
+ * Identified by BASE_URL. The model *supplier* is NOT a profile field:
+ * it is encoded in the per-entry `model_id` string (e.g. `glm-5.2` vs
+ * `ZHIPU/GLM-5.2` on the same platform), so `(providerId, model_id)`
+ * fully determines `(platform, supplier, model)`.
+ *
+ * Profiles are auto-loaded from the cc-switch SQLite DB; any field here may
+ * be overridden or manually supplied via `providerOverrides` / `providerProfiles` config.
+ */
+export type ProviderProfile = {
+	id: string; // natural key, e.g. "bailian-aliyun-singapore" (matches cc-switch providers.id)
+	name: string;
+	appType: string; // claude | codex | gemini | ...
+	category?: string; // official | custom | ...
+	baseUrl?: string; // ANTHROPIC_BASE_URL — identifies the sales platform
+	modelAliasMap?: Record<string, string>; // slot (opus/sonnet/haiku/...) → actual model_id
+	costMultiplier?: number; // per-provider cost multiplier (default 1)
+	limitDailyUsd?: number;
+	limitMonthlyUsd?: number;
+	providerType?: string;
+	isCurrent?: boolean;
+	// Derived / user-supplied fields:
+	platform?: string; // bailian | anthropic | openai | google | zhipu | moonshot | minimax | deepseek | ...
+	region?: string; // singapore | beijing | us | ...
+	workspace?: string; // extracted from base_url or user-supplied
+	planType?: PlanType;
+	billingCurrency?: string; // ISO 4217 — the currency this platform bills in
+	note?: string; // manual user note for readability
+};
+
+/**
+ * A single per-transaction payment record. Decoupled from usage entries:
+ * payments happen at payment time, not usage time. The dual-currency
+ * (billingAmount in billingCurrency, paymentAmount in paymentCurrency) pair
+ * implicitly captures the effective FX rate at payment time.
+ */
+export const paymentRecordSchema = v.object({
+	id: v.optional(v.string()),
+	paymentTime: isoTimestampSchema,
+	providerId: v.optional(v.string()), // which platform this payment topped up
+	billingCurrency: currencyCodeSchema,
+	billingAmount: v.number(),
+	paymentCurrency: currencyCodeSchema,
+	paymentAmount: v.number(),
+	note: v.optional(v.string()),
+	coversRange: v.optional(v.object({
+		from: isoTimestampSchema,
+		to: isoTimestampSchema,
+	})),
+});
+export type PaymentRecord = v.InferOutput<typeof paymentRecordSchema>;
+
+/**
+ * User-declared temporal mapping: "during [from, to] I used provider X".
+ * The reliable fallback for historical provider disambiguation, since
+ * JSONL has no base_url and cc-switch stores no switch history.
+ */
+export const providerScheduleEntrySchema = v.object({
+	from: isoTimestampSchema,
+	to: isoTimestampSchema,
+	providerId: v.string(),
+});
+export type ProviderScheduleEntry = v.InferOutput<typeof providerScheduleEntrySchema>;

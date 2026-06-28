@@ -166,3 +166,33 @@ export const CONFIG_FILE_NAME = 'better-ccusage.json';
  * Used consistently across the application for date parsing and display
  */
 export const DEFAULT_LOCALE = 'en-CA';
+
+// ─── Multi-currency & provider constants ────────────────────────────────────
+
+/**
+ * Default billing currency assumed when a provider profile or pricing entry
+ * does not declare one. The bundled pricing JSON is historically all-USD.
+ */
+export const DEFAULT_BILLING_CURRENCY = 'USD';
+
+/**
+ * Default file name for the per-transaction payment log (dual-currency).
+ * Searched for in the same directories as the Claude config.
+ */
+export const PAYMENTS_FILE_NAME = 'better-ccusage-payments.json';
+
+/**
+ * Default file name for the user-supplied per-platform pricing overrides.
+ * Keys are `{providerId}/{model_id}` and values carry `currency` + per-token
+ * prices in that currency.
+ */
+export const PRICING_FILE_NAME = 'better-ccusage-pricing.json';
+
+/**
+ * Default cc-switch SQLite DB paths (TUI variant preferred, then CLI variant).
+ * The DB stores provider profiles (base_url, model alias maps, cost_multiplier).
+ */
+export const CC_SWITCH_DB_PATHS = [
+	path.join(USER_HOME_DIR, '.cc-switch-tui', 'cc-switch.db'),
+	path.join(USER_HOME_DIR, '.cc-switch', 'cc-switch.db'),
+];
