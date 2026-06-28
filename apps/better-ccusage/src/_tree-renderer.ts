@@ -221,7 +221,11 @@ function buildLevel(rows: Row[], dims: TreeDimension[], depth: number): TreeNode
 		// `children: []` and thus `isLeaf: true`.
 		return [];
 	}
-	const [dim, ...rest] = dims;
+	const dim = dims[0];
+	if (dim == null) {
+		return [makeNode('(all)', depth, [], rows)];
+	}
+	const rest = dims.slice(1);
 	// `model` explodes breakdowns into fragments before grouping; other dims
 	// group items directly.
 	const sourceRows: Row[] = dim === 'model'
@@ -312,7 +316,11 @@ function walk(node: TreeNode, prefix: string, isLast: boolean, lines: string[], 
 	}
 	lines.push(line);
 	for (let i = 0; i < node.children.length; i++) {
-		walk(node.children[i], childPrefix, i === node.children.length - 1, lines, opts, ctx, statsEnabled);
+		const child = node.children[i];
+		if (child == null) {
+			break;
+		}
+		walk(child, childPrefix, i === node.children.length - 1, lines, opts, ctx, statsEnabled);
 	}
 }
 
@@ -333,7 +341,11 @@ export function renderTree(nodes: TreeNode[], opts: RenderTreeOptions): string {
 	lines.push(`Claude Code Token Usage Report - ${opts.title} (Tree)`);
 	lines.push('');
 	for (let i = 0; i < nodes.length; i++) {
-		walk(nodes[i], '', i === nodes.length - 1, lines, opts, ctx, statsEnabled);
+		const node = nodes[i];
+		if (node == null) {
+			break;
+		}
+		walk(node, '', i === nodes.length - 1, lines, opts, ctx, statsEnabled);
 	}
 	// Root aggregate line
 	const rootAgg = aggregateNodeTotals(nodes);
@@ -399,7 +411,7 @@ if (import.meta.vitest != null) {
 			];
 			const nodes = buildTree(items, ['time', 'model']);
 			expect(nodes).toHaveLength(1);
-			const timeNode = nodes[0];
+			const timeNode = nodes[0]!;
 			expect(timeNode.label).toBe('2026-01-01');
 			expect(timeNode.children).toHaveLength(2);
 			expect(timeNode.inputTokens).toBe(30);
@@ -431,12 +443,12 @@ if (import.meta.vitest != null) {
 			];
 			const nodes = buildTree(items, ['time', 'project', 'model']);
 			expect(nodes).toHaveLength(1);
-			const timeNode = nodes[0];
+			const timeNode = nodes[0]!;
 			expect(timeNode.children.map(c => c.label).sort()).toEqual(['proj-a', 'proj-b']);
 			const projA = timeNode.children.find(c => c.label === 'proj-a');
 			expect(projA?.children).toHaveLength(1);
-			expect(projA?.children[0].label).toBe('m1');
-			expect(projA?.children[0].inputTokens).toBe(10);
+			expect(projA?.children[0]?.label).toBe('m1');
+			expect(projA?.children[0]?.inputTokens).toBe(10);
 		});
 
 		it('provider dim groups by providerId', () => {
@@ -456,7 +468,7 @@ if (import.meta.vitest != null) {
 				mkItem({ costByCurrency: { USD: 2, CNY: 14 } }),
 			];
 			const nodes = buildTree(items, ['time']);
-			expect(nodes[0].costByCurrency).toEqual({ USD: 3, CNY: 21 });
+			expect(nodes[0]?.costByCurrency).toEqual({ USD: 3, CNY: 21 });
 		});
 
 		it('empty items returns empty', () => {
