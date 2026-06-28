@@ -160,6 +160,23 @@
 							"type": "string",
 							"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
 							"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
+						},
+						"dbPath": {
+							"type": "string",
+							"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
+							"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
+						},
+						"noDuckdb": {
+							"type": "boolean",
+							"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+							"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+							"default": false
+						},
+						"rebuild": {
+							"type": "boolean",
+							"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+							"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+							"default": false
 						}
 					},
 					"additionalProperties": false,
@@ -320,6 +337,23 @@
 									"type": "string",
 									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
 									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
+								},
+								"dbPath": {
+									"type": "string",
+									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
+									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
+								},
+								"noDuckdb": {
+									"type": "boolean",
+									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"default": false
+								},
+								"rebuild": {
+									"type": "boolean",
+									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"default": false
 								},
 								"instances": {
 									"type": "boolean",
@@ -491,6 +525,23 @@
 									"type": "string",
 									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
 									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
+								},
+								"dbPath": {
+									"type": "string",
+									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
+									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
+								},
+								"noDuckdb": {
+									"type": "boolean",
+									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"default": false
+								},
+								"rebuild": {
+									"type": "boolean",
+									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"default": false
 								}
 							},
 							"additionalProperties": false
@@ -646,6 +697,23 @@
 									"type": "string",
 									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
 									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
+								},
+								"dbPath": {
+									"type": "string",
+									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
+									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
+								},
+								"noDuckdb": {
+									"type": "boolean",
+									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"default": false
+								},
+								"rebuild": {
+									"type": "boolean",
+									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"default": false
 								},
 								"startOfWeek": {
 									"type": "string",
@@ -807,6 +875,23 @@
 									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
 									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
 								},
+								"dbPath": {
+									"type": "string",
+									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
+									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
+								},
+								"noDuckdb": {
+									"type": "boolean",
+									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"default": false
+								},
+								"rebuild": {
+									"type": "boolean",
+									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"default": false
+								},
 								"id": {
 									"type": "string",
 									"description": "Load usage data for a specific session ID",
@@ -966,6 +1051,23 @@
 									"type": "string",
 									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
 									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
+								},
+								"dbPath": {
+									"type": "string",
+									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
+									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
+								},
+								"noDuckdb": {
+									"type": "boolean",
+									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"default": false
+								},
+								"rebuild": {
+									"type": "boolean",
+									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"default": false
 								},
 								"active": {
 									"type": "boolean",

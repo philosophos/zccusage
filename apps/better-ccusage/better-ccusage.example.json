@@ -5,7 +5,10 @@
 		"format": "table",
 		"statsCurrency": "CNY",
 		"costColumns": "billing,stats",
-		"rate": "USD/CNY=7.2"
+		"rate": "USD/CNY=7.2",
+		"dbPath": "~/.cc-switch-tui/better-ccusage.duckdb",
+		"noDuckdb": false,
+		"rebuild": false
 	},
 	"commands": {
 		"daily": {

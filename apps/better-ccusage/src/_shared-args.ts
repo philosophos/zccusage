@@ -150,6 +150,21 @@ export const sharedArgs = {
 		type: 'string',
 		description: 'Filter/report only the given provider id (e.g. "bailian-aliyun-singapore").',
 	},
+	// ─── DuckDB OLAP store args ─────────────────────────────────────────────
+	dbPath: {
+		type: 'string',
+		description: 'Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.',
+	},
+	noDuckdb: {
+		type: 'boolean',
+		description: 'Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).',
+		default: false,
+	},
+	rebuild: {
+		type: 'boolean',
+		description: 'Force a full re-ingest of the DuckDB store (drops and re-imports all rows).',
+		default: false,
+	},
 } as const satisfies Args;
 
 /**
@@ -172,10 +187,10 @@ export function resolveFormat(opts: { format?: string; json?: boolean; tree?: bo
 	if (opts.format != null && opts.format !== 'table') {
 		return opts.format as OutputFormat;
 	}
-	if (opts.json) {
+	if (opts.json === true) {
 		return 'json';
 	}
-	if (opts.tree) {
+	if (opts.tree === true) {
 		return 'tree';
 	}
 	return 'table';
