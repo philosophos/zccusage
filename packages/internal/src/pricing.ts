@@ -404,7 +404,8 @@ export class PricingFetcher implements Disposable {
 	 * @param tokens.cache_creation_input_tokens - Number of cache creation input tokens
 	 * @param tokens.cache_read_input_tokens - Number of cache read input tokens
 	 * @param pricing - Model pricing information
-	 * @returns Total cost in USD
+	 * @returns Total cost as a {@link Money} value, denominated in
+	 * `pricing.currency` (defaulting to USD when unset)
 	 */
 	calculateCostFromPricing(
 		tokens: {
@@ -414,7 +415,7 @@ export class PricingFetcher implements Disposable {
 			cache_read_input_tokens?: number;
 		},
 		pricing: ModelPricing,
-	): number {
+	): Money {
 		/**
 		 * Calculate cost with tiered pricing for 1M context window models
 		 *
@@ -545,7 +546,10 @@ export class PricingFetcher implements Disposable {
 				pricing.cache_read_input_token_cost_above_200k_tokens,
 			);
 
-			return tieredResult.inputCost + tieredResult.outputCost + cacheCreationCost + cacheReadCost;
+			return {
+				amount: tieredResult.inputCost + tieredResult.outputCost + cacheCreationCost + cacheReadCost,
+				currency: pricing.currency ?? DEFAULT_PRICING_CURRENCY,
+			};
 		}
 
 		// Use existing tiered pricing logic for backward compatibility
@@ -573,7 +577,10 @@ export class PricingFetcher implements Disposable {
 			pricing.cache_read_input_token_cost_above_200k_tokens,
 		);
 
-		return inputCost + outputCost + cacheCreationCost + cacheReadCost;
+		return {
+			amount: inputCost + outputCost + cacheCreationCost + cacheReadCost,
+			currency: pricing.currency ?? DEFAULT_PRICING_CURRENCY,
+		};
 	}
 
 	/**
@@ -585,7 +592,7 @@ export class PricingFetcher implements Disposable {
 	 * @param tokens.cache_creation_input_tokens - Number of cache creation input tokens
 	 * @param tokens.cache_read_input_tokens - Number of cache read input tokens
 	 * @param modelName - Model name to resolve pricing for
-	 * @returns Total cost in USD
+	 * @returns Total cost as a {@link Money} value (USD when model is unset)
 	 */
 	async calculateCostFromTokens(
 		tokens: {
@@ -595,9 +602,9 @@ export class PricingFetcher implements Disposable {
 			cache_read_input_tokens?: number;
 		},
 		modelName?: string,
-	): Result.ResultAsync<number, Error> {
+	): Result.ResultAsync<Money, Error> {
 		if (modelName == null || modelName === '') {
-			return Result.succeed(0);
+			return Result.succeed({ amount: 0, currency: DEFAULT_PRICING_CURRENCY });
 		}
 
 		return Result.pipe(
@@ -648,7 +655,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 200,
 			}, 'gpt-5'));
 
-			expect(cost).toBeCloseTo((1000 * 1.25e-6) + (500 * 1e-5) + (200 * 1.25e-7));
+			expect(cost.amount).toBeCloseTo((1000 * 1.25e-6) + (500 * 1e-5) + (200 * 1.25e-7));
 		});
 
 		it('calculates tiered pricing for tokens exceeding 200k threshold (300k input, 250k output, 300k cache creation, 250k cache read)', async () => {
@@ -680,7 +687,7 @@ if (import.meta.vitest != null) {
 					+ (200_000 * 1.5e-5) + (50_000 * 2.25e-5) // output
 					+ (200_000 * 3.75e-6) + (100_000 * 7.5e-6) // cache creation
 					+ (200_000 * 3e-7) + (50_000 * 6e-7); // cache read
-			expect(cost).toBeCloseTo(expectedCost);
+			expect(cost.amount).toBeCloseTo(expectedCost);
 		});
 
 		it('uses standard pricing for 300k/250k tokens when model lacks tiered pricing', async () => {
@@ -699,7 +706,7 @@ if (import.meta.vitest != null) {
 				output_tokens: 250_000,
 			}, 'gpt-5'));
 
-			expect(cost).toBeCloseTo((300_000 * 1e-6) + (250_000 * 2e-6));
+			expect(cost.amount).toBeCloseTo((300_000 * 1e-6) + (250_000 * 2e-6));
 		});
 
 		it('correctly applies pricing at 200k boundary (200k uses base, 200,001 uses tiered, 0 returns 0)', async () => {
@@ -717,21 +724,21 @@ if (import.meta.vitest != null) {
 				input_tokens: 200_000,
 				output_tokens: 0,
 			}, 'claude-4-sonnet-20250514'));
-			expect(cost200k).toBeCloseTo(200_000 * 3e-6);
+			expect(cost200k.amount).toBeCloseTo(200_000 * 3e-6);
 
 			// Test with 200,001 tokens (should use tiered pricing for 1 token)
 			const cost200k1 = await Result.unwrap(fetcher.calculateCostFromTokens({
 				input_tokens: 200_001,
 				output_tokens: 0,
 			}, 'claude-4-sonnet-20250514'));
-			expect(cost200k1).toBeCloseTo((200_000 * 3e-6) + (1 * 6e-6));
+			expect(cost200k1.amount).toBeCloseTo((200_000 * 3e-6) + (1 * 6e-6));
 
 			// Test with 0 tokens (should return 0)
 			const costZero = await Result.unwrap(fetcher.calculateCostFromTokens({
 				input_tokens: 0,
 				output_tokens: 0,
 			}, 'claude-4-sonnet-20250514'));
-			expect(costZero).toBe(0);
+			expect(costZero.amount).toBe(0);
 		});
 
 		it('charges only for tokens above 200k when base price is missing (300k→100k charged, 100k→0 charged)', async () => {
@@ -753,14 +760,14 @@ if (import.meta.vitest != null) {
 
 			// Only 100k input tokens above 200k are charged
 			// Only 50k output tokens above 200k are charged
-			expect(cost).toBeCloseTo((100_000 * 6e-6) + (50_000 * 2.25e-5));
+			expect(cost.amount).toBeCloseTo((100_000 * 6e-6) + (50_000 * 2.25e-5));
 
 			// Test with tokens below threshold - should return 0 (no base price)
 			const costBelow = await Result.unwrap(fetcher.calculateCostFromTokens({
 				input_tokens: 100_000,
 				output_tokens: 100_000,
 			}, 'theoretical-model'));
-			expect(costBelow).toBe(0);
+			expect(costBelow.amount).toBe(0);
 		});
 
 		// Tests for input length-based tiered pricing
@@ -803,7 +810,7 @@ if (import.meta.vitest != null) {
 			}, 'kat-coder-pro-v1'));
 
 			const expectedCost = 0.02124;
-			expect(cost).toBeCloseTo(expectedCost);
+			expect(cost.amount).toBeCloseTo(expectedCost);
 		});
 
 		it('calculates cost using input length-based tiered pricing for KAT-Coder-Pro V1 tier 2 (32-128K tokens)', async () => {
@@ -845,7 +852,7 @@ if (import.meta.vitest != null) {
 			}, 'kat-coder-pro-v1'));
 
 			const expectedCost = 0.08189999999999999;
-			expect(cost).toBeCloseTo(expectedCost);
+			expect(cost.amount).toBeCloseTo(expectedCost);
 		});
 
 		it('calculates cost using input length-based tiered pricing for KAT-Coder-Pro V1 tier 3 (128-256K tokens)', async () => {
@@ -887,7 +894,7 @@ if (import.meta.vitest != null) {
 			}, 'kat-coder-pro-v1'));
 
 			const expectedCost = 0.34800000000000003;
-			expect(cost).toBeCloseTo(expectedCost);
+			expect(cost.amount).toBeCloseTo(expectedCost);
 		});
 
 		it('correctly handles boundary cases for input length-based tiered pricing', async () => {
@@ -926,28 +933,28 @@ if (import.meta.vitest != null) {
 				input_tokens: 32000,
 				output_tokens: 0,
 			}, 'kat-coder-pro-v1'));
-			expect(cost32k).toBeCloseTo(0.0192);
+			expect(cost32k.amount).toBeCloseTo(0.0192);
 
 			// Test boundary at 32,001 (should use tier 2)
 			const cost32k1 = await Result.unwrap(fetcher.calculateCostFromTokens({
 				input_tokens: 32001,
 				output_tokens: 0,
 			}, 'kat-coder-pro-v1'));
-			expect(cost32k1).toBeCloseTo(0.0288009);
+			expect(cost32k1.amount).toBeCloseTo(0.0288009);
 
 			// Test boundary at 128,000 (should use tier 2)
 			const cost128k = await Result.unwrap(fetcher.calculateCostFromTokens({
 				input_tokens: 128000,
 				output_tokens: 0,
 			}, 'kat-coder-pro-v1'));
-			expect(cost128k).toBeCloseTo(0.1152);
+			expect(cost128k.amount).toBeCloseTo(0.1152);
 
 			// Test boundary at 128,001 (should use tier 3)
 			const cost128k1 = await Result.unwrap(fetcher.calculateCostFromTokens({
 				input_tokens: 128001,
 				output_tokens: 0,
 			}, 'kat-coder-pro-v1'));
-			expect(cost128k1).toBeCloseTo(0.1920015);
+			expect(cost128k1.amount).toBeCloseTo(0.1920015);
 		});
 
 		it('handles free models with input length-based tiered pricing (KAT-Coder-Air V1)', async () => {
@@ -975,7 +982,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 5000,
 			}, 'kat-coder-air-v1'));
 
-			expect(cost).toBe(0);
+			expect(cost.amount).toBe(0);
 		});
 
 		it('falls back to base pricing when tiered_pricing is not defined', async () => {
@@ -997,7 +1004,7 @@ if (import.meta.vitest != null) {
 			}, 'regular-model'));
 
 			const expectedCost = (50000 * 1e-6) + (10000 * 2e-6) + (5000 * 1e-7);
-			expect(cost).toBeCloseTo(expectedCost);
+			expect(cost.amount).toBeCloseTo(expectedCost);
 		});
 
 		it('normalizes custom model names to match standard database models in getModelPricing', async () => {

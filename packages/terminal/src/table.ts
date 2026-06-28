@@ -438,6 +438,8 @@ export type UsageData = {
 	cacheCreationTokens: number;
 	cacheReadTokens: number;
 	totalCost: number;
+	costByCurrency?: Record<string, number>; // multi-currency breakdown; absent = { USD: totalCost }
+	providerId?: string; // sales platform that billed this row
 	modelsUsed?: string[];
 	source?: string;
 };

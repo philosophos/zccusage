@@ -66,7 +66,7 @@ export async function calculateCostForEntry(
 	);
 
 	if (Result.isSuccess(result)) {
-		return result.value;
+		return result.value.amount;
 	}
 
 	// Return 0 if we can't calculate cost

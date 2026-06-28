@@ -230,6 +230,13 @@ export const userMessageSchema = v.object({
 });
 
 /**
+ * Multi-currency cost map: `{ currency -> amount }`. Sits alongside the legacy
+ * `totalCost`/`cost` numbers (which become the statistics-currency projection).
+ * Absent means `{ USD: totalCost }` (legacy/codex/opencode stay valid).
+ */
+export const costByCurrencySchema = v.optional(v.record(v.string(), v.number()));
+
+/**
  * Valibot schema for model-specific usage breakdown data
  */
 export const modelBreakdownSchema = v.object({
@@ -239,6 +246,8 @@ export const modelBreakdownSchema = v.object({
 	cacheCreationTokens: v.number(),
 	cacheReadTokens: v.number(),
 	cost: v.number(),
+	costByCurrency: costByCurrencySchema,
+	providerId: v.optional(v.string()), // sales platform that billed this model
 });
 
 /**
@@ -256,6 +265,8 @@ export const dailyUsageSchema = v.object({
 	cacheCreationTokens: v.number(),
 	cacheReadTokens: v.number(),
 	totalCost: v.number(),
+	costByCurrency: costByCurrencySchema,
+	providerId: v.optional(v.string()), // sales platform that billed this period
 	modelsUsed: v.array(modelNameSchema),
 	modelBreakdowns: v.array(modelBreakdownSchema),
 	project: v.optional(v.string()), // Project name when groupByProject is enabled
@@ -278,6 +289,8 @@ export const sessionUsageSchema = v.object({
 	cacheCreationTokens: v.number(),
 	cacheReadTokens: v.number(),
 	totalCost: v.number(),
+	costByCurrency: costByCurrencySchema,
+	providerId: v.optional(v.string()), // sales platform that billed this session
 	lastActivity: activityDateSchema,
 	versions: v.array(versionSchema), // List of unique versions used in this session
 	modelsUsed: v.array(modelNameSchema),
@@ -300,6 +313,8 @@ export const monthlyUsageSchema = v.object({
 	cacheCreationTokens: v.number(),
 	cacheReadTokens: v.number(),
 	totalCost: v.number(),
+	costByCurrency: costByCurrencySchema,
+	providerId: v.optional(v.string()), // sales platform that billed this month
 	modelsUsed: v.array(modelNameSchema),
 	modelBreakdowns: v.array(modelBreakdownSchema),
 	project: v.optional(v.string()), // Project name when groupByProject is enabled
@@ -321,6 +336,8 @@ export const weeklyUsageSchema = v.object({
 	cacheCreationTokens: v.number(),
 	cacheReadTokens: v.number(),
 	totalCost: v.number(),
+	costByCurrency: costByCurrencySchema,
+	providerId: v.optional(v.string()), // sales platform that billed this week
 	modelsUsed: v.array(modelNameSchema),
 	modelBreakdowns: v.array(modelBreakdownSchema),
 	project: v.optional(v.string()), // Project name when groupByProject is enabled
@@ -343,6 +360,8 @@ export const bucketUsageSchema = v.object({
 	cacheCreationTokens: v.number(),
 	cacheReadTokens: v.number(),
 	totalCost: v.number(),
+	costByCurrency: costByCurrencySchema,
+	providerId: v.optional(v.string()), // sales platform that billed this bucket
 	modelsUsed: v.array(modelNameSchema),
 	modelBreakdowns: v.array(modelBreakdownSchema),
 	project: v.optional(v.string()), // Project name when groupByProject is enabled
@@ -651,7 +670,8 @@ export async function calculateCostForEntry(
 		// Always calculate from tokens
 		if (data.message.model != null) {
 			// Use standard cost calculation for both Claude and droid entries
-			return Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), 0);
+			const cost = await Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), { amount: 0, currency: 'USD' });
+			return cost.amount;
 		}
 		return 0;
 	}
@@ -664,7 +684,8 @@ export async function calculateCostForEntry(
 
 		if (data.message.model != null) {
 			// Use standard cost calculation for both Claude and droid entries
-			return Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), 0);
+			const cost = await Result.unwrap(fetcher.calculateCostFromTokens(data.message.usage, data.message.model), { amount: 0, currency: 'USD' });
+			return cost.amount;
 		}
 
 		return 0;

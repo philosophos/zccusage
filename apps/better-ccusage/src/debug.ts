@@ -140,10 +140,10 @@ export async function detectMismatches(
 				stats.entriesWithBoth++;
 
 				const model = data.message.model;
-				const calculatedCost = await Result.unwrap(fetcher.calculateCostFromTokens(
+				const calculatedCost = (await Result.unwrap(fetcher.calculateCostFromTokens(
 					data.message.usage,
 					model,
-				));
+				))).amount;
 
 				// Only compare if we could calculate a cost
 				const difference = Math.abs(data.costUSD - calculatedCost);

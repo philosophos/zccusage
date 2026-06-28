@@ -219,7 +219,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 300,
 			}, pricing!);
 
-			expect(cost).toBeGreaterThan(0);
+			expect(cost.amount).toBeGreaterThan(0);
 		});
 
 		it('calculates cost for claude-sonnet-4-5-20250929 model tokens', async () => {
@@ -232,7 +232,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 300,
 			}, pricing!);
 
-			expect(cost).toBeGreaterThan(0);
+			expect(cost.amount).toBeGreaterThan(0);
 		});
 
 		it('calculates cost for GLM-4.5 model tokens', async () => {
@@ -245,7 +245,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 300,
 			}, pricing!);
 
-			expect(cost).toBeGreaterThan(0);
+			expect(cost.amount).toBeGreaterThan(0);
 		});
 
 		it('calculates cost for GLM-4.5 model with provider prefix', async () => {
@@ -258,7 +258,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 300,
 			}, pricing!);
 
-			expect(cost).toBeGreaterThan(0);
+			expect(cost.amount).toBeGreaterThan(0);
 		});
 
 		it('calculates cost for GLM-4.5-Air model', async () => {
@@ -271,7 +271,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 300,
 			}, pricing!);
 
-			expect(cost).toBeGreaterThan(0);
+			expect(cost.amount).toBeGreaterThan(0);
 		});
 		it('calculates cost for GLM-5-Turbo model', async () => {
 			using fetcher = new CcusagePricingFetcher();
@@ -283,7 +283,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 300,
 			}, pricing!);
 
-			expect(cost).toBeGreaterThan(0);
+			expect(cost.amount).toBeGreaterThan(0);
 		});
 		it('calculates cost for GLM-5.1 model', async () => {
 			using fetcher = new CcusagePricingFetcher();
@@ -295,7 +295,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 300,
 			}, pricing!);
 
-			expect(cost).toBeGreaterThan(0);
+			expect(cost.amount).toBeGreaterThan(0);
 		});
 		it('calculates cost for GLM-5V-Turbo model', async () => {
 			using fetcher = new CcusagePricingFetcher();
@@ -307,7 +307,7 @@ if (import.meta.vitest != null) {
 				cache_read_input_tokens: 300,
 			}, pricing!);
 
-			expect(cost).toBeGreaterThan(0);
+			expect(cost.amount).toBeGreaterThan(0);
 		});
 
 		it('shared fetchers use the same pricing Map', async () => {
