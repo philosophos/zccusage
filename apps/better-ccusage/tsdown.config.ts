@@ -15,6 +15,10 @@ export default defineConfig({
 	],
 	outDir: 'dist',
 	format: 'esm',
+	// @duckdb/node-api ships native .node prebuilds that cannot be bundled —
+	// keep it as a runtime require resolved from node_modules (it is listed
+	// in package.json `dependencies` so npm installs it alongside dist).
+	external: ['@duckdb/node-api'],
 	clean: true,
 	sourcemap: false,
 	minify: 'dce-only',

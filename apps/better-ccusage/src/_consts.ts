@@ -196,3 +196,10 @@ export const CC_SWITCH_DB_PATHS = [
 	path.join(USER_HOME_DIR, '.cc-switch-tui', 'cc-switch.db'),
 	path.join(USER_HOME_DIR, '.cc-switch', 'cc-switch.db'),
 ];
+
+/**
+ * Default DuckDB OLAP store path. Persistent columnar usage facts for fast
+ * ad-hoc queries. Sits alongside the cc-switch DB (logical grouping).
+ * Override via `--db-path` / config `dbPath`.
+ */
+export const DEFAULT_DUCKDB_PATH = path.join(USER_HOME_DIR, '.cc-switch-tui', 'better-ccusage.duckdb');

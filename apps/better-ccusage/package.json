@@ -42,6 +42,9 @@
 		"test": "TZ=UTC vitest run",
 		"typecheck": "tsgo --noEmit"
 	},
+	"dependencies": {
+		"@duckdb/node-api": "catalog:runtime"
+	},
 	"devDependencies": {
 		"@antfu/utils": "catalog:runtime",
 		"@better-ccusage/internal": "workspace:*",
