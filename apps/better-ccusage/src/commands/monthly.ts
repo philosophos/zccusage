@@ -13,7 +13,7 @@ import {
 	createTotalsObject,
 	getTotalTokens,
 } from '../calculate-cost.ts';
-import { loadMonthlyUsageData } from '../data-loader.ts';
+import { computeStatsProjection, loadMonthlyUsageData } from '../data-loader.ts';
 import { detectMismatches, printMismatchReport } from '../debug.ts';
 import { log, logger } from '../logger.ts';
 
@@ -76,10 +76,12 @@ export const monthlyCommand = define({
 					cacheReadTokens: data.cacheReadTokens,
 					totalTokens: getTotalTokens(data),
 					totalCost: data.totalCost,
+					costByCurrency: data.costByCurrency ?? { USD: data.totalCost },
+					...(data.providerId != null ? { providerId: data.providerId } : {}),
 					modelsUsed: data.modelsUsed,
 					modelBreakdowns: data.modelBreakdowns,
 				})),
-				totals: createTotalsObject(totals),
+				totals: { ...createTotalsObject(totals), ...computeStatsProjection(totals, mergedOptions) },
 			};
 
 			// Process with jq if specified

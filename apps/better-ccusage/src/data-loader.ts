@@ -10,6 +10,7 @@
 
 import type { Money } from '@better-ccusage/internal/pricing';
 import type { WeekDay } from './_consts.ts';
+import type { ConversionContext } from './_currency-convert.ts';
 import type { LoadedUsageEntry, SessionBlock } from './_session-blocks.ts';
 import type {
 	ActivityDate,
@@ -32,6 +33,7 @@ import { isDirectorySync } from 'path-type';
 import { glob } from 'tinyglobby';
 import * as v from 'valibot';
 import { CLAUDE_CONFIG_DIR_ENV, CLAUDE_PROJECTS_DIR_NAME, DEFAULT_CLAUDE_CODE_PATH, DEFAULT_CLAUDE_CONFIG_PATH, DEFAULT_LOCALE, USAGE_DATA_GLOB_PATTERN, USER_HOME_DIR } from './_consts.ts';
+import { sumToCurrency } from './_currency-convert.ts';
 import {
 	filterByDateRange,
 	formatDate,
@@ -40,6 +42,7 @@ import {
 	getDayNumber,
 	sortByDate,
 } from './_date-utils.ts';
+import { loadPaymentRecords } from './_payments-loader.ts';
 import { CcusagePricingFetcher } from './_pricing-fetcher.ts';
 import { loadProviderProfiles, resolveProviderId } from './_provider-profile-loader.ts';
 import {
@@ -750,6 +753,65 @@ export async function calculateCostForEntry(
 	}
 
 	unreachable(mode);
+}
+
+/**
+ * Parse a `--rate "FROM/TO=rate"` (comma-separated) string into a rates map.
+ * Malformed pairs are silently skipped.
+ */
+export function parseRateArg(rate?: string): Record<string, number> {
+	if (rate == null || rate === '') {
+		return {};
+	}
+	const out: Record<string, number> = {};
+	for (const pair of rate.split(',')) {
+		const trimmed = pair.trim();
+		if (trimmed === '') {
+			continue;
+		}
+		const eq = trimmed.lastIndexOf('=');
+		if (eq <= 0) {
+			continue;
+		}
+		const key = trimmed.slice(0, eq).trim().toUpperCase();
+		const val = Number(trimmed.slice(eq + 1).trim());
+		if (key !== '' && Number.isFinite(val)) {
+			out[key] = val;
+		}
+	}
+	return out;
+}
+
+/**
+ * Project a totals row's `costByCurrency` into the statistics currency when one
+ * is configured. Returns an empty object when statsCurrency is unset or USD
+ * (the legacy `totalCost` already serves that case).
+ */
+export function computeStatsProjection(
+	totals: { costByCurrency?: Record<string, number>; totalCost: number },
+	options: { statsCurrency?: string; paymentsPath?: string; rate?: string; rates?: Record<string, number> },
+): { statsCost?: number; statsCurrency?: string; unconvertedCurrencies?: string[] } {
+	const statsCurrency = options.statsCurrency;
+	if (statsCurrency == null || statsCurrency.toUpperCase() === 'USD') {
+		return {};
+	}
+	const ctx: ConversionContext = {
+		paymentRecords: loadPaymentRecords(options.paymentsPath),
+		configRates: options.rates ?? parseRateArg(options.rate),
+	};
+	const { total, unconverted } = sumToCurrency(
+		totals.costByCurrency ?? { USD: totals.totalCost },
+		statsCurrency,
+		ctx,
+	);
+	const result: { statsCost?: number; statsCurrency?: string; unconvertedCurrencies?: string[] } = {
+		statsCost: total,
+		statsCurrency: statsCurrency.toUpperCase(),
+	};
+	if (unconverted.length > 0) {
+		result.unconvertedCurrencies = unconverted;
+	}
+	return result;
 }
 
 /**

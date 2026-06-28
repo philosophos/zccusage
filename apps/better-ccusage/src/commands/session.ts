@@ -13,7 +13,7 @@ import {
 	createTotalsObject,
 	getTotalTokens,
 } from '../calculate-cost.ts';
-import { loadSessionData } from '../data-loader.ts';
+import { computeStatsProjection, loadSessionData } from '../data-loader.ts';
 import { detectMismatches, printMismatchReport } from '../debug.ts';
 import { log, logger } from '../logger.ts';
 import { handleSessionIdLookup } from './_session_id.ts';
@@ -97,12 +97,14 @@ export const sessionCommand = define({
 					cacheReadTokens: data.cacheReadTokens,
 					totalTokens: getTotalTokens(data),
 					totalCost: data.totalCost,
+					costByCurrency: data.costByCurrency ?? { USD: data.totalCost },
+					...(data.providerId != null ? { providerId: data.providerId } : {}),
 					lastActivity: data.lastActivity,
 					modelsUsed: data.modelsUsed,
 					modelBreakdowns: data.modelBreakdowns,
 					projectPath: data.projectPath,
 				})),
-				totals: createTotalsObject(totals),
+				totals: { ...createTotalsObject(totals), ...computeStatsProjection(totals, mergedOptions) },
 			};
 
 			// Process with jq if specified

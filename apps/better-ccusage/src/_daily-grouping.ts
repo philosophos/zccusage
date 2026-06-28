@@ -29,6 +29,8 @@ export function groupByProject(dailyData: DailyData): Record<string, DailyProjec
 			cacheReadTokens: data.cacheReadTokens,
 			totalTokens: getTotalTokens(data),
 			totalCost: data.totalCost,
+			costByCurrency: data.costByCurrency ?? { USD: data.totalCost },
+			...(data.providerId != null ? { providerId: data.providerId } : {}),
 			modelsUsed: data.modelsUsed,
 			modelBreakdowns: data.modelBreakdowns,
 		});

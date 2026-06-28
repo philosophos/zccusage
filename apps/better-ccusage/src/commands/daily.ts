@@ -15,7 +15,7 @@ import {
 	createTotalsObject,
 	getTotalTokens,
 } from '../calculate-cost.ts';
-import { loadDailyUsageData } from '../data-loader.ts';
+import { computeStatsProjection, loadDailyUsageData } from '../data-loader.ts';
 import { detectMismatches, printMismatchReport } from '../debug.ts';
 import { log, logger } from '../logger.ts';
 
@@ -98,7 +98,7 @@ export const dailyCommand = define({
 			const jsonOutput = Boolean(mergedOptions.instances) && dailyData.some(d => d.project != null)
 				? {
 						projects: groupByProject(dailyData),
-						totals: createTotalsObject(totals),
+						totals: { ...createTotalsObject(totals), ...computeStatsProjection(totals, mergedOptions) },
 					}
 				: {
 						daily: dailyData.map(data => ({
@@ -109,11 +109,13 @@ export const dailyCommand = define({
 							cacheReadTokens: data.cacheReadTokens,
 							totalTokens: getTotalTokens(data),
 							totalCost: data.totalCost,
+							costByCurrency: data.costByCurrency ?? { USD: data.totalCost },
+							...(data.providerId != null ? { providerId: data.providerId } : {}),
 							modelsUsed: data.modelsUsed,
 							modelBreakdowns: data.modelBreakdowns,
 							...(data.project !== null ? { project: data.project } : {}),
 						})),
-						totals: createTotalsObject(totals),
+						totals: { ...createTotalsObject(totals), ...computeStatsProjection(totals, mergedOptions) },
 					};
 
 			// Process with jq if specified

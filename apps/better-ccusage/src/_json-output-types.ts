@@ -23,6 +23,8 @@ export type DailyProjectOutput = {
 	cacheReadTokens: number;
 	totalTokens: number;
 	totalCost: number;
+	costByCurrency?: Record<string, number>;
+	providerId?: string;
 	modelsUsed: ModelName[];
 	modelBreakdowns: ModelBreakdown[];
 };
