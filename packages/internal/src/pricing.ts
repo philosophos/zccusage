@@ -56,9 +56,28 @@ export const modelPricingSchema = v.object({
 		range: v.tuple([v.number(), v.number()]),
 		cache_read_input_token_cost: v.optional(v.number()),
 	}))),
+	// ISO 4217 currency code in which this provider's per-token prices are denominated.
+	// Absent means USD (the historical convention of the bundled pricing data).
+	currency: v.optional(v.string()),
 });
 
 export type ModelPricing = v.InferOutput<typeof modelPricingSchema>;
+
+/**
+ * Currency-aware monetary amount. `amount` is in `currency` (ISO 4217 code).
+ * Costs produced by `calculateCostFromPricing` are denominated in the matched
+ * `ModelPricing.currency` (defaulting to USD when unset).
+ */
+export type Money = {
+	amount: number;
+	currency: string;
+};
+
+/**
+ * Default currency assumed when a pricing entry does not declare one.
+ * The bundled pricing JSON is historically all-USD.
+ */
+export const DEFAULT_PRICING_CURRENCY = 'USD';
 
 /**
  * LiteLLM pricing URL — the canonical source for model pricing data.
