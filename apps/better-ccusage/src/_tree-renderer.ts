@@ -509,4 +509,147 @@ if (import.meta.vitest != null) {
 			expect(out).toContain('¥');
 		});
 	});
+
+	// ─── Integration / end-to-end: buildTree → renderTree full pipeline ──────
+	describe('integration: buildTree → renderTree', () => {
+		it('4-level nesting (time,project,provider,model) aggregates up the tree', () => {
+			const items = [
+				mkItem({
+					time: '2026-01-01',
+					project: 'proj-a',
+					providerId: 'bailian',
+					inputTokens: 30,
+					outputTokens: 15,
+					totalTokens: 45,
+					costByCurrency: { CNY: 85 },
+					modelBreakdowns: [
+						{ modelName: 'glm-5.1' as never, inputTokens: 20, outputTokens: 10, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 60, costByCurrency: { CNY: 60 } },
+						{ modelName: 'glm-5.2' as never, inputTokens: 10, outputTokens: 5, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 25, costByCurrency: { CNY: 25 } },
+					],
+				}),
+				mkItem({
+					time: '2026-01-01',
+					project: 'proj-a',
+					providerId: 'claude-official',
+					inputTokens: 100,
+					outputTokens: 50,
+					totalTokens: 150,
+					costByCurrency: { USD: 1 },
+					modelBreakdowns: [
+						{ modelName: 'claude-sonnet-4-5' as never, inputTokens: 100, outputTokens: 50, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 1, costByCurrency: { USD: 1 } },
+					],
+				}),
+			];
+			const nodes = buildTree(items, ['time', 'project', 'provider', 'model']);
+			expect(nodes).toHaveLength(1);
+			const timeNode = nodes[0]!;
+			expect(timeNode.label).toBe('2026-01-01');
+			expect(timeNode.inputTokens).toBe(130); // 30 + 100
+			expect(timeNode.costByCurrency).toEqual({ CNY: 85, USD: 1 });
+			const projA = timeNode.children.find(c => c.label === 'proj-a');
+			expect(projA?.inputTokens).toBe(130);
+			expect(projA?.children.map(c => c.label).sort()).toEqual(['bailian', 'claude-official']);
+			const bailian = projA?.children.find(c => c.label === 'bailian');
+			expect(bailian?.inputTokens).toBe(30);
+			expect(bailian?.costByCurrency).toEqual({ CNY: 85 });
+			expect(bailian?.children.map(c => c.label).sort()).toEqual(['glm-5.1', 'glm-5.2']);
+			const glm51 = bailian?.children.find(c => c.label === 'glm-5.1');
+			expect(glm51?.isLeaf).toBe(true);
+			expect(glm51?.inputTokens).toBe(20);
+			expect(glm51?.costByCurrency).toEqual({ CNY: 60 });
+		});
+
+		it('rendered 4-level tree shows nested box chars + per-node billing', () => {
+			const items = [
+				mkItem({
+					time: '2026-01-01',
+					project: 'proj-a',
+					providerId: 'bailian',
+					costByCurrency: { CNY: 85 },
+					totalCost: 85,
+					modelBreakdowns: [{ modelName: 'glm-5.1' as never, inputTokens: 20, outputTokens: 10, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 85, costByCurrency: { CNY: 85 } }],
+				}),
+			];
+			const out = renderTree(buildTree(items, ['time', 'project', 'provider', 'model']), { title: 'Daily' });
+			expect(out).toContain('└── 2026-01-01');
+			expect(out).toContain('└── proj-a');
+			expect(out).toContain('└── bailian');
+			expect(out).toContain('└── glm-5.1');
+			expect(out).toContain('billing:');
+			expect(out).toContain('Total');
+		});
+
+		it('stats projection math: USD cost × rate 7 → CNY amount rendered', () => {
+			const items = [
+				mkItem({
+					costByCurrency: { USD: 2 },
+					totalCost: 2,
+					modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 2, costByCurrency: { USD: 2 } }],
+				}),
+			];
+			const out = renderTree(buildTree(items, ['time', 'model']), {
+				title: 'Daily',
+				statsCurrency: 'CNY',
+				rates: { 'USD/CNY': 7.0 },
+			});
+			expect(out).toContain('stats:');
+			expect(out).toContain('14.00'); // USD 2 × 7 = CNY 14.00
+		});
+
+		it('multi-currency billing shows each currency on one node', () => {
+			const items = [
+				mkItem({
+					costByCurrency: { USD: 1, CNY: 7 },
+					totalCost: 8,
+					modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 8, costByCurrency: { USD: 1, CNY: 7 } }],
+				}),
+			];
+			const out = renderTree(buildTree(items, ['time', 'model']), { title: 'Daily' });
+			expect(out).toContain('$1.00'); // USD
+			expect(out).toContain('7.00'); // CNY
+			expect(out).toContain(' / '); // billing join separator
+		});
+
+		it('stats with no rate for a currency → unconverted label', () => {
+			const items = [
+				mkItem({
+					costByCurrency: { EUR: 5 },
+					totalCost: 5,
+					modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 5, costByCurrency: { EUR: 5 } }],
+				}),
+			];
+			const out = renderTree(buildTree(items, ['time', 'model']), {
+				title: 'Daily',
+				statsCurrency: 'CNY',
+				rates: {}, // no EUR/CNY rate
+			});
+			expect(out).toContain('stats:');
+			expect(out).toContain('unconverted: EUR');
+		});
+
+		it('parseTreeGroup → buildTree round-trip groups in declared order', () => {
+			const items = [
+				mkItem({ time: '2026-01-01', project: 'proj-a', providerId: 'p1', modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 0, costByCurrency: {} }] }),
+				mkItem({ time: '2026-01-01', project: 'proj-b', providerId: 'p2', modelBreakdowns: [{ modelName: 'm2' as never, inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 0, costByCurrency: {} }] }),
+			];
+			const dims = parseTreeGroup('provider,time,project,model', 'daily', false);
+			expect(dims).toEqual(['provider', 'time', 'project', 'model']);
+			const nodes = buildTree(items, dims);
+			expect(nodes.map(n => n.label).sort()).toEqual(['p1', 'p2']);
+			const p1 = nodes.find(n => n.label === 'p1');
+			expect(p1?.children[0]?.label).toBe('2026-01-01'); // time
+			expect(p1?.children[0]?.children[0]?.label).toBe('proj-a'); // project
+			expect(p1?.children[0]?.children[0]?.children[0]?.label).toBe('m1'); // model leaf
+		});
+
+		it('root Total line sums across multiple top-level nodes', () => {
+			const items = [
+				mkItem({ time: '2026-01-01', inputTokens: 10, outputTokens: 5, totalTokens: 15, costByCurrency: { USD: 1 }, modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 10, outputTokens: 5, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 1, costByCurrency: { USD: 1 } }] }),
+				mkItem({ time: '2026-01-02', inputTokens: 20, outputTokens: 10, totalTokens: 30, costByCurrency: { USD: 2 }, modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 20, outputTokens: 10, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 2, costByCurrency: { USD: 2 } }] }),
+			];
+			const out = renderTree(buildTree(items, ['time']), { title: 'Daily' });
+			expect(out).toContain('Total  in:30 out:15'); // 10+20, 5+10
+			expect(out).toContain('$3.00'); // 1 + 2
+		});
+	});
 }
