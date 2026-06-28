@@ -130,8 +130,10 @@ export const sessionCommand = define({
 				includeLastActivity: true,
 				dateFormatter: (dateStr: string) => formatDateCompact(dateStr, ctx.values.timezone, ctx.values.locale),
 				forceCompact: ctx.values.compact,
+				statsCurrency: mergedOptions.statsCurrency,
 			};
 			const table = createUsageReportTable(tableConfig);
+			const statsFor = (d: { costByCurrency?: Record<string, number>; totalCost: number }): ReturnType<typeof computeStatsProjection> => computeStatsProjection(d, mergedOptions);
 
 			// Add session data
 			let maxSessionLength = 0;
@@ -147,13 +149,14 @@ export const sessionCommand = define({
 					cacheCreationTokens: data.cacheCreationTokens,
 					cacheReadTokens: data.cacheReadTokens,
 					totalCost: data.totalCost,
+					...statsFor(data),
 					modelsUsed: data.modelsUsed,
 				}, data.lastActivity);
 				table.push(row);
 
 				// Add model breakdown rows if flag is set
 				if (ctx.values.breakdown) {
-					// Session has 2 extra columns before data and 1 trailing column
+				// Session has 2 extra columns before data and 1 trailing column
 					pushBreakdownRows(table, data.modelBreakdowns, 2, 1);
 				}
 			}
@@ -168,6 +171,7 @@ export const sessionCommand = define({
 				cacheCreationTokens: totals.cacheCreationTokens,
 				cacheReadTokens: totals.cacheReadTokens,
 				totalCost: totals.totalCost,
+				...computeStatsProjection(totals, mergedOptions),
 			}, true); // Include Last Activity column
 			table.push(totalsRow);
 

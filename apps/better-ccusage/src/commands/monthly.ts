@@ -106,12 +106,14 @@ export const monthlyCommand = define({
 				firstColumnName: 'Month',
 				dateFormatter: (dateStr: string) => formatDateCompact(dateStr, mergedOptions.timezone, mergedOptions.locale ?? DEFAULT_LOCALE),
 				forceCompact: ctx.values.compact,
+				statsCurrency: mergedOptions.statsCurrency,
 			};
 			const table = createUsageReportTable(tableConfig);
+			const statsFor = (d: { costByCurrency?: Record<string, number>; totalCost: number }): ReturnType<typeof computeStatsProjection> => computeStatsProjection(d, mergedOptions);
 
 			// Add monthly data
 			for (const data of monthlyData) {
-				// Main row
+			// Main row
 				const row = formatUsageDataRow(data.month, {
 					source: data.source,
 					inputTokens: data.inputTokens,
@@ -119,6 +121,7 @@ export const monthlyCommand = define({
 					cacheCreationTokens: data.cacheCreationTokens,
 					cacheReadTokens: data.cacheReadTokens,
 					totalCost: data.totalCost,
+					...statsFor(data),
 					modelsUsed: data.modelsUsed,
 				});
 				table.push(row);
@@ -139,6 +142,7 @@ export const monthlyCommand = define({
 				cacheCreationTokens: totals.cacheCreationTokens,
 				cacheReadTokens: totals.cacheReadTokens,
 				totalCost: totals.totalCost,
+				...computeStatsProjection(totals, mergedOptions),
 			});
 			table.push(totalsRow);
 

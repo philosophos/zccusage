@@ -140,8 +140,11 @@ export const dailyCommand = define({
 				firstColumnName: 'Date',
 				dateFormatter: (dateStr: string) => formatDateCompact(dateStr, mergedOptions.timezone, mergedOptions.locale ?? undefined),
 				forceCompact: ctx.values.compact,
+				statsCurrency: mergedOptions.statsCurrency,
 			};
 			const table = createUsageReportTable(tableConfig);
+			// Per-row statistics-currency projection (no-op when statsCurrency is unset/USD)
+			const statsFor = (d: { costByCurrency?: Record<string, number>; totalCost: number }): ReturnType<typeof computeStatsProjection> => computeStatsProjection(d, mergedOptions);
 
 			// Add daily data - group by project if instances flag is used
 			if (Boolean(mergedOptions.instances) && dailyData.some(d => d.project != null)) {
@@ -178,6 +181,7 @@ export const dailyCommand = define({
 							cacheCreationTokens: data.cacheCreationTokens,
 							cacheReadTokens: data.cacheReadTokens,
 							totalCost: data.totalCost,
+							...statsFor(data),
 							modelsUsed: data.modelsUsed,
 							source: data.source,
 						});
@@ -202,6 +206,7 @@ export const dailyCommand = define({
 						cacheCreationTokens: data.cacheCreationTokens,
 						cacheReadTokens: data.cacheReadTokens,
 						totalCost: data.totalCost,
+						...statsFor(data),
 						modelsUsed: data.modelsUsed,
 						source: data.source,
 					});
@@ -223,6 +228,7 @@ export const dailyCommand = define({
 				cacheCreationTokens: totals.cacheCreationTokens,
 				cacheReadTokens: totals.cacheReadTokens,
 				totalCost: totals.totalCost,
+				...computeStatsProjection(totals, mergedOptions),
 			});
 			table.push(totalsRow);
 

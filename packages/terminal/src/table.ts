@@ -453,7 +453,20 @@ export type UsageReportConfig = {
 	dateFormatter?: (dateStr: string) => string;
 	/** Force compact mode regardless of terminal width */
 	forceCompact?: boolean;
+	/** Statistics currency for the Cost column header (default 'USD') */
+	statsCurrency?: string;
 };
+
+/**
+ * Resolve the cost cell for a row: the statistics-currency projection when
+ * available, else the legacy USD totalCost. Returns a formatted string.
+ */
+function formatCostCell(data: UsageData): string {
+	if (data.statsCost != null && data.statsCurrency != null) {
+		return formatMoney(data.statsCost, data.statsCurrency);
+	}
+	return formatMoney(data.totalCost, 'USD');
+}
 
 /**
  * Standard usage data structure for table rows
@@ -466,6 +479,8 @@ export type UsageData = {
 	totalCost: number;
 	costByCurrency?: Record<string, number>; // multi-currency breakdown; absent = { USD: totalCost }
 	providerId?: string; // sales platform that billed this row
+	statsCost?: number; // statistics-currency projection of costByCurrency (when --stats-currency set)
+	statsCurrency?: string; // ISO 4217 of statsCost; absent means USD (use totalCost)
 	modelsUsed?: string[];
 	source?: string;
 };
@@ -476,6 +491,7 @@ export type UsageData = {
  * @returns Configured ResponsiveTable instance
  */
 export function createUsageReportTable(config: UsageReportConfig): ResponsiveTable {
+	const costHeader = `Cost (${config.statsCurrency ?? 'USD'})`;
 	const baseHeaders = [
 		config.firstColumnName,
 		'Source',
@@ -485,7 +501,7 @@ export function createUsageReportTable(config: UsageReportConfig): ResponsiveTab
 		'Cache Create',
 		'Cache Read',
 		'Total Tokens',
-		'Cost (USD)',
+		costHeader,
 	];
 
 	const baseAligns: TableCellAlign[] = [
@@ -506,7 +522,7 @@ export function createUsageReportTable(config: UsageReportConfig): ResponsiveTab
 		'Models',
 		'Input',
 		'Output',
-		'Cost (USD)',
+		costHeader,
 	];
 
 	const compactAligns: TableCellAlign[] = [
@@ -561,7 +577,7 @@ export function formatUsageDataRow(
 		formatNumber(data.cacheCreationTokens),
 		formatNumber(data.cacheReadTokens),
 		formatNumber(totalTokens),
-		formatCurrency(data.totalCost),
+		formatCostCell(data),
 	];
 
 	if (lastActivity !== undefined) {
@@ -589,7 +605,7 @@ export function formatTotalsRow(totals: UsageData, includeLastActivity = false):
 		pc.yellow(formatNumber(totals.cacheCreationTokens)),
 		pc.yellow(formatNumber(totals.cacheReadTokens)),
 		pc.yellow(formatNumber(totalTokens)),
-		pc.yellow(formatCurrency(totals.totalCost)),
+		pc.yellow(formatCostCell(totals)),
 	];
 
 	if (includeLastActivity) {
