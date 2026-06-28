@@ -34,6 +34,7 @@ export type LiveMonitorConfig = {
 	sessionDurationHours: number;
 	mode: CostMode;
 	order: SortOrder;
+	pricingPath?: string;
 };
 
 /**
@@ -72,7 +73,7 @@ async function isRecentFile(filePath: string, cutoffTime: Date): Promise<boolean
  * Creates a new live monitoring state
  */
 export function createLiveMonitorState(config: LiveMonitorConfig): LiveMonitorState {
-	const fetcher = config.mode !== 'display' ? new CcusagePricingFetcher() : null;
+	const fetcher = config.mode !== 'display' ? new CcusagePricingFetcher({ pricingPath: config.pricingPath }) : null;
 
 	return {
 		fetcher,

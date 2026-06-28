@@ -259,6 +259,7 @@ export const blocksCommand = define({
 				sessionDurationHours: ctx.values.sessionLength,
 				mode: ctx.values.mode,
 				order: ctx.values.order,
+				pricingPath: mergedOptions.pricingPath,
 			});
 			return; // Exit early, don't show table
 		}

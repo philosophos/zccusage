@@ -1,0 +1,19 @@
+{
+  "$schema": "./config-schema.json",
+  "defaults": {
+    "mode": "auto",
+    "statsCurrency": "CNY",
+    "costColumns": "billing,stats",
+    "rate": "USD/CNY=7.2"
+  },
+  "commands": {
+    "daily": {
+      "breakdown": true,
+      "statsCurrency": "CNY"
+    },
+    "blocks": {
+      "live": true,
+      "refreshInterval": 5
+    }
+  }
+}

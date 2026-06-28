@@ -147,6 +147,7 @@ export const statuslineCommand = define({
 		},
 		config: sharedArgs.config,
 		debug: sharedArgs.debug,
+		pricingPath: sharedArgs.pricingPath,
 	},
 	async run(ctx) {
 		// Set logger to silent for statusline output
@@ -270,7 +271,7 @@ export const statuslineCommand = define({
 					const costSource = ctx.values.costSource;
 					const today = new Date();
 					const todayStr = today.toISOString().split('T')[0]?.replaceAll('-', '') ?? '';
-					const sharedFetcher = createSharedPricingFetcher();
+					const sharedFetcher = createSharedPricingFetcher({ pricingPath: ctx.values.pricingPath });
 
 					// Load all data in parallel: statusline data + context tokens
 					const [statuslineData, contextInfo] = await Promise.all([

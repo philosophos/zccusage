@@ -60,11 +60,9 @@ export const sessionCommand = define({
 
 		// Original session listing logic
 		const sessionData = await loadSessionData({
+			...mergedOptions,
 			since: ctx.values.since,
 			until: ctx.values.until,
-			mode: ctx.values.mode,
-			timezone: ctx.values.timezone,
-			locale: ctx.values.locale,
 		});
 
 		if (sessionData.length === 0) {
