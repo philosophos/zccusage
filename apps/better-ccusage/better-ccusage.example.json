@@ -2,6 +2,7 @@
 	"$schema": "./config-schema.json",
 	"defaults": {
 		"mode": "auto",
+		"format": "table",
 		"statsCurrency": "CNY",
 		"costColumns": "billing,stats",
 		"rate": "USD/CNY=7.2"
@@ -10,6 +11,10 @@
 		"daily": {
 			"breakdown": true,
 			"statsCurrency": "CNY"
+		},
+		"weekly": {
+			"format": "tree",
+			"treeGroup": "time,project,model"
 		},
 		"blocks": {
 			"live": true,

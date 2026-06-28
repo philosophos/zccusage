@@ -24,9 +24,31 @@
 						},
 						"json": {
 							"type": "boolean",
-							"description": "Output in JSON format",
-							"markdownDescription": "Output in JSON format",
+							"description": "Output in JSON format (shorthand for --format json)",
+							"markdownDescription": "Output in JSON format (shorthand for --format json)",
 							"default": false
+						},
+						"format": {
+							"type": "string",
+							"enum": [
+								"table",
+								"json",
+								"tree"
+							],
+							"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+							"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+							"default": "table"
+						},
+						"tree": {
+							"type": "boolean",
+							"description": "Output in hierarchical tree view (shorthand for --format tree)",
+							"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
+							"default": false
+						},
+						"treeGroup": {
+							"type": "string",
+							"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
+							"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
 						},
 						"mode": {
 							"type": "string",
@@ -162,9 +184,31 @@
 								},
 								"json": {
 									"type": "boolean",
-									"description": "Output in JSON format",
-									"markdownDescription": "Output in JSON format",
+									"description": "Output in JSON format (shorthand for --format json)",
+									"markdownDescription": "Output in JSON format (shorthand for --format json)",
 									"default": false
+								},
+								"format": {
+									"type": "string",
+									"enum": [
+										"table",
+										"json",
+										"tree"
+									],
+									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"default": "table"
+								},
+								"tree": {
+									"type": "boolean",
+									"description": "Output in hierarchical tree view (shorthand for --format tree)",
+									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
+									"default": false
+								},
+								"treeGroup": {
+									"type": "string",
+									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
+									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
 								},
 								"mode": {
 									"type": "string",
@@ -311,9 +355,31 @@
 								},
 								"json": {
 									"type": "boolean",
-									"description": "Output in JSON format",
-									"markdownDescription": "Output in JSON format",
+									"description": "Output in JSON format (shorthand for --format json)",
+									"markdownDescription": "Output in JSON format (shorthand for --format json)",
 									"default": false
+								},
+								"format": {
+									"type": "string",
+									"enum": [
+										"table",
+										"json",
+										"tree"
+									],
+									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"default": "table"
+								},
+								"tree": {
+									"type": "boolean",
+									"description": "Output in hierarchical tree view (shorthand for --format tree)",
+									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
+									"default": false
+								},
+								"treeGroup": {
+									"type": "string",
+									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
+									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
 								},
 								"mode": {
 									"type": "string",
@@ -444,9 +510,31 @@
 								},
 								"json": {
 									"type": "boolean",
-									"description": "Output in JSON format",
-									"markdownDescription": "Output in JSON format",
+									"description": "Output in JSON format (shorthand for --format json)",
+									"markdownDescription": "Output in JSON format (shorthand for --format json)",
 									"default": false
+								},
+								"format": {
+									"type": "string",
+									"enum": [
+										"table",
+										"json",
+										"tree"
+									],
+									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"default": "table"
+								},
+								"tree": {
+									"type": "boolean",
+									"description": "Output in hierarchical tree view (shorthand for --format tree)",
+									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
+									"default": false
+								},
+								"treeGroup": {
+									"type": "string",
+									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
+									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
 								},
 								"mode": {
 									"type": "string",
@@ -592,9 +680,31 @@
 								},
 								"json": {
 									"type": "boolean",
-									"description": "Output in JSON format",
-									"markdownDescription": "Output in JSON format",
+									"description": "Output in JSON format (shorthand for --format json)",
+									"markdownDescription": "Output in JSON format (shorthand for --format json)",
 									"default": false
+								},
+								"format": {
+									"type": "string",
+									"enum": [
+										"table",
+										"json",
+										"tree"
+									],
+									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"default": "table"
+								},
+								"tree": {
+									"type": "boolean",
+									"description": "Output in hierarchical tree view (shorthand for --format tree)",
+									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
+									"default": false
+								},
+								"treeGroup": {
+									"type": "string",
+									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
+									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
 								},
 								"mode": {
 									"type": "string",
@@ -720,9 +830,31 @@
 								},
 								"json": {
 									"type": "boolean",
-									"description": "Output in JSON format",
-									"markdownDescription": "Output in JSON format",
+									"description": "Output in JSON format (shorthand for --format json)",
+									"markdownDescription": "Output in JSON format (shorthand for --format json)",
 									"default": false
+								},
+								"format": {
+									"type": "string",
+									"enum": [
+										"table",
+										"json",
+										"tree"
+									],
+									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"default": "table"
+								},
+								"tree": {
+									"type": "boolean",
+									"description": "Output in hierarchical tree view (shorthand for --format tree)",
+									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
+									"default": false
+								},
+								"treeGroup": {
+									"type": "string",
+									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
+									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
 								},
 								"mode": {
 									"type": "string",
