@@ -373,9 +373,9 @@ if (import.meta.vitest != null) {
 			// Both the raw kebab name and the camelCase form are flagged so the
 			// merge loop (which iterates camelCase ctx.values keys) can match.
 			expect(result['stats-currency']).toBe(true);
-			expect(result['statsCurrency']).toBe(true);
-			expect(result['paymentsPath']).toBe(true);
-			expect(result['mode']).toBe(true);
+			expect(result.statsCurrency).toBe(true);
+			expect(result.paymentsPath).toBe(true);
+			expect(result.mode).toBe(true);
 		});
 
 		it('should handle invalid token structures', () => {
