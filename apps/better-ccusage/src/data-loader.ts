@@ -41,6 +41,7 @@ import {
 	sortByDate,
 } from './_date-utils.ts';
 import { CcusagePricingFetcher } from './_pricing-fetcher.ts';
+import { loadProviderProfiles, resolveProviderId } from './_provider-profile-loader.ts';
 import {
 	identifySessionBlocks,
 } from './_session-blocks.ts';
@@ -395,6 +396,30 @@ type TokenStats = {
  */
 function mergeMoney(acc: Record<string, number>, money: Money): void {
 	acc[money.currency] = (acc[money.currency] ?? 0) + money.amount;
+}
+
+/**
+ * Returns the common providerId across all entries, or `undefined` if entries
+ * span multiple providers (or none resolved). Used to stamp a row-level
+ * providerId without re-grouping model breakdowns by provider.
+ */
+function uniformProviderId<T extends { providerId?: string }>(entries: T[]): string | undefined {
+	let common: string | undefined;
+	let seen = false;
+	for (const entry of entries) {
+		const id = entry.providerId;
+		if (id == null) {
+			continue;
+		}
+		if (!seen) {
+			common = id;
+			seen = true;
+		}
+		else if (id !== common) {
+			return undefined;
+		}
+	}
+	return common;
 }
 
 /**
@@ -869,11 +894,19 @@ export async function loadDailyUsageData(
 	// Use CcusagePricingFetcher with try/finally for cleanup
 	const fetcher = mode === 'display' ? null : new CcusagePricingFetcher({ pricingPath: options?.pricingPath });
 
+	// Load provider profiles (cc-switch DB) for temporal provider resolution.
+	// Gated on `import.meta.vitest` so in-source tests stay hermetic (no real
+	// cc-switch DB leak); production auto-discovers the default DB paths.
+	const providerProfiles = import.meta.vitest != null
+		? []
+		: await loadProviderProfiles({ ccSwitchDbPath: options?.ccSwitchDbPath });
+	const providerCtx = { profiles: providerProfiles, schedule: options?.providerSchedule };
+
 	// Track processed message+request combinations for deduplication
 	const processedHashes = new Set<string>();
 
 	// Collect all valid data entries first
-	const allEntries: { data: UsageData; date: string; cost: Money; model: string | undefined; project: string }[] = [];
+	const allEntries: { data: UsageData; date: string; cost: Money; model: string | undefined; project: string; providerId?: string }[] = [];
 
 	for (const file of sortedFiles) {
 		const content = await readFile(file, 'utf-8');
@@ -915,7 +948,10 @@ export async function loadDailyUsageData(
 				// Extract project name from file path
 				const project = extractProjectFromPath(file);
 
-				allEntries.push({ data, date, cost, model: data.message.model, project });
+				// Resolve the provider (sales platform) for this entry's timestamp
+				const providerId = resolveProviderId(new Date(data.timestamp).getTime(), providerCtx) ?? undefined;
+
+				allEntries.push({ data, date, cost, model: data.message.model, project, providerId });
 			}
 			catch {
 				// Skip invalid JSON lines
@@ -954,6 +990,7 @@ export async function loadDailyUsageData(
 			cost,
 			model: droidData.message.model,
 			project: droidData.cwd ?? path.join('droid', 'unknown'),
+			providerId: resolveProviderId(new Date(droidData.timestamp).getTime(), providerCtx) ?? undefined,
 		});
 	}
 
@@ -1023,6 +1060,7 @@ export async function loadDailyUsageData(
 				date: createDailyDate(date),
 				source: createSource(combinedSource), // Use combined source (claude/droid, claude, or droid)
 				...totals,
+				providerId: uniformProviderId(entries),
 				modelsUsed: modelsUsed as ModelName[],
 				modelBreakdowns,
 				...(project == null ? {} : { project }),
@@ -1102,6 +1140,12 @@ export async function loadSessionData(
 	// Use CcusagePricingFetcher with try/finally for cleanup
 	const fetcher = mode === 'display' ? null : new CcusagePricingFetcher({ pricingPath: options?.pricingPath });
 
+	// Load provider profiles for temporal provider resolution (hermetic in tests).
+	const providerProfiles = import.meta.vitest != null
+		? []
+		: await loadProviderProfiles({ ccSwitchDbPath: options?.ccSwitchDbPath });
+	const providerCtx = { profiles: providerProfiles, schedule: options?.providerSchedule };
+
 	// Track processed message+request combinations for deduplication
 	const processedHashes = new Set<string>();
 
@@ -1114,6 +1158,7 @@ export async function loadSessionData(
 		cost: Money;
 		timestamp: string;
 		model: string | undefined;
+		providerId?: string;
 	}> = [];
 
 	for (const { file } of sortedFilesWithBase) {
@@ -1162,6 +1207,7 @@ export async function loadSessionData(
 					cost,
 					timestamp: data.timestamp,
 					model: data.message.model,
+					providerId: resolveProviderId(new Date(data.timestamp).getTime(), providerCtx) ?? undefined,
 				});
 			}
 			catch {
@@ -1189,6 +1235,7 @@ export async function loadSessionData(
 			cost,
 			timestamp: droidData.timestamp,
 			model: droidData.message.model,
+			providerId: resolveProviderId(new Date(droidData.timestamp).getTime(), providerCtx) ?? undefined,
 		});
 	}
 
@@ -1241,6 +1288,7 @@ export async function loadSessionData(
 				sessionId: createSessionId(latestEntry.sessionId),
 				projectPath: createProjectPath(latestEntry.projectPath),
 				...totals,
+				providerId: uniformProviderId(entries),
 				// Always use DEFAULT_LOCALE for date storage to ensure YYYY-MM-DD format
 				lastActivity: formatDate(latestEntry.timestamp, options?.timezone, DEFAULT_LOCALE) as ActivityDate,
 				versions: [...new Set(versions)].sort((a, b) => a.localeCompare(b)) as Version[],
@@ -1474,6 +1522,7 @@ export async function loadBucketUsageData(
 			cacheReadTokens: totalCacheReadTokens,
 			totalCost,
 			costByCurrency,
+			providerId: uniformProviderId(dailyEntries),
 			modelsUsed: [...new Set(models)] as ModelName[],
 			modelBreakdowns,
 			...(project == null ? {} : { project }),
