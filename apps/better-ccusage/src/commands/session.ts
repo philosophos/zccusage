@@ -7,7 +7,8 @@ import { loadConfig, mergeConfigWithArgs } from '../_config-loader-tokens.ts';
 import { DEFAULT_LOCALE } from '../_consts.ts';
 import { formatDateCompact } from '../_date-utils.ts';
 import { processWithJq } from '../_jq-processor.ts';
-import { sharedCommandConfig } from '../_shared-args.ts';
+import { resolveFormat, sharedCommandConfig } from '../_shared-args.ts';
+import { buildTree, parseTreeGroup, renderTree } from '../_tree-renderer.ts';
 import {
 	calculateTotals,
 	createTotalsObject,
@@ -82,6 +83,34 @@ export const sessionCommand = define({
 		if (ctx.values.debug && !useJson) {
 			const mismatchStats = await detectMismatches(undefined);
 			printMismatchReport(mismatchStats, ctx.values.debugSamples);
+		}
+
+		// Tree output format (third format alongside table/json)
+		const format = resolveFormat(mergedOptions);
+		if (format === 'tree') {
+			logger.level = 0;
+			const items = sessionData.map(d => ({
+				time: d.sessionId,
+				project: d.projectPath,
+				providerId: d.providerId,
+				inputTokens: d.inputTokens,
+				outputTokens: d.outputTokens,
+				cacheCreationTokens: d.cacheCreationTokens,
+				cacheReadTokens: d.cacheReadTokens,
+				totalTokens: getTotalTokens(d),
+				totalCost: d.totalCost,
+				costByCurrency: d.costByCurrency,
+				modelBreakdowns: d.modelBreakdowns,
+			}));
+			const nodes = buildTree(items, parseTreeGroup(mergedOptions.treeGroup, 'session', Boolean(mergedOptions.instances)));
+			log(renderTree(nodes, {
+				statsCurrency: mergedOptions.statsCurrency,
+				paymentsPath: mergedOptions.paymentsPath,
+				rate: mergedOptions.rate,
+				locale: mergedOptions.locale,
+				title: 'By Session',
+			}));
+			return;
 		}
 
 		if (useJson) {

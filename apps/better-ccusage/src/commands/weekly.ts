@@ -7,13 +7,14 @@ import { loadConfig, mergeConfigWithArgs } from '../_config-loader-tokens.ts';
 import { WEEK_DAYS } from '../_consts.ts';
 import { formatDateCompact } from '../_date-utils.ts';
 import { processWithJq } from '../_jq-processor.ts';
-import { sharedArgs } from '../_shared-args.ts';
+import { resolveFormat, sharedArgs } from '../_shared-args.ts';
+import { buildTree, parseTreeGroup, renderTree } from '../_tree-renderer.ts';
 import {
 	calculateTotals,
 	createTotalsObject,
 	getTotalTokens,
 } from '../calculate-cost.ts';
-import { loadWeeklyUsageData } from '../data-loader.ts';
+import { computeStatsProjection, loadWeeklyUsageData } from '../data-loader.ts';
 import { detectMismatches, printMismatchReport } from '../debug.ts';
 import { log, logger } from '../logger.ts';
 
@@ -74,6 +75,34 @@ export const weeklyCommand = define({
 			printMismatchReport(mismatchStats, mergedOptions.debugSamples as number | undefined);
 		}
 
+		// Tree output format (third format alongside table/json)
+		const format = resolveFormat(mergedOptions);
+		if (format === 'tree') {
+			logger.level = 0;
+			const items = weeklyData.map(d => ({
+				time: d.week,
+				project: d.project,
+				providerId: d.providerId,
+				inputTokens: d.inputTokens,
+				outputTokens: d.outputTokens,
+				cacheCreationTokens: d.cacheCreationTokens,
+				cacheReadTokens: d.cacheReadTokens,
+				totalTokens: getTotalTokens(d),
+				totalCost: d.totalCost,
+				costByCurrency: d.costByCurrency,
+				modelBreakdowns: d.modelBreakdowns,
+			}));
+			const nodes = buildTree(items, parseTreeGroup(mergedOptions.treeGroup, 'weekly', Boolean(mergedOptions.instances)));
+			log(renderTree(nodes, {
+				statsCurrency: mergedOptions.statsCurrency,
+				paymentsPath: mergedOptions.paymentsPath,
+				rate: mergedOptions.rate,
+				locale: mergedOptions.locale,
+				title: 'Weekly',
+			}));
+			return;
+		}
+
 		if (useJson) {
 			// Output JSON format
 			const jsonOutput = {
@@ -86,10 +115,12 @@ export const weeklyCommand = define({
 					cacheReadTokens: data.cacheReadTokens,
 					totalTokens: getTotalTokens(data),
 					totalCost: data.totalCost,
+					costByCurrency: data.costByCurrency ?? { USD: data.totalCost },
+					...(data.providerId != null ? { providerId: data.providerId } : {}),
 					modelsUsed: data.modelsUsed,
 					modelBreakdowns: data.modelBreakdowns,
 				})),
-				totals: createTotalsObject(totals),
+				totals: { ...createTotalsObject(totals), ...computeStatsProjection(totals, mergedOptions) },
 			};
 
 			// Process with jq if specified
@@ -114,8 +145,10 @@ export const weeklyCommand = define({
 				firstColumnName: 'Week',
 				dateFormatter: (dateStr: string) => formatDateCompact(dateStr, mergedOptions.timezone, mergedOptions.locale ?? undefined),
 				forceCompact: ctx.values.compact,
+				statsCurrency: mergedOptions.statsCurrency,
 			};
 			const table = createUsageReportTable(tableConfig);
+			const statsFor = (d: { costByCurrency?: Record<string, number>; totalCost: number }): ReturnType<typeof computeStatsProjection> => computeStatsProjection(d, mergedOptions);
 
 			// Add weekly data
 			for (const data of weeklyData) {
@@ -127,6 +160,7 @@ export const weeklyCommand = define({
 					cacheCreationTokens: data.cacheCreationTokens,
 					cacheReadTokens: data.cacheReadTokens,
 					totalCost: data.totalCost,
+					...statsFor(data),
 					modelsUsed: data.modelsUsed,
 				});
 				table.push(row);
@@ -147,6 +181,7 @@ export const weeklyCommand = define({
 				cacheCreationTokens: totals.cacheCreationTokens,
 				cacheReadTokens: totals.cacheReadTokens,
 				totalCost: totals.totalCost,
+				...statsFor(totals),
 			});
 			table.push(totalsRow);
 
