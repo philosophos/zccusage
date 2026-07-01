@@ -2,27 +2,26 @@ import process from 'node:process';
 import { cli } from 'gunshi';
 import packageJson from '../../package.json' with { type: 'json' };
 import { blocksCommand } from './blocks.ts';
-import { dailyCommand } from './daily.ts';
-import { monthlyCommand } from './monthly.ts';
-import { sessionCommand } from './session.ts';
 import { statuslineCommand } from './statusline.ts';
-import { weeklyCommand } from './weekly.ts';
+import { usageCommand } from './usage.ts';
+import { watchCommand } from './watch.ts';
 
 const { description, name, version } = packageJson;
 
 // Re-export all commands for easy importing
-export { blocksCommand, dailyCommand, monthlyCommand, sessionCommand, statuslineCommand, weeklyCommand };
+export { blocksCommand, statuslineCommand, usageCommand, watchCommand };
 
 /**
- * Command entries as tuple array
+ * Command entries as tuple array.
+ *
+ * daily/weekly/monthly/session are no longer subcommands — they are selected
+ * via the `--group` flag on the main `usageCommand`. `blocks`, `statusline`,
+ * and `watch` remain as subcommands (their structure does not fit `--group`).
  */
 export const subCommandUnion = [
-	['daily', dailyCommand],
-	['monthly', monthlyCommand],
-	['weekly', weeklyCommand],
-	['session', sessionCommand],
 	['blocks', blocksCommand],
 	['statusline', statuslineCommand],
+	['watch', watchCommand],
 ] as const;
 
 /**
@@ -39,9 +38,9 @@ for (const [name, command] of subCommandUnion) {
 }
 
 /**
- * Default command when no subcommand is specified (defaults to daily)
+ * Default command when no subcommand is specified.
  */
-const mainCommand = dailyCommand;
+const mainCommand = usageCommand;
 
 /**
  * Entry point for the CLI. Parses process arguments and delegates to Gunshi's
