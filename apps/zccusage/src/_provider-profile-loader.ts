@@ -533,6 +533,25 @@ export function loadProviderSchedule(schedulePath?: string): ProviderScheduleEnt
 	return schedule;
 }
 
+/**
+ * Build a `providerId → planType` override map from a loaded schedule. Entries
+ * without `planType` are skipped. When the same providerId appears in multiple
+ * schedule entries with different planTypes, the last entry wins (callers
+ * should avoid declaring conflicting plans for the same providerId, but this
+ * keeps the override well-defined). Used by `attachProfileFields` so the `plan`
+ * tree dimension resolves for provider ids that carry no plan token (e.g.
+ * `bailian-aliyun-singapore` → `saving plan`).
+ */
+export function buildPlanOverrides(schedule: ProviderScheduleEntry[]): Map<string, string> {
+	const overrides = new Map<string, string>();
+	for (const entry of schedule) {
+		if (entry.planType != null && entry.planType !== '') {
+			overrides.set(entry.providerId, entry.planType);
+		}
+	}
+	return overrides;
+}
+
 // ─── In-source tests ─────────────────────────────────────────────────────────
 
 if (import.meta.vitest != null) {

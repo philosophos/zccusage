@@ -322,6 +322,11 @@ export const providerScheduleEntrySchema = v.object({
 	from: isoTimestampSchema,
 	to: isoTimestampSchema,
 	providerId: v.string(),
+	// Optional plan override: when the cc-switch provider id carries no plan
+	// token (e.g. `bailian-aliyun-singapore`), the schedule entry can declare
+	// the plan active during this period so the `plan` tree dimension resolves
+	// correctly instead of falling back to (unknown).
+	planType: v.optional(v.string()),
 });
 export type ProviderScheduleEntry = v.InferOutput<typeof providerScheduleEntrySchema>;
 

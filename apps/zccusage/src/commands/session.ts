@@ -8,8 +8,9 @@ import { DEFAULT_LOCALE } from '../_consts.ts';
 import { formatDateCompact } from '../_date-utils.ts';
 import { querySessionUsage } from '../_duckdb-query.ts';
 import { processWithJq } from '../_jq-processor.ts';
+import { buildPlanOverrides, loadProviderProfiles, loadProviderSchedule } from '../_provider-profile-loader.ts';
 import { resolveFormat, sharedCommandConfig } from '../_shared-args.ts';
-import { buildTree, parseTreeGroup, renderTree } from '../_tree-renderer.ts';
+import { attachProfileFields, buildTree, detectTreeSeparator, parseGroup, renderTree } from '../_tree-renderer.ts';
 import {
 	calculateTotals,
 	createTotalsObject,
@@ -109,12 +110,16 @@ export const sessionCommand = define({
 				costByCurrency: d.costByCurrency,
 				modelBreakdowns: d.modelBreakdowns,
 			}));
-			const nodes = buildTree(items, parseTreeGroup(mergedOptions.treeGroup, 'session', false));
+			const treeDims = parseGroup(mergedOptions.group ?? mergedOptions.treeGroup, 'session').dims;
+			attachProfileFields(items, await loadProviderProfiles({ ccSwitchDbPath: mergedOptions.ccSwitchDbPath, allAppTypes: treeDims.includes('agent') }), buildPlanOverrides(loadProviderSchedule()));
+			const nodes = buildTree(items, treeDims);
 			log(renderTree(nodes, {
 				statsCurrency: mergedOptions.statsCurrency,
 				paymentsPath: mergedOptions.paymentsPath,
 				rate: mergedOptions.rate,
 				locale: mergedOptions.locale,
+				separator: detectTreeSeparator(),
+				wrap: mergedOptions.wrap ?? mergedOptions.treeWrap,
 				title: 'By Session',
 			}));
 			return;

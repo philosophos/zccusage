@@ -377,7 +377,11 @@ export function buildTree(items: TreeItem[], dims: TreeDimension[]): TreeNode[] 
  *
  * Mutates and returns the input array (no copy) so callers can chain.
  */
-export function attachProfileFields(items: TreeItem[], profiles: ProviderProfile[]): TreeItem[] {
+export function attachProfileFields(
+	items: TreeItem[],
+	profiles: ProviderProfile[],
+	planOverrides?: Map<string, string>,
+): TreeItem[] {
 	if (profiles.length === 0) {
 		return items;
 	}
@@ -391,6 +395,8 @@ export function attachProfileFields(items: TreeItem[], profiles: ProviderProfile
 	// explodes breakdowns into fragments — a single monthly item can span
 	// multiple providers, so the fragment must carry its own profile fields
 	// rather than inherit the item's uniform providerId).
+	// `plan` prefers a schedule-declared override (planOverrides) when the
+	// provider id carries no plan token (e.g. `bailian-aliyun-singapore`).
 	const attach = (providerId: string | undefined, target: { reseller?: string; region?: string; plan?: string; agent?: string }): void => {
 		if (providerId == null) {
 			return;
@@ -401,7 +407,7 @@ export function attachProfileFields(items: TreeItem[], profiles: ProviderProfile
 		}
 		target.reseller = p.platform;
 		target.region = p.region;
-		target.plan = p.planType;
+		target.plan = planOverrides?.get(providerId) ?? p.planType;
 		target.agent = p.appType;
 	};
 	for (const it of items) {
