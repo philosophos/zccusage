@@ -625,14 +625,18 @@ function statsForNode(node: TreeNode, opts: RenderTreeOptions, ctx: ConversionCo
 /**
  * Build cell rows from the tree using the `┗┳━` skeleton. Each level indents by
  * one space; non-leaf nodes use `┗┳━` (last child) or `┣┳━`, leaf nodes use
- * `┗━` (last) or `┣━`. `ancestorIsLast` records, per ancestor (excluding self),
+ * `┗━ ` (last) or `┣━ ` — leaf branches carry a trailing space separating the
+ * label from the `━` connector. `ancestorIsLast` records, per ancestor (excluding self),
  * whether that ancestor was its parent's last child — it drives the wrap-mode
  * continuation gutter's vertical trunk.
  */
 function collectRows(node: TreeNode, depth: number, isLast: boolean, ancestorIsLast: boolean[], rows: CellRow[], opts: RenderTreeOptions, ctx: ConversionContext | null, statsEnabled: boolean): void {
 	const isLeaf = node.children.length === 0;
+	// Leaf branches carry a trailing space so the label is visually separated
+	// from the `━` connector (e.g. `┗━ m1` instead of `┗━m1`). Non-leaf branches
+	// keep `┗┳━`/`┣┳━` (no trailing space — the `┳` already separates).
 	const branch = isLeaf
-		? (isLast ? '┗━' : '┣━')
+		? (isLast ? '┗━ ' : '┣━ ')
 		: (isLast ? '┗┳━' : '┣┳━');
 	// Ancestor trunk prefix: align each ancestor's `┃` under that ancestor's
 	// BRANCH connector (column `ancestorDepth`) — the same column the ancestor's
@@ -1175,8 +1179,8 @@ if (import.meta.vitest != null) {
 			expect(out).toMatch(/in\s+out\s+cache_create\s+cache_read\s+billing/);
 			// Body tree skeleton + labels.
 			expect(out).toContain('┗┳━2026-01-01');
-			expect(out).toContain('┣━m1');
-			expect(out).toContain('┗━m2');
+			expect(out).toContain('┣━ m1');
+			expect(out).toContain('┗━ m2');
 			// Total row.
 			expect(out).toContain('Total');
 			// Token values appear.
@@ -1272,8 +1276,8 @@ if (import.meta.vitest != null) {
 			const out = renderTree(buildTree(items, ['time', 'model']), { title: 'Daily' });
 			expect(out).toContain('Claude Code Token Usage Report - Daily (Tree)');
 			expect(out).toContain('┗┳━2026-01-01');
-			expect(out).toContain('┣━m1');
-			expect(out).toContain('┗━m2');
+			expect(out).toContain('┣━ m1');
+			expect(out).toContain('┗━ m2');
 			expect(out).toContain('billing:');
 			expect(out).toContain('Total');
 		});
@@ -1587,7 +1591,7 @@ if (import.meta.vitest != null) {
 			expect(out).toContain('┗┳━2026-01-01');
 			expect(out).toContain('┗┳━proj-a');
 			expect(out).toContain('┗┳━bailian');
-			expect(out).toContain('┗━glm-5.1');
+			expect(out).toContain('┗━ glm-5.1');
 			expect(out).toContain('billing:');
 			expect(out).toContain('Total');
 		});
