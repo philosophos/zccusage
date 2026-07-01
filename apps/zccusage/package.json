@@ -20,6 +20,7 @@
 		"./data-loader": "./src/data-loader.ts",
 		"./debug": "./src/debug.ts",
 		"./logger": "./src/logger.ts",
+		"./switch-watcher": "./src/_switch-watcher.ts",
 		"./package.json": "./package.json"
 	},
 	"main": "./dist/index.js",
@@ -56,6 +57,7 @@
 		"@types/sql.js": "catalog:",
 		"@typescript/native-preview": "catalog:types",
 		"ansi-escapes": "catalog:runtime",
+		"chokidar": "catalog:",
 		"clean-pkg-json": "catalog:release",
 		"consola": "catalog:runtime",
 		"es-toolkit": "catalog:runtime",
@@ -94,6 +96,7 @@
 			"./data-loader": "./dist/data-loader.js",
 			"./debug": "./dist/debug.js",
 			"./logger": "./dist/logger.js",
+			"./switch-watcher": "./dist/_switch-watcher.js",
 			"./package.json": "./package.json"
 		}
 	}
