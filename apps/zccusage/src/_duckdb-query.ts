@@ -33,7 +33,7 @@ import { createFixture } from 'fs-fixture';
 import { filterByDateRange, sortByDate } from './_date-utils.ts';
 import { openDb, runQuery, syncIngest } from './_duckdb-store.ts';
 import { CcusagePricingFetcher } from './_pricing-fetcher.ts';
-import { loadProviderProfiles } from './_provider-profile-loader.ts';
+import { loadProviderProfiles, loadProviderSchedule } from './_provider-profile-loader.ts';
 import { createActivityDate, createDailyDate, createModelName, createMonthlyDate, createProjectPath, createSessionId, createSource, createVersion, createWeeklyDate } from './_types.ts';
 import { calculateCostForEntry, loadDailyUsageData, loadMonthlyUsageData, loadSessionData, loadWeeklyUsageData } from './data-loader.ts';
 import { logger } from './logger.ts';
@@ -151,7 +151,10 @@ async function queryByPeriod(options: QueryOptions | undefined, kind: PeriodKind
 		const profiles = import.meta.vitest != null
 			? []
 			: await loadProviderProfiles({ ccSwitchDbPath: options?.ccSwitchDbPath });
-		const providerCtx = { profiles, schedule: options?.providerSchedule };
+		const schedule = import.meta.vitest != null
+			? options?.providerSchedule
+			: (options?.providerSchedule ?? loadProviderSchedule());
+		const providerCtx = { profiles, schedule };
 		// Thread claudePath through to syncIngest so tests stay hermetic (no real
 		// ~ scan). When unset in production, syncIngest falls back to getClaudePaths().
 		const claudePaths = options?.claudePath != null ? [options.claudePath] : undefined;
@@ -245,6 +248,10 @@ async function queryByPeriod(options: QueryOptions | undefined, kind: PeriodKind
 			for (let i = 0; i < groupRows.length; i++) {
 				const row = groupRows[i];
 				if (row == null) {
+					continue;
+				}
+				// Skip synthetic model (zero-token placeholder, never billed)
+				if (row.model === '<synthetic>') {
 					continue;
 				}
 				const cost = rowCostMap.get(row) ?? { amount: 0, currency: 'USD' } as Money;
@@ -439,7 +446,10 @@ export async function querySessionUsage(options?: QueryOptions): Promise<Session
 		const profiles = import.meta.vitest != null
 			? []
 			: await loadProviderProfiles({ ccSwitchDbPath: options?.ccSwitchDbPath });
-		const providerCtx = { profiles, schedule: options?.providerSchedule };
+		const schedule = import.meta.vitest != null
+			? options?.providerSchedule
+			: (options?.providerSchedule ?? loadProviderSchedule());
+		const providerCtx = { profiles, schedule };
 		const claudePaths = options?.claudePath != null ? [options.claudePath] : undefined;
 		const droidPath = options?.claudePath != null ? '' : undefined;
 		await syncIngest(conn, { claudePaths, droidPath, loadOptions: options, providerContext: providerCtx, rebuild: options?.rebuild });
@@ -529,6 +539,10 @@ export async function querySessionUsage(options?: QueryOptions): Promise<Session
 
 			for (const row of groupRows) {
 				if (row == null) {
+					continue;
+				}
+				// Skip synthetic model (zero-token placeholder, never billed)
+				if (row.model === '<synthetic>') {
 					continue;
 				}
 				const cost = rowCostMap.get(row) ?? ({ amount: 0, currency: 'USD' } as Money);
@@ -659,6 +673,23 @@ if (import.meta.vitest != null) {
 			const fixture = await createFixture({ projects: {} });
 			const actual = await queryDailyUsage({ claudePath: fixture.path, mode: 'display', dbPath: ':memory:' });
 			expect(actual).toEqual([]);
+		});
+
+		it('queryDailyUsage excludes <synthetic> model from modelsUsed and breakdowns', async () => {
+			const fixture = await createFixture({
+				projects: {
+					'test-project': {
+						'session-123.jsonl': [
+							JSON.stringify({ timestamp: '2026-01-01T10:00:00.000Z', sessionId: 's1', message: { id: 'm1', model: 'glm-5.1', usage: { input_tokens: 100, output_tokens: 50 } }, costUSD: 0.01 }),
+							JSON.stringify({ timestamp: '2026-01-01T11:00:00.000Z', sessionId: 's1', message: { id: 'm2', model: '<synthetic>', usage: { input_tokens: 0, output_tokens: 0 } }, costUSD: 0 }),
+						].join('\n'),
+					},
+				},
+			});
+			const actual = await queryDailyUsage({ claudePath: fixture.path, mode: 'display', dbPath: ':memory:' });
+			expect(actual).toHaveLength(1);
+			expect(actual[0]?.modelsUsed).toEqual(['glm-5.1']);
+			expect(actual[0]?.modelBreakdowns.map(b => b.modelName)).toEqual(['glm-5.1']);
 		});
 
 		it('queryMonthlyUsage matches loadMonthlyUsageData (display mode, tokens)', async () => {

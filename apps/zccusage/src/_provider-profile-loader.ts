@@ -2,8 +2,11 @@ import type { Database, SqlJsStatic, SqlValue } from 'sql.js';
 import type { PlanType, ProviderHistoryEntry, ProviderProfile, ProviderScheduleEntry } from './_types.ts';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import initSqlJs from 'sql.js';
-import { CC_SWITCH_DB_PATHS } from './_consts.ts';
+import * as v from 'valibot';
+import { CC_SWITCH_DB_PATHS, resolveCcSwitchConfigDir } from './_consts.ts';
+import { providerScheduleEntrySchema } from './_types.ts';
 import { logger } from './logger.ts';
 
 /**
@@ -481,6 +484,53 @@ export function resolveProviderId(
 
 	// 4. Unmapped.
 	return undefined;
+}
+
+/**
+ * Load the manual provider schedule from `$CC_SWITCH_CONFIG_DIR/provider_schedule.json`
+ * (the R1 retrospective attribution source). The file declares `{from, to, providerId}`
+ * ranges that take priority over both watcher history and the `is_current` snapshot.
+ * Returns an empty array when the file is missing or unreadable (callers fall back
+ * to history → is_current → undefined). Validates each entry against the valibot
+ * schema; malformed entries are logged and skipped (a single bad row does not abort
+ * the whole schedule).
+ */
+export function loadProviderSchedule(schedulePath?: string): ProviderScheduleEntry[] {
+	const filePath = schedulePath != null && schedulePath !== ''
+		? schedulePath
+		: path.join(resolveCcSwitchConfigDir(), 'provider_schedule.json');
+	let raw: string;
+	try {
+		raw = readFileSync(filePath, 'utf8');
+	}
+	catch {
+		// Missing schedule is the common case (file is optional) — debug only.
+		logger.debug(`No provider schedule at ${filePath}; schedule layer will be empty`);
+		return [];
+	}
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(raw);
+	}
+	catch (err) {
+		logger.warn(`Provider schedule at ${filePath} is not valid JSON: ${(err as Error).message}`);
+		return [];
+	}
+	if (!Array.isArray(parsed)) {
+		logger.warn(`Provider schedule at ${filePath} is not a JSON array`);
+		return [];
+	}
+	const schedule: ProviderScheduleEntry[] = [];
+	for (const entry of parsed) {
+		const result = v.safeParse(providerScheduleEntrySchema, entry);
+		if (result.success) {
+			schedule.push(result.output);
+		}
+		else {
+			logger.warn(`Provider schedule entry skipped (invalid): ${JSON.stringify(entry)}`);
+		}
+	}
+	return schedule;
 }
 
 // ─── In-source tests ─────────────────────────────────────────────────────────
