@@ -235,13 +235,30 @@ export type OutputFormat = TupleToUnion<typeof OutputFormats>;
 /**
  * Nesting dimensions for the tree output format. `--tree-group` accepts a
  * comma-separated subset of these in any order.
- * - time:     the report period (date / week / month / sessionId)
+ * - time:     the report period (date / week / month / sessionId). Selected by
+ *             the command name (daily/weekly/monthly/session), NOT the literal
+ *             "time". Kept as the internal dimension name.
  * - project:  project directory
  * - provider: sales platform id (providerId)
+ * - reseller: platform / reseller (profile.platform — bailian | zhipu | anthropic | ...)
+ * - region:   sales region (profile.region — singapore | beijing | us | ...)
+ * - plan:     subscription plan (profile.planType — coding plan | saving plan | ...)
  * - model:    model name (exploded from modelBreakdowns; recommended last)
+ *
+ * `reseller` / `region` / `plan` are derived from the provider profile that
+ * backs each row's `providerId`; rows without a profile resolve to `(unknown)`.
  */
-export const TreeDimensions = ['time', 'project', 'provider', 'model'] as const;
+export const TreeDimensions = ['time', 'project', 'provider', 'agent', 'reseller', 'region', 'plan', 'model'] as const;
 export type TreeDimension = TupleToUnion<typeof TreeDimensions>;
+
+/**
+ * Time-bucket values accepted by `--group`. A bucket selects the data loader
+ * (daily/weekly/monthly/session) and occupies the `time` dimension slot in the
+ * tree at the position it appears in the `--group` list. Omitting a bucket
+ * loads all records with no time aggregation.
+ */
+export const TreeBuckets = ['daily', 'weekly', 'monthly', 'session'] as const;
+export type TreeBucket = TupleToUnion<typeof TreeBuckets>;
 
 /**
  * A provider profile — the *sales platform* that bills for API usage.
@@ -307,3 +324,13 @@ export const providerScheduleEntrySchema = v.object({
 	providerId: v.string(),
 });
 export type ProviderScheduleEntry = v.InferOutput<typeof providerScheduleEntrySchema>;
+
+/**
+ * One observed provider switch (from the watcher). `ts` is epoch milliseconds
+ * (the live-config file mtime at switch time). Used by `resolveProviderId` as
+ * priority layer 2: the most recent entry with `ts <= entry timestamp` wins.
+ */
+export type ProviderHistoryEntry = {
+	ts: number;
+	providerId: string;
+};

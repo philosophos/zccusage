@@ -1,5 +1,5 @@
 import type { Database, SqlJsStatic, SqlValue } from 'sql.js';
-import type { PlanType, ProviderProfile, ProviderScheduleEntry } from './_types.ts';
+import type { PlanType, ProviderHistoryEntry, ProviderProfile, ProviderScheduleEntry } from './_types.ts';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import initSqlJs from 'sql.js';
@@ -424,6 +424,7 @@ export async function loadProviderProfiles(options: LoadProviderProfileOptions =
 export type ProviderResolutionContext = {
 	profiles: ProviderProfile[];
 	schedule?: ProviderScheduleEntry[];
+	history?: ProviderHistoryEntry[];
 };
 
 /**
@@ -432,9 +433,11 @@ export type ProviderResolutionContext = {
  * Priority:
  *  1. User-declared `schedule` range containing the timestamp (most reliable —
  *     explicit historical disambiguation).
- *  2. The `is_current` profile snapshot (accurate for recent entries, i.e. the
+ *  2. Watcher `history`: the most recent entry with `ts <= timestamp` (observed
+ *     switch events from the live-config watcher).
+ *  3. The `is_current` profile snapshot (accurate for recent entries, i.e. the
  *     period since the last switch).
- *  3. `undefined` — caller should treat the entry as `unknown` (model_id still
+ *  4. `undefined` — caller should treat the entry as `unknown` (model_id still
  *     resolves via static USD pricing, preserving current behavior).
  */
 export function resolveProviderId(
@@ -457,13 +460,26 @@ export function resolveProviderId(
 		}
 	}
 
-	// 2. is_current snapshot.
+	// 2. Watcher history: most recent entry with ts <= entry timestamp.
+	if (ctx.history != null && ctx.history.length > 0) {
+		let best: ProviderHistoryEntry | undefined;
+		for (const entry of ctx.history) {
+			if (entry.ts <= ts && (best == null || entry.ts > best.ts)) {
+				best = entry;
+			}
+		}
+		if (best != null) {
+			return best.providerId;
+		}
+	}
+
+	// 3. is_current snapshot.
 	const current = ctx.profiles.find(p => p.isCurrent === true);
 	if (current != null) {
 		return current.id;
 	}
 
-	// 3. Unmapped.
+	// 4. Unmapped.
 	return undefined;
 }
 
@@ -583,6 +599,48 @@ if (import.meta.vitest != null) {
 
 		it('returns undefined for invalid timestamp', () => {
 			expect(resolveProviderId(Number.NaN, { profiles })).toBeUndefined();
+		});
+
+		it('history beats is_current when ts <= entry timestamp', () => {
+			const history = [
+				{ ts: new Date('2026-06-29T18:41:14').getTime(), providerId: 'volcengine-ark-beijing-agent-plan' } as never,
+			];
+			const ts = new Date('2026-06-30T00:00:00').getTime();
+			// profiles[0] (bailian SG) is_current, but history should win
+			expect(resolveProviderId(ts, { profiles, history })).toBe('volcengine-ark-beijing-agent-plan');
+		});
+
+		it('history ignored when ts > entry timestamp (uses is_current)', () => {
+			const history = [
+				{ ts: new Date('2026-06-29T18:41:14').getTime(), providerId: 'volcengine-ark-beijing-agent-plan' } as never,
+			];
+			const ts = new Date('2026-06-28T00:00:00').getTime(); // before the switch
+			expect(resolveProviderId(ts, { profiles, history })).toBe('bailian-aliyun-singapore');
+		});
+
+		it('schedule still beats history', () => {
+			const schedule = [
+				{ from: '2026-06-01T00:00:00.000Z' as never, to: '2026-06-30T23:59:59.000Z' as never, providerId: 'claude-official' } as never,
+			];
+			const history = [
+				{ ts: new Date('2026-06-15T00:00:00').getTime(), providerId: 'poe-philosophos' } as never,
+			];
+			const ts = new Date('2026-06-20T00:00:00').getTime();
+			expect(resolveProviderId(ts, { profiles, schedule, history })).toBe('claude-official');
+		});
+
+		it('most recent history entry <= ts wins', () => {
+			const history = [
+				{ ts: new Date('2026-06-21T14:00:00').getTime(), providerId: 'bailian-aliyun-singapore' } as never,
+				{ ts: new Date('2026-06-28T17:56').getTime(), providerId: 'aliyun-bailian-beijing-token-plan' } as never,
+			];
+			const ts = new Date('2026-06-29T00:00:00').getTime();
+			expect(resolveProviderId(ts, { profiles, history })).toBe('aliyun-bailian-beijing-token-plan');
+		});
+
+		it('empty history array falls through to is_current', () => {
+			const ts = new Date('2026-06-01T00:00:00').getTime();
+			expect(resolveProviderId(ts, { profiles, history: [] })).toBe('bailian-aliyun-singapore');
 		});
 	});
 }
