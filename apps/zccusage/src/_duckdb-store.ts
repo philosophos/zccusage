@@ -182,6 +182,13 @@ function resolveCcSwitchDbPath(): string | undefined {
  *
  * On ATTACH failure (db missing / locked / unreadable), returns zero counts
  * and logs a warning — caller should run JSONL fallback.
+ *
+ * Overlap invariant: `proxy_request_logs` holds 6/22+ per-request rows while
+ * `usage_daily_rollups` holds 4-5月 daily aggregates — non-overlapping by
+ * cc-switch.db contents. If cc-switch.cli ever backfills rollups for a period
+ * also covered by proxy_request_logs, same-day usage would double-count (the
+ * distinct message_hash spaces prevent ON CONFLICT dedup). Verify non-overlap
+ * in e2e if cc-switch.db semantics change.
  */
 export async function ingestCcSwitchDb(conn: DuckDBConnection): Promise<{
 	proxyRows: number;
@@ -278,10 +285,19 @@ export async function ingestCcSwitchDb(conn: DuckDBConnection): Promise<{
 	}
 
 	// Count inserted (best-effort — ON CONFLICT may suppress duplicates).
-	const proxyCount = await runQuery<{ c: number }>(conn, 'SELECT COUNT(*) AS c FROM usage_facts WHERE source_path = \'cc-switch:proxy_request_logs\'');
-	const rollupCount = await runQuery<{ c: number }>(conn, 'SELECT COUNT(*) AS c FROM usage_facts WHERE source_path = \'cc-switch:usage_daily_rollups\'');
+	let proxyCount = 0;
+	let rollupCount = 0;
+	try {
+		const pc = await runQuery<{ c: number }>(conn, 'SELECT COUNT(*) AS c FROM usage_facts WHERE source_path = \'cc-switch:proxy_request_logs\'');
+		const rc = await runQuery<{ c: number }>(conn, 'SELECT COUNT(*) AS c FROM usage_facts WHERE source_path = \'cc-switch:usage_daily_rollups\'');
+		proxyCount = Number(pc[0]?.c ?? 0);
+		rollupCount = Number(rc[0]?.c ?? 0);
+	}
+	catch (err) {
+		logger.warn(`cc-switch count query failed: ${(err as Error).message}`);
+	}
 
-	// DETACH to release the SQLite handle.
+	// DETACH to release the SQLite handle — always, even if counts failed.
 	try {
 		await conn.run('DETACH ccs');
 	}
@@ -290,8 +306,8 @@ export async function ingestCcSwitchDb(conn: DuckDBConnection): Promise<{
 	}
 
 	return {
-		proxyRows: Number(proxyCount[0]?.c ?? 0),
-		rollupRows: Number(rollupCount[0]?.c ?? 0),
+		proxyRows: proxyCount,
+		rollupRows: rollupCount,
 		attached: true,
 	};
 }
