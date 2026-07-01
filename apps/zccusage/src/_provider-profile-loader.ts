@@ -1,5 +1,5 @@
 import type { Database, SqlJsStatic, SqlValue } from 'sql.js';
-import type { ProviderProfile, ProviderScheduleEntry } from './_types.ts';
+import type { PlanType, ProviderProfile, ProviderScheduleEntry } from './_types.ts';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import initSqlJs from 'sql.js';
@@ -63,6 +63,7 @@ const SLOT_NAMES: Record<string, string> = {
 export type LoadProviderProfileOptions = {
 	ccSwitchDbPath?: string; // explicit override
 	appType?: string; // filter by app_type (default: 'claude')
+	allAppTypes?: boolean; // load every app_type (for the `agent` tree dimension)
 };
 
 /**
@@ -142,20 +143,223 @@ function toBoolean(value: SqlValue | undefined): boolean | undefined {
 
 function rowToProfile(row: Record<string, SqlValue>): ProviderProfile {
 	const settings = parseSettingsConfig(typeof row.settings_config === 'string' ? row.settings_config : null);
+	const id = String(row.id ?? '');
+	const baseUrl = settings.baseUrl;
+	const derived = deriveProfileFields(id, baseUrl);
 	const profile: ProviderProfile = {
-		id: String(row.id ?? ''),
+		id,
 		name: String(row.name ?? ''),
 		appType: String(row.app_type ?? ''),
 		category: typeof row.category === 'string' ? row.category : undefined,
-		baseUrl: settings.baseUrl,
+		baseUrl,
 		modelAliasMap: settings.modelAliasMap,
 		costMultiplier: toNumber(row.cost_multiplier),
 		limitDailyUsd: toNumber(row.limit_daily_usd),
 		limitMonthlyUsd: toNumber(row.limit_monthly_usd),
 		providerType: typeof row.provider_type === 'string' ? row.provider_type : undefined,
 		isCurrent: toBoolean(row.is_current),
+		platform: derived.platform,
+		region: derived.region,
+		planType: derived.planType,
 	};
 	return profile;
+}
+
+// ─── Derived field inference (platform / region / planType) ──────────────────
+//
+// cc-switch stores only `id` + `settings_config.base_url` per provider; the
+// `platform` / `region` / `planType` sales-platform attributes are NOT columns.
+// They are encoded in the `id` (e.g. `volcengine-ark-beijing-agent-plan`) and,
+// for region, often also in the base_url host (`*.cn-beijing.*`, `*.ap-southeast-1.*`).
+// We infer them here so tree `--tree-group reseller,region,plan` works without
+// a user-supplied `providerProfiles` config. Explicit config overrides always win
+// (callers layer those on top of this list).
+
+const PLATFORM_ALIASES: Record<string, string> = {
+	anthropic: 'anthropic',
+	claude: 'anthropic',
+	official: 'anthropic',
+	bailian: 'bailian',
+	aliyun: 'bailian',
+	dashscope: 'bailian',
+	volcengine: 'volcengine',
+	ark: 'volcengine',
+	doubao: 'volcengine',
+	zhipu: 'zhipu',
+	glm: 'zhipu',
+	moonshot: 'moonshot',
+	kimi: 'moonshot',
+	minimax: 'minimax',
+	deepseek: 'deepseek',
+	openai: 'openai',
+	google: 'google',
+	gemini: 'google',
+	poe: 'poe',
+};
+
+// Known region tokens. Matched against id segments and base_url host substrings.
+const REGIONS = [
+	'singapore',
+	'beijing',
+	'shanghai',
+	'hangzhou',
+	'shenzhen',
+	'guangzhou',
+	'us',
+	'us-east',
+	'us-west',
+	'eu',
+	'hk',
+	'hongkong',
+	'tokyo',
+	'frankfurt',
+	'london',
+	'sydney',
+	'mumbai',
+	'seoul',
+] as const;
+
+// base_url host substrings → region (covers Alibaba `ap-southeast-1` etc.)
+const HOST_REGION_PATTERNS: Array<{ pattern: string; region: string }> = [
+	{ pattern: 'ap-southeast-1', region: 'singapore' },
+	{ pattern: 'cn-beijing', region: 'beijing' },
+	{ pattern: 'cn-shanghai', region: 'shanghai' },
+	{ pattern: 'cn-hangzhou', region: 'hangzhou' },
+	{ pattern: 'cn-shenzhen', region: 'shenzhen' },
+	{ pattern: 'cn-hongkong', region: 'hk' },
+	{ pattern: 'us-east', region: 'us-east' },
+	{ pattern: 'us-west', region: 'us-west' },
+	{ pattern: 'eu-west', region: 'eu' },
+	{ pattern: 'ap-northeast-1', region: 'tokyo' },
+	{ pattern: 'eu-central', region: 'frankfurt' },
+];
+
+// planType tokens as they appear in id segments (kebab). Map to PlanType values.
+const PLAN_TOKENS: Record<string, PlanType> = {
+	'agent-plan': 'agent plan',
+	'coding-plan': 'coding plan',
+	'saving-plan': 'saving plan',
+	'token-plan': 'token plan',
+	'pay-as-you-go': 'pay-as-you-go',
+	'payg': 'pay-as-you-go',
+};
+
+function derivePlatform(idSegments: string[], baseUrl?: string): string | undefined {
+	// First id segment is the platform token (e.g. "volcengine", "bailian", "claude").
+	const first = idSegments[0]?.toLowerCase();
+	if (first != null && PLATFORM_ALIASES[first] != null) {
+		return PLATFORM_ALIASES[first];
+	}
+	// Fall back to base_url host.
+	if (baseUrl != null) {
+		try {
+			const host = new URL(baseUrl).hostname.toLowerCase();
+			for (const [token, platform] of Object.entries(PLATFORM_ALIASES)) {
+				if (host.includes(token)) {
+					return platform;
+				}
+			}
+			// host-only fallback (e.g. api.poe.com → "poe")
+			const apex = host.split('.').slice(-2, -1)[0];
+			if (apex != null && PLATFORM_ALIASES[apex] != null) {
+				return PLATFORM_ALIASES[apex];
+			}
+			return apex;
+		}
+		catch {
+			return undefined;
+		}
+	}
+	return undefined;
+}
+
+function deriveRegion(idSegments: string[], baseUrl?: string): string | undefined {
+	const lower = idSegments.map(s => s.toLowerCase());
+	for (const seg of lower) {
+		for (const r of REGIONS) {
+			if (seg === r || seg === r.replace('-', '')) {
+				return r;
+			}
+		}
+	}
+	if (baseUrl != null) {
+		try {
+			const host = new URL(baseUrl).hostname.toLowerCase();
+			for (const { pattern, region } of HOST_REGION_PATTERNS) {
+				if (host.includes(pattern)) {
+					return region;
+				}
+			}
+		}
+		catch {
+			// ignore
+		}
+	}
+	return undefined;
+}
+
+function derivePlanType(id: string): PlanType | undefined {
+	const lower = id.toLowerCase();
+	// Prefer the longest token to avoid partial collisions.
+	const matched = Object.keys(PLAN_TOKENS)
+		.filter(token => lower.includes(token))
+		.sort((a, b) => b.length - a.length);
+	return matched[0] != null ? PLAN_TOKENS[matched[0]] : undefined;
+}
+
+export function deriveProfileFields(id: string, baseUrl?: string): { platform?: string; region?: string; planType?: PlanType } {
+	const idSegments = id.split('-');
+	return {
+		platform: derivePlatform(idSegments, baseUrl),
+		region: deriveRegion(idSegments, baseUrl),
+		planType: derivePlanType(id),
+	};
+}
+
+/**
+ * Reverse-lookup a providerId by base_url. Tries exact match first, then a
+ * loose same-host match. Returns undefined when no profile matches (e.g. the
+ * base_url belongs to a provider not in cc-switch.db). Callers should still
+ * record the switch with a NULL provider_id so the timestamp is preserved.
+ */
+export function findProviderIdByBaseUrl(
+	baseUrl: string,
+	profiles: ProviderProfile[],
+): string | undefined {
+	if (baseUrl == null || baseUrl === '') {
+		return undefined;
+	}
+	// 1. Exact match.
+	for (const p of profiles) {
+		if (p.baseUrl === baseUrl) {
+			return p.id;
+		}
+	}
+	// 2. Loose match: same hostname.
+	let targetHost: string;
+	try {
+		targetHost = new URL(baseUrl).hostname.toLowerCase();
+	}
+	catch {
+		return undefined;
+	}
+	if (targetHost === '') {
+		return undefined;
+	}
+	for (const p of profiles) {
+		if (p.baseUrl == null) {
+			continue;
+		}
+		try {
+			if (new URL(p.baseUrl).hostname.toLowerCase() === targetHost) {
+				return p.id;
+			}
+		}
+		catch {
+			continue;
+		}
+	}
+	return undefined;
 }
 
 /**
@@ -182,11 +386,15 @@ export async function loadProviderProfiles(options: LoadProviderProfileOptions =
 	}
 
 	try {
+		const allAppTypes = options.allAppTypes === true;
 		const appType = options.appType ?? 'claude';
-		const stmt = db.prepare(
-			'SELECT id, name, app_type, settings_config, category, cost_multiplier, limit_daily_usd, limit_monthly_usd, provider_type, is_current FROM providers WHERE app_type = ?',
-		);
-		stmt.bind([appType]);
+		const baseSql = 'SELECT id, name, app_type, settings_config, category, cost_multiplier, limit_daily_usd, limit_monthly_usd, provider_type, is_current FROM providers';
+		const stmt = allAppTypes
+			? db.prepare(`${baseSql};`)
+			: db.prepare(`${baseSql} WHERE app_type = ?;`);
+		if (!allAppTypes) {
+			stmt.bind([appType]);
+		}
 		const profiles: ProviderProfile[] = [];
 		while (stmt.step()) {
 			const row = stmt.getAsObject();
@@ -266,6 +474,86 @@ if (import.meta.vitest != null) {
 		it('returns empty when DB path does not exist', async () => {
 			const profiles = await loadProviderProfiles({ ccSwitchDbPath: '/nonexistent/cc-switch.db' });
 			expect(profiles).toEqual([]);
+		});
+	});
+
+	describe('deriveProfileFields', () => {
+		it('infers platform/region/planType from a structured id', () => {
+			expect(deriveProfileFields('volcengine-ark-beijing-agent-plan')).toEqual({
+				platform: 'volcengine',
+				region: 'beijing',
+				planType: 'agent plan',
+			});
+		});
+
+		it('infers bailian singapore from id', () => {
+			expect(deriveProfileFields('bailian-aliyun-singapore')).toEqual({
+				platform: 'bailian',
+				region: 'singapore',
+				planType: undefined,
+			});
+		});
+
+		it('infers region from base_url host when id has none', () => {
+			expect(deriveProfileFields('aliyun-bailian-beijing-token-plan', 'https://token-plan.cn-beijing.maas.aliyuncs.com/apps/anthropic')).toEqual({
+				platform: 'bailian',
+				region: 'beijing',
+				planType: 'token plan',
+			});
+		});
+
+		it('infers region from base_url ap-southeast-1 pattern', () => {
+			const r = deriveProfileFields('bailian-aliyun-singapore', 'https://ws-4u9rppj98g323w16.ap-southeast-1.maas.aliyuncs.com/apps/anthropic');
+			expect(r.region).toBe('singapore');
+			expect(r.platform).toBe('bailian');
+		});
+
+		it('falls back to base_url host apex for platform when id token unknown', () => {
+			expect(deriveProfileFields('default', 'https://api.poe.com')?.platform).toBe('poe');
+		});
+
+		it('maps claude/official id to anthropic platform', () => {
+			expect(deriveProfileFields('claude-official')?.platform).toBe('anthropic');
+		});
+
+		it('returns undefineds for unstructured id with no base_url', () => {
+			expect(deriveProfileFields('default')).toEqual({
+				platform: undefined,
+				region: undefined,
+				planType: undefined,
+			});
+		});
+
+		it('matches pay-as-you-go plan token', () => {
+			expect(deriveProfileFields('acme-pay-as-you-go')?.planType).toBe('pay-as-you-go');
+		});
+	});
+
+	describe('findProviderIdByBaseUrl', () => {
+		const profiles = [
+			{ id: 'poe-philosophos', name: 'POE', appType: 'claude', baseUrl: 'https://api.poe.com/v1' } as never,
+			{ id: 'bailian-aliyun-singapore', name: 'Bailian SG', appType: 'claude', baseUrl: 'https://ws-xxx.ap-southeast-1.maas.aliyuncs.com/apps/anthropic' } as never,
+			{ id: 'no-url-provider', name: 'NoUrl', appType: 'claude', baseUrl: undefined } as never,
+		];
+
+		it('exact base_url match returns provider id', () => {
+			expect(findProviderIdByBaseUrl('https://api.poe.com/v1', profiles)).toBe('poe-philosophos');
+		});
+
+		it('same host loose match when exact url differs', () => {
+			expect(findProviderIdByBaseUrl('https://api.poe.com/v2', profiles)).toBe('poe-philosophos');
+		});
+
+		it('returns undefined when no host matches', () => {
+			expect(findProviderIdByBaseUrl('https://api.unknown.com', profiles)).toBeUndefined();
+		});
+
+		it('returns undefined for invalid url', () => {
+			expect(findProviderIdByBaseUrl('not-a-url', profiles)).toBeUndefined();
+		});
+
+		it('skips profiles without baseUrl', () => {
+			expect(findProviderIdByBaseUrl('https://api.poe.com/v1', [profiles[2]!])).toBeUndefined();
 		});
 	});
 
