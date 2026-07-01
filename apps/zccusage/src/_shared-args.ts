@@ -47,9 +47,23 @@ export const sharedArgs = {
 		description: 'Output in hierarchical tree view (shorthand for --format tree)',
 		default: false,
 	},
+	group: {
+		type: 'string',
+		description: 'Group/bucket selector, comma-separated. A time-bucket (daily|weekly|monthly|session) selects the data loader and occupies the time nesting slot at its position; the rest are nesting dims: project,provider,agent,reseller,region,plan,model. Omitting a bucket loads all records with no time aggregation. Default: daily (→ time,model). Example: --group agent,reseller,region,plan,model,weekly',
+	},
 	treeGroup: {
 		type: 'string',
-		description: 'Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).',
+		description: 'Alias for --group (deprecated).',
+	},
+	wrap: {
+		type: 'boolean',
+		description: 'Tree view: wrap each row after the `out` column onto a second line (cache_create / cache_read / billing / stats). Reduces horizontal width.',
+		default: false,
+	},
+	treeWrap: {
+		type: 'boolean',
+		description: 'Alias for --wrap (deprecated).',
+		default: false,
 	},
 	mode: {
 		type: 'enum',
