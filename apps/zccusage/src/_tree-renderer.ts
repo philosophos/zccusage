@@ -248,7 +248,7 @@ function aggregateNodeTotals(nodes: TreeNode[]): Pick<TreeNode, 'inputTokens' | 
  * (matched lowercase), output is the cased display name.
  */
 const PLATFORM_DISPLAY_NAMES: Record<string, string> = {
-	anthropic: 'Claude',
+	anthropic: 'Anthropic_claude',
 	bailian: 'Aliyun_bailian',
 	volcengine: 'Volcengine_ark',
 	poe: 'POE',
@@ -1028,8 +1028,8 @@ if (import.meta.vitest != null) {
 			];
 			const nodes = buildTree(items, ['reseller', 'region', 'plan']);
 			// reseller values are formatted via PLATFORM_DISPLAY_NAMES (bailian→Aliyun_bailian,
-			// anthropic→Claude); region/plan are word-capitalized.
-			expect(nodes.map(n => n.label).sort()).toEqual(['Aliyun_bailian', 'Claude']);
+			// anthropic→Anthropic_claude); region/plan are word-capitalized.
+			expect(nodes.map(n => n.label).sort()).toEqual(['Aliyun_bailian', 'Anthropic_claude']);
 			const bailian = nodes.find(n => n.label === 'Aliyun_bailian');
 			expect(bailian?.children.map(c => c.label)).toEqual(['Singapore']);
 			expect(bailian?.children[0]?.children.map(c => c.label)).toEqual(['Coding plan']);
