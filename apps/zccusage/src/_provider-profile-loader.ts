@@ -601,7 +601,7 @@ if (import.meta.vitest != null) {
 			expect(resolveProviderId(Number.NaN, { profiles })).toBeUndefined();
 		});
 
-		it('history beats is_current when ts <= entry timestamp', () => {
+		it('history beats is_current when ts >= entry timestamp', () => {
 			const history = [
 				{ ts: new Date('2026-06-29T18:41:14').getTime(), providerId: 'volcengine-ark-beijing-agent-plan' } as never,
 			];
@@ -610,7 +610,7 @@ if (import.meta.vitest != null) {
 			expect(resolveProviderId(ts, { profiles, history })).toBe('volcengine-ark-beijing-agent-plan');
 		});
 
-		it('history ignored when ts > entry timestamp (uses is_current)', () => {
+		it('history ignored when ts < entry timestamp (uses is_current)', () => {
 			const history = [
 				{ ts: new Date('2026-06-29T18:41:14').getTime(), providerId: 'volcengine-ark-beijing-agent-plan' } as never,
 			];
