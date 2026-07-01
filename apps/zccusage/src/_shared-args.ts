@@ -196,15 +196,19 @@ export const sharedCommandConfig = {
  * `--tree` boolean shorthands take effect (json before tree); otherwise the
  * default `table` is used. This keeps `--json`/`--tree` as drop-in shorthands
  * for `--format json`/`--format tree` while letting `--format` override them.
+ *
+ * The deprecated `--tree-group` / `--tree-wrap` aliases also imply the tree
+ * format — a user passing `--tree-group model` expects tree output, not the
+ * default table. They are accepted as tree triggers alongside `--tree`.
  */
-export function resolveFormat(opts: { format?: string; json?: boolean; tree?: boolean }): OutputFormat {
+export function resolveFormat(opts: { format?: string; json?: boolean; tree?: boolean; treeGroup?: string; treeWrap?: boolean }): OutputFormat {
 	if (opts.format != null && opts.format !== 'table') {
 		return opts.format as OutputFormat;
 	}
 	if (opts.json === true) {
 		return 'json';
 	}
-	if (opts.tree === true) {
+	if (opts.tree === true || opts.treeGroup != null || opts.treeWrap === true) {
 		return 'tree';
 	}
 	return 'table';

@@ -119,7 +119,7 @@ export const sessionCommand = define({
 				rate: mergedOptions.rate,
 				locale: mergedOptions.locale,
 				separator: detectTreeSeparator(),
-				wrap: mergedOptions.wrap ?? mergedOptions.treeWrap,
+				wrap: mergedOptions.wrap === true || mergedOptions.treeWrap === true,
 				title: 'By Session',
 			};
 			log(format === 'tree-table' ? renderTreeTable(nodes, renderOpts) : renderTree(nodes, renderOpts));

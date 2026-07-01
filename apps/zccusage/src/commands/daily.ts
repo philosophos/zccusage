@@ -127,7 +127,7 @@ export const dailyCommand = define({
 				rate: mergedOptions.rate,
 				locale: mergedOptions.locale,
 				separator: detectTreeSeparator(),
-				wrap: mergedOptions.wrap ?? mergedOptions.treeWrap,
+				wrap: mergedOptions.wrap === true || mergedOptions.treeWrap === true,
 				title: 'Daily',
 			};
 			log(format === 'tree-table' ? renderTreeTable(nodes, renderOpts) : renderTree(nodes, renderOpts));
