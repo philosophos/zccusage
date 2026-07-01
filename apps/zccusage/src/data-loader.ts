@@ -255,6 +255,13 @@ export const modelBreakdownSchema = v.object({
 	cost: v.number(),
 	costByCurrency: costByCurrencySchema,
 	providerId: v.optional(v.string()), // sales platform that billed this model
+	// Attached by attachProfileFields() so the `model` tree dimension (which
+	// explodes breakdowns into fragments) can group by reseller/region/plan per
+	// fragment instead of inheriting the parent item's single providerId.
+	reseller: v.optional(v.string()),
+	region: v.optional(v.string()),
+	plan: v.optional(v.string()),
+	agent: v.optional(v.string()),
 });
 
 /**
