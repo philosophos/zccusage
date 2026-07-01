@@ -195,7 +195,9 @@ function createBlock(startTime: Date, entries: LoadedUsageEntry[], userMessages:
 		tokenCounts.cacheReadInputTokens += entry.usage.cacheReadInputTokens;
 		costUSD += entry.costUSD ?? 0;
 		usageLimitResetTime = entry.usageLimitResetTime ?? usageLimitResetTime;
-		models.push(entry.model);
+		if (entry.model != null && entry.model !== '<synthetic>') {
+			models.push(entry.model);
+		}
 	}
 
 	// Count user messages in this block's time range
@@ -477,6 +479,18 @@ if (import.meta.vitest != null) {
 			const blocks = identifySessionBlocks(entries);
 			expect(blocks).toHaveLength(1);
 			expect(blocks[0]?.models).toEqual(['claude-sonnet-4-5-20250929', 'claude-opus-4-20250514']);
+		});
+
+		it('excludes <synthetic> model from block.models', () => {
+			const baseTime = new Date('2024-01-01T10:00:00Z');
+			const entries: LoadedUsageEntry[] = [
+				createMockEntry(baseTime, 1000, 500, 'claude-sonnet-4-20250514'),
+				createMockEntry(new Date(baseTime.getTime() + 60 * 60 * 1000), 0, 0, '<synthetic>'),
+			];
+
+			const blocks = identifySessionBlocks(entries);
+			expect(blocks).toHaveLength(1);
+			expect(blocks[0]?.models).toEqual(['claude-sonnet-4-20250514']);
 		});
 
 		it('handles null costUSD correctly', () => {
