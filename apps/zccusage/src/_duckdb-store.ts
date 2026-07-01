@@ -20,12 +20,13 @@ import type { ProviderResolutionContext } from './_provider-profile-loader.ts';
 import type { ProviderHistoryEntry } from './_types.ts';
 import type { LoadOptions, UsageData } from './data-loader.ts';
 import { createHash } from 'node:crypto';
-import { mkdirSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import process from 'node:process';
 import { DuckDBInstance } from '@duckdb/node-api';
-import { DEFAULT_DUCKDB_PATH } from './_consts.ts';
+import { Result } from '@praha/byethrow';
+import { CC_SWITCH_DB_PATHS, DEFAULT_DUCKDB_PATH } from './_consts.ts';
 import { resolveProviderId } from './_provider-profile-loader.ts';
 import { extractProjectFromPath, getClaudePaths, globUsageFiles } from './data-loader.ts';
 import { getDroidPath, processDroidSessions } from './droid-adapter.ts';
@@ -154,6 +155,145 @@ export async function ingestClaudeFile(
 	const afterCount = Number(after[0]?.c ?? 0);
 	// Rough delta of newly inserted rows for this file (not exact across-file dedup).
 	return Math.max(0, afterCount - beforeCount);
+}
+
+/**
+ * Resolve the cc-switch DB path (first existing candidate). Returns undefined
+ * if none exists (caller falls back to JSONL).
+ */
+function resolveCcSwitchDbPath(): string | undefined {
+	for (const candidate of CC_SWITCH_DB_PATHS) {
+		try {
+			readFileSync(candidate);
+			return candidate;
+		}
+		catch {
+			continue;
+		}
+	}
+	return undefined;
+}
+
+/**
+ * ATTACH the cc-switch SQLite DB (read-only) and import its two usage tables
+ * into `usage_facts`. `_session` provider_ids are normalized to NULL so the
+ * post-ingest resolveProviderIds pass picks them up. Returns counts of
+ * inserted rows per table. Idempotent via ON CONFLICT(message_hash) DO NOTHING.
+ *
+ * On ATTACH failure (db missing / locked / unreadable), returns zero counts
+ * and logs a warning — caller should run JSONL fallback.
+ */
+export async function ingestCcSwitchDb(conn: DuckDBConnection): Promise<{
+	proxyRows: number;
+	rollupRows: number;
+	attached: boolean;
+}> {
+	const dbPath = resolveCcSwitchDbPath();
+	if (dbPath == null) {
+		logger.debug('No cc-switch DB found; skipping cc-switch.db ingest');
+		return { proxyRows: 0, rollupRows: 0, attached: false };
+	}
+
+	const attachResult = await Result.try({
+		try: async () => {
+			// Detach first if a stale ATTACH lingers (re-runs in same process).
+			try {
+				await conn.run('DETACH ccs');
+			}
+			catch {
+				// not attached — fine
+			}
+			await conn.run(`ATTACH '${dbPath.replace(/'/g, '\'\'')}' AS ccs (READ_ONLY)`);
+		},
+		catch: (error: unknown) => error instanceof Error ? error : new Error(String(error)),
+	})();
+	if (Result.isFailure(attachResult)) {
+		logger.warn(`cc-switch.db ATTACH failed at ${dbPath}: ${attachResult.error.message}`);
+		return { proxyRows: 0, rollupRows: 0, attached: false };
+	}
+
+	// proxy_request_logs: 6/22+ per-request.
+	const proxyResult = await Result.try({
+		try: async () => {
+			await conn.run(`
+				INSERT INTO usage_facts (
+					message_hash, timestamp, session_id, project, source, source_path,
+					model, provider_id, input_tokens, output_tokens,
+					cache_creation_tokens, cache_read_tokens, cost_usd, version, ingested_at
+				)
+				SELECT
+					md5(COALESCE(request_id::TEXT, '') || ':' || COALESCE(created_at::TEXT, '')),
+					to_timestamp(created_at),
+					session_id,
+					NULL,
+					'claude',
+					'cc-switch:proxy_request_logs',
+					model,
+					CASE WHEN provider_id = '_session' THEN NULL ELSE provider_id END,
+					input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens,
+					CAST(total_cost_usd AS REAL),
+					NULL,
+					CURRENT_TIMESTAMP
+				FROM ccs.proxy_request_logs
+				WHERE created_at IS NOT NULL
+				ON CONFLICT(message_hash) DO NOTHING
+			`);
+		},
+		catch: (error: unknown) => error instanceof Error ? error : new Error(String(error)),
+	})();
+	if (Result.isFailure(proxyResult)) {
+		logger.warn(`proxy_request_logs import failed: ${proxyResult.error.message}`);
+	}
+
+	// usage_daily_rollups: 4-5月 daily aggregate. Use date + 12:00 as ts.
+	const rollupResult = await Result.try({
+		try: async () => {
+			await conn.run(`
+				INSERT INTO usage_facts (
+					message_hash, timestamp, session_id, project, source, source_path,
+					model, provider_id, input_tokens, output_tokens,
+					cache_creation_tokens, cache_read_tokens, cost_usd, version, ingested_at
+				)
+				SELECT
+					md5(date::TEXT || COALESCE(model, '') || COALESCE(provider_id, '')),
+					(date::TEXT || ' 12:00:00')::TIMESTAMP,
+					NULL,
+					NULL,
+					'claude',
+					'cc-switch:usage_daily_rollups',
+					model,
+					CASE WHEN provider_id = '_session' THEN NULL ELSE provider_id END,
+					input_tokens, output_tokens, cache_creation_tokens, cache_read_tokens,
+					CAST(total_cost_usd AS REAL),
+					NULL,
+					CURRENT_TIMESTAMP
+				FROM ccs.usage_daily_rollups
+				ON CONFLICT(message_hash) DO NOTHING
+			`);
+		},
+		catch: (error: unknown) => error instanceof Error ? error : new Error(String(error)),
+	})();
+	if (Result.isFailure(rollupResult)) {
+		logger.warn(`usage_daily_rollups import failed: ${rollupResult.error.message}`);
+	}
+
+	// Count inserted (best-effort — ON CONFLICT may suppress duplicates).
+	const proxyCount = await runQuery<{ c: number }>(conn, 'SELECT COUNT(*) AS c FROM usage_facts WHERE source_path = \'cc-switch:proxy_request_logs\'');
+	const rollupCount = await runQuery<{ c: number }>(conn, 'SELECT COUNT(*) AS c FROM usage_facts WHERE source_path = \'cc-switch:usage_daily_rollups\'');
+
+	// DETACH to release the SQLite handle.
+	try {
+		await conn.run('DETACH ccs');
+	}
+	catch {
+		// ignore
+	}
+
+	return {
+		proxyRows: Number(proxyCount[0]?.c ?? 0),
+		rollupRows: Number(rollupCount[0]?.c ?? 0),
+		attached: true,
+	};
 }
 
 /**
@@ -449,6 +589,13 @@ export async function syncIngest(
 		await conn.run('DELETE FROM ingested_files');
 		progress('Rebuild: cleared usage_facts and ingested_files');
 	}
+
+	// ── cc-switch.db ingest (primary source) ──────────────────────────────
+	const ccResult = await ingestCcSwitchDb(conn);
+	if (ccResult.attached) {
+		progress(`cc-switch.db: ${ccResult.proxyRows} proxy rows, ${ccResult.rollupRows} rollup rows`);
+	}
+	// JSONL ingest below acts as fallback for gaps cc-switch.db doesn't cover.
 
 	// ── Claude JSONL discovery + incremental ingest ────────────────────────
 	let claudePaths: string[];
@@ -878,6 +1025,19 @@ if (import.meta.vitest != null) {
 			await resolveProviderIds(conn, ctx);
 			const rows = await runQuery<{ provider_id: string }>(conn, 'SELECT provider_id FROM usage_facts WHERE message_hash = \'h2\'');
 			expect(rows[0]?.provider_id).toBe('claude-official');
+		});
+	});
+
+	describe('ingestCcSwitchDb', () => {
+		it('returns attached=false when no cc-switch.db exists', async () => {
+			const conn = await openDb(':memory:');
+			// ingestCcSwitchDb uses module-level resolveCcSwitchDbPath which reads
+			// CC_SWITCH_DB_PATHS. In test env none exist → returns zeros, no throw.
+			const result = await ingestCcSwitchDb(conn);
+			expect(result.attached).toBe(false);
+			expect(result.proxyRows).toBe(0);
+			expect(result.rollupRows).toBe(0);
+			conn.closeSync();
 		});
 	});
 }
