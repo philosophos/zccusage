@@ -1,5 +1,7 @@
+import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import path from 'node:path';
+import process from 'node:process';
 import { xdgConfig } from 'xdg-basedir';
 
 /**
@@ -189,17 +191,50 @@ export const PAYMENTS_FILE_NAME = 'better-ccusage-payments.json';
 export const PRICING_FILE_NAME = 'better-ccusage-pricing.json';
 
 /**
- * Default cc-switch SQLite DB paths (TUI variant preferred, then CLI variant).
- * The DB stores provider profiles (base_url, model alias maps, cost_multiplier).
+ * Resolve `$CC_SWITCH_CONFIG_DIR` env var (cc-switch-cli's config override).
+ * Returns undefined if unset or empty.
  */
-export const CC_SWITCH_DB_PATHS = [
-	path.join(USER_HOME_DIR, '.cc-switch-tui', 'cc-switch.db'),
-	path.join(USER_HOME_DIR, '.cc-switch', 'cc-switch.db'),
-];
+function getCcSwitchConfigDir(): string | undefined {
+	const dir = process.env.CC_SWITCH_CONFIG_DIR;
+	return dir != null && dir !== '' ? dir : undefined;
+}
+
+/**
+ * Default cc-switch SQLite DB paths. `$CC_SWITCH_CONFIG_DIR` (cc-switch-cli's
+ * override) wins if set; else the legacy `~/.cc-switch-tui/` and `~/.cc-switch/`
+ * candidates are tried in order. The DB stores provider profiles (base_url,
+ * model alias maps, cost_multiplier) and per-request usage logs.
+ */
+export const CC_SWITCH_DB_PATHS: string[] = (() => {
+	const configDir = getCcSwitchConfigDir();
+	if (configDir != null) {
+		return [path.join(configDir, 'cc-switch.db')];
+	}
+	return [
+		path.join(USER_HOME_DIR, '.cc-switch-tui', 'cc-switch.db'),
+		path.join(USER_HOME_DIR, '.cc-switch', 'cc-switch.db'),
+	];
+})();
+
+/**
+ * Resolve the cc-switch config directory: `$CC_SWITCH_CONFIG_DIR` if set, else
+ * the first existing legacy candidate's parent dir. Used to anchor sibling
+ * files (better-ccusage.duckdb, provider_schedule.json, watcher pid).
+ */
+export function resolveCcSwitchConfigDir(): string {
+	const envDir = getCcSwitchConfigDir();
+	if (envDir != null) {
+		return envDir;
+	}
+	if (existsSync(path.join(USER_HOME_DIR, '.cc-switch-tui'))) {
+		return path.join(USER_HOME_DIR, '.cc-switch-tui');
+	}
+	return path.join(USER_HOME_DIR, '.cc-switch');
+}
 
 /**
  * Default DuckDB OLAP store path. Persistent columnar usage facts for fast
  * ad-hoc queries. Sits alongside the cc-switch DB (logical grouping).
  * Override via `--db-path` / config `dbPath`.
  */
-export const DEFAULT_DUCKDB_PATH = path.join(USER_HOME_DIR, '.cc-switch-tui', 'better-ccusage.duckdb');
+export const DEFAULT_DUCKDB_PATH = path.join(resolveCcSwitchConfigDir(), 'better-ccusage.duckdb');
