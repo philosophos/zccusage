@@ -3,6 +3,7 @@ import process from 'node:process';
 import { serve } from '@hono/node-server';
 import { getClaudePaths } from 'better-ccusage/data-loader';
 import { logger } from 'better-ccusage/logger';
+import { DEFAULT_DUCKDB_PATH, resolveCcSwitchConfigDir, startSwitchWatcher } from 'better-ccusage/switch-watcher';
 import { cli, define } from 'gunshi';
 import packageJson from '../package.json' with { type: 'json' };
 import { createMcpHttpApp, createMcpServer, startMcpServerStdio } from './mcp.ts';
@@ -63,6 +64,18 @@ export const mcpCommand = define({
 			claudePath: paths.at(0),
 			mode,
 		};
+
+		// W3: embed the switch watcher so MCP users get forward-looking provider
+		// switch capture without running `zccusage watch` separately. Disable via
+		// ZCCUSAGE_DISABLE_WATCHER=1. Runs in background (chokidar persistent).
+		if (process.env.ZCCUSAGE_DISABLE_WATCHER !== '1') {
+			const configDir = resolveCcSwitchConfigDir();
+			const duckdbPath = process.env.ZCCUSAGE_DUCKDB_PATH ?? DEFAULT_DUCKDB_PATH;
+			void startSwitchWatcher({ configDir, duckdbPath }).then((handle) => {
+				process.on('SIGINT', () => void handle.stop());
+				process.on('SIGTERM', () => void handle.stop());
+			});
+		}
 
 		switch (mcpType) {
 			case 'stdio': {
