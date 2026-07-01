@@ -16,6 +16,7 @@
  */
 
 import type { DuckDBConnection, DuckDBValue } from '@duckdb/node-api';
+import type { ProviderHistoryEntry } from './_types.ts';
 import type { ProviderResolutionContext } from './_provider-profile-loader.ts';
 import type { LoadOptions, UsageData } from './data-loader.ts';
 import { createHash } from 'node:crypto';
@@ -70,6 +71,14 @@ CREATE TABLE IF NOT EXISTS ingest_meta (
 	key TEXT PRIMARY KEY,
 	value TEXT
 );
+
+CREATE TABLE IF NOT EXISTS provider_switch_history (
+	ts TIMESTAMPTZ,
+	provider_id TEXT,
+	base_url TEXT,
+	source TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_history_ts ON provider_switch_history(ts);
 `;
 
 /**
@@ -316,6 +325,58 @@ export async function resolveProviderIds(
 		resolved++;
 	}
 	return resolved;
+}
+
+/**
+ * Record an observed provider switch into `provider_switch_history`. Called by
+ * the watcher when a live-config atomic write is detected. Dedup: skips insert
+ * if the most recent entry within 5 seconds has the same provider_id (chokidar
+ * may fire multiple events for one atomic write).
+ */
+export async function insertSwitchHistory(
+	conn: DuckDBConnection,
+	entry: { ts: Date; providerId: string | null; baseUrl: string | null; source: string },
+): Promise<boolean> {
+	// Dedup: same provider within 5s = skip.
+	const recent = await runQuery<{ provider_id: string | null }>(
+		conn,
+		`SELECT provider_id FROM provider_switch_history
+		 WHERE ts >= CAST($ts AS TIMESTAMPTZ) - INTERVAL 5 SECOND
+		 ORDER BY ts DESC LIMIT 1`,
+		{ ts: entry.ts.toISOString() },
+	);
+	if (recent[0]?.provider_id === entry.providerId) {
+		return false;
+	}
+	await conn.run(
+		`INSERT INTO provider_switch_history (ts, provider_id, base_url, source)
+		 VALUES ($ts, $pid, $url, $src)`,
+		{
+			ts: entry.ts.toISOString(),
+			pid: entry.providerId,
+			url: entry.baseUrl,
+			src: entry.source,
+		},
+	);
+	return true;
+}
+
+/**
+ * Load all provider_switch_history rows ordered by ts ascending. Used by
+ * `resolveProviderIds` to populate `ctx.history` for the in-memory priority
+ * chain (keeps `resolveProviderId` a pure function — no DB access).
+ */
+export async function loadHistory(
+	conn: DuckDBConnection,
+): Promise<ProviderHistoryEntry[]> {
+	const rows = await runQuery<{ ts: string; provider_id: string }>(
+		conn,
+		'SELECT ts, provider_id FROM provider_switch_history WHERE provider_id IS NOT NULL ORDER BY ts ASC',
+	);
+	return rows.map(r => ({
+		ts: new Date(r.ts).getTime(),
+		providerId: r.provider_id,
+	}));
 }
 
 /**
@@ -707,6 +768,61 @@ if (import.meta.vitest != null) {
 			// mapProviderToModel('anthropic') → sonnet-4-5
 			expect(rows[0]?.model).toBe('sonnet-4-5');
 			conn.closeSync();
+		});
+	});
+
+	describe('provider_switch_history', () => {
+		it('insertSwitchHistory writes a row', async () => {
+			const conn = await openDb(':memory:');
+			await insertSwitchHistory(conn, {
+				ts: new Date('2026-06-29T18:41:14Z'),
+				providerId: 'volcengine-ark-beijing-agent-plan',
+				baseUrl: 'https://ark.cn-beijing.volces.com',
+				source: 'watcher:claude',
+			});
+			const rows = await runQuery<{ c: number }>(conn, 'SELECT COUNT(*) AS c FROM provider_switch_history');
+			expect(Number(rows[0]?.c)).toBe(1);
+		});
+
+		it('dedup skips same provider within 5 seconds', async () => {
+			const conn = await openDb(':memory:');
+			const ts = new Date('2026-06-29T18:41:14Z');
+			const inserted1 = await insertSwitchHistory(conn, { ts, providerId: 'poe', baseUrl: null, source: 'watcher:claude' });
+			const inserted2 = await insertSwitchHistory(conn, { ts: new Date(ts.getTime() + 2000), providerId: 'poe', baseUrl: null, source: 'watcher:claude' });
+			expect(inserted1).toBe(true);
+			expect(inserted2).toBe(false);
+			const rows = await runQuery<{ c: number }>(conn, 'SELECT COUNT(*) AS c FROM provider_switch_history');
+			expect(Number(rows[0]?.c)).toBe(1);
+		});
+
+		it('different provider within 5 seconds is recorded', async () => {
+			const conn = await openDb(':memory:');
+			const ts = new Date('2026-06-29T18:41:14Z');
+			await insertSwitchHistory(conn, { ts, providerId: 'poe', baseUrl: null, source: 'watcher:claude' });
+			await insertSwitchHistory(conn, { ts: new Date(ts.getTime() + 2000), providerId: 'ark', baseUrl: null, source: 'watcher:claude' });
+			const rows = await runQuery<{ c: number }>(conn, 'SELECT COUNT(*) AS c FROM provider_switch_history');
+			expect(Number(rows[0]?.c)).toBe(2);
+		});
+
+		it('loadHistory returns entries as ms epoch', async () => {
+			const conn = await openDb(':memory:');
+			await insertSwitchHistory(conn, {
+				ts: new Date('2026-06-29T18:41:14Z'),
+				providerId: 'volcengine-ark-beijing-agent-plan',
+				baseUrl: null,
+				source: 'watcher:claude',
+			});
+			const history = await loadHistory(conn);
+			expect(history).toHaveLength(1);
+			expect(history[0]?.providerId).toBe('volcengine-ark-beijing-agent-plan');
+			expect(history[0]?.ts).toBe(new Date('2026-06-29T18:41:14Z').getTime());
+		});
+
+		it('loadHistory skips NULL provider_id rows', async () => {
+			const conn = await openDb(':memory:');
+			await insertSwitchHistory(conn, { ts: new Date('2026-06-29T18:41:14Z'), providerId: null, baseUrl: 'https://unknown.com', source: 'watcher:claude' });
+			const history = await loadHistory(conn);
+			expect(history).toHaveLength(0);
 		});
 	});
 }
