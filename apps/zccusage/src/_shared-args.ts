@@ -38,7 +38,7 @@ export const sharedArgs = {
 	format: {
 		type: 'enum',
 		short: 'f',
-		description: 'Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.',
+		description: 'Output format: table, json, tree, or tree-table. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.',
 		default: 'table' as const satisfies OutputFormat,
 		choices: OutputFormats,
 	},

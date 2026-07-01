@@ -10,7 +10,7 @@ import { queryWeeklyUsage } from '../_duckdb-query.ts';
 import { processWithJq } from '../_jq-processor.ts';
 import { buildPlanOverrides, loadProviderProfiles, loadProviderSchedule } from '../_provider-profile-loader.ts';
 import { resolveFormat, sharedArgs } from '../_shared-args.ts';
-import { attachProfileFields, buildTree, detectTreeSeparator, parseGroup, renderTree } from '../_tree-renderer.ts';
+import { attachProfileFields, buildTree, detectTreeSeparator, parseGroup, renderTree, renderTreeTable } from '../_tree-renderer.ts';
 import {
 	calculateTotals,
 	createTotalsObject,
@@ -79,9 +79,9 @@ export const weeklyCommand = define({
 			printMismatchReport(mismatchStats, mergedOptions.debugSamples as number | undefined);
 		}
 
-		// Tree output format (third format alongside table/json)
+		// Tree / tree-table output format (alongside table/json)
 		const format = resolveFormat(mergedOptions);
-		if (format === 'tree') {
+		if (format === 'tree' || format === 'tree-table') {
 			logger.level = 0;
 			const items = weeklyData.map(d => ({
 				time: d.week,
@@ -99,7 +99,7 @@ export const weeklyCommand = define({
 			const treeDims = parseGroup(mergedOptions.group ?? mergedOptions.treeGroup, 'weekly').dims;
 			attachProfileFields(items, await loadProviderProfiles({ ccSwitchDbPath: mergedOptions.ccSwitchDbPath, allAppTypes: treeDims.includes('agent') }), buildPlanOverrides(loadProviderSchedule()));
 			const nodes = buildTree(items, treeDims);
-			log(renderTree(nodes, {
+			const renderOpts = {
 				statsCurrency: mergedOptions.statsCurrency,
 				paymentsPath: mergedOptions.paymentsPath,
 				rate: mergedOptions.rate,
@@ -107,7 +107,8 @@ export const weeklyCommand = define({
 				separator: detectTreeSeparator(),
 				wrap: mergedOptions.wrap ?? mergedOptions.treeWrap,
 				title: 'Weekly',
-			}));
+			};
+			log(format === 'tree-table' ? renderTreeTable(nodes, renderOpts) : renderTree(nodes, renderOpts));
 			return;
 		}
 

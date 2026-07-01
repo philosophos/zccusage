@@ -822,6 +822,83 @@ export function renderTree(nodes: TreeNode[], opts: RenderTreeOptions): string {
 	return lines.join('\n');
 }
 
+/**
+ * Render a tree of nodes as a borderless aligned-column table: the tree
+ * skeleton + label on the left, numeric columns on the right, with a header
+ * row. Numeric columns are right-aligned across all rows; the label column is
+ * padded so the `in` header and every body row's `in` value start at the same
+ * column. The `--wrap` option is ignored (the columns are already compact).
+ *
+ * Differs from `renderTree` in that the column headers are a row above the
+ * body (not inline `in:`/`out:` prefixes), and no `:` separators are emitted.
+ */
+export function renderTreeTable(nodes: TreeNode[], opts: RenderTreeOptions): string {
+	const statsCurrency = opts.statsCurrency;
+	const statsEnabled = statsCurrency != null && statsCurrency !== '';
+	const separator = opts.separator ?? 'combining';
+	const ctx: ConversionContext | null = statsEnabled
+		? {
+				paymentRecords: loadPaymentRecords(opts.paymentsPath),
+				configRates: opts.rates ?? parseRateArg(opts.rate),
+			}
+		: null;
+	const pruned = pruneEmptyNodes(nodes);
+	const rows: CellRow[] = [];
+	for (let i = 0; i < pruned.length; i++) {
+		const node = pruned[i];
+		if (node == null) {
+			break;
+		}
+		collectRows(node, 0, i === pruned.length - 1, [], rows, opts, ctx, statsEnabled);
+	}
+	const w = (sel: (r: CellRow) => string): number => rows.reduce((m, r) => Math.max(m, stringWidth(sel(r))), 0);
+	const wLabel = w(r => `${r.skeleton}${r.label}`);
+	const wIn = w(r => r.in);
+	const wOut = w(r => r.out);
+	const wCc = w(r => r.cacheCreate);
+	const wCr = w(r => r.cacheRead);
+	const wBilling = w(r => r.billing);
+	const wStats = rows.some(r => r.stats != null) ? w(r => r.stats ?? '') : 0;
+	const pad = (s: string, width: number): string => padLeftToWidth(s, width);
+	const lines: string[] = [];
+	lines.push(`Claude Code Token Usage Report - ${opts.title} (Tree-Table)`);
+	lines.push('');
+	// Header row: blank label field + right-aligned column names.
+	const headerLabel = ' '.repeat(wLabel);
+	let header = `${headerLabel}  ${pad('in', wIn)} ${pad('out', wOut)} ${pad('cache_create', wCc)} ${pad('cache_read', wCr)}  ${pad('billing', wBilling)}`;
+	if (wStats > 0) {
+		header += `  ${pad('stats', wStats)}`;
+	}
+	lines.push(header);
+	// Body rows.
+	for (const r of rows) {
+		const labelField = padRightToWidth(`${r.skeleton}${r.label}`, wLabel);
+		let line = `${labelField}  ${pad(r.in, wIn)} ${pad(r.out, wOut)} ${pad(r.cacheCreate, wCc)} ${pad(r.cacheRead, wCr)}  ${pad(r.billing, wBilling)}`;
+		if (wStats > 0) {
+			const stats = r.stats ?? '';
+			line += `  ${pad(stats, wStats)}`;
+		}
+		lines.push(line);
+	}
+	// Root aggregate line.
+	const rootAgg = aggregateNodeTotals(pruned);
+	const rootIn = formatTokens(rootAgg.inputTokens, separator);
+	const rootOut = formatTokens(rootAgg.outputTokens, separator);
+	const rootCc = formatTokens(rootAgg.cacheCreationTokens, separator);
+	const rootCr = formatTokens(rootAgg.cacheReadTokens, separator);
+	const rootBilling = formatBilling(rootAgg.costByCurrency, opts.locale);
+	const totalLabel = padRightToWidth('Total', wLabel);
+	let totalLine = `${totalLabel}  ${pad(rootIn, wIn)} ${pad(rootOut, wOut)} ${pad(rootCc, wCc)} ${pad(rootCr, wCr)}  ${pad(rootBilling, wBilling)}`;
+	if (statsEnabled && ctx != null) {
+		const rootStats = formatMoney(sumToCurrency(rootAgg.costByCurrency, opts.statsCurrency as string, ctx).total, opts.statsCurrency as string, opts.locale);
+		const wStats2 = w(r => r.stats ?? '');
+		totalLine += `  ${pad(rootStats, wStats2)}`;
+	}
+	lines.push('');
+	lines.push(totalLine);
+	return lines.join('\n');
+}
+
 // ─── In-source tests ─────────────────────────────────────────────────────────
 
 if (import.meta.vitest != null) {
@@ -1078,6 +1155,106 @@ if (import.meta.vitest != null) {
 
 		it('empty items returns empty', () => {
 			expect(buildTree([], ['time', 'model'])).toEqual([]);
+		});
+	});
+
+	describe('renderTreeTable', () => {
+		it('renders header row + body + total with aligned columns', () => {
+			const items = [
+				mkItem({
+					time: '2026-01-01',
+					modelBreakdowns: [
+						{ modelName: 'm1' as never, inputTokens: 10, outputTokens: 5, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 0.01, costByCurrency: { USD: 0.01 } },
+						{ modelName: 'm2' as never, inputTokens: 20, outputTokens: 10, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 0.02, costByCurrency: { USD: 0.02 } },
+					],
+				}),
+			];
+			const out = renderTreeTable(buildTree(items, ['time', 'model']), { title: 'Daily' });
+			expect(out).toContain('Claude Code Token Usage Report - Daily (Tree-Table)');
+			// Header row with column names.
+			expect(out).toMatch(/in\s+out\s+cache_create\s+cache_read\s+billing/);
+			// Body tree skeleton + labels.
+			expect(out).toContain('┗┳━2026-01-01');
+			expect(out).toContain('┣━m1');
+			expect(out).toContain('┗━m2');
+			// Total row.
+			expect(out).toContain('Total');
+			// Token values appear.
+			expect(out).toContain('$0.01');
+			expect(out).toContain('$0.02');
+			expect(out).toContain('$0.03');
+		});
+
+		it('omits stats column when statsCurrency unset', () => {
+			const items = [mkItem({ modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 0.01, costByCurrency: { USD: 0.01 } }] })];
+			const out = renderTreeTable(buildTree(items, ['time', 'model']), { title: 'Daily' });
+			expect(out).not.toMatch(/stats/);
+		});
+
+		it('shows stats column when statsCurrency set with rate', () => {
+			const items = [mkItem({ costByCurrency: { USD: 1 }, modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 1, outputTokens: 1, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 1, costByCurrency: { USD: 1 } }] })];
+			const out = renderTreeTable(buildTree(items, ['time', 'model']), { title: 'Daily', statsCurrency: 'CNY', rates: { 'USD/CNY': 7.0 } });
+			expect(out).toMatch(/stats/);
+			expect(out).toContain('¥');
+		});
+
+		it('aligns in/out/cache_create/cache_read columns across rows', () => {
+			// Use the `model` dim only so labels carry no digits (a `time` label
+			// like `2026-01-01` would let the in-field regex match the label's
+			// digits instead of the in value).
+			const items = [
+				mkItem({
+					modelBreakdowns: [
+						{ modelName: 'x' as never, inputTokens: 5, outputTokens: 5, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 0.01, costByCurrency: { USD: 0.01 } },
+						{ modelName: 'a-much-longer-model-name' as never, inputTokens: 1000, outputTokens: 10, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 0.02, costByCurrency: { USD: 0.02 } },
+					],
+				}),
+			];
+			const out = renderTreeTable(buildTree(items, ['model']), { title: 'Daily', separator: 'comma' });
+			// Right-aligned `in` → every body/total row's `in` value ENDS at the
+			// same column (padLeftToWidth pushes the value to the field's right edge).
+			const isData = (l: string): boolean => l.startsWith('┗') || l.startsWith('┣') || l.startsWith('Total');
+			const dataLines = out.split('\n').filter(isData);
+			const inEndCols = dataLines.map((l) => {
+				const m = l.match(/(\d[\d,]*)(\s+)(\d[\d,]*)/);
+				if (m == null || m.index == null) {
+					return -1;
+				}
+				return m.index + m[1]!.length;
+			});
+			expect(inEndCols.length).toBeGreaterThan(1);
+			expect(inEndCols.every(c => c === inEndCols[0] && c > 0)).toBe(true);
+		});
+
+		it('prunes all-zero nodes from the rendered table', () => {
+			const items = [
+				mkItem({
+					time: '2026-01-01',
+					inputTokens: 5,
+					outputTokens: 5,
+					costByCurrency: { USD: 0.01 },
+					modelBreakdowns: [
+						{ modelName: 'zero-model' as never, inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 0, costByCurrency: { USD: 0 } },
+						{ modelName: 'real-model' as never, inputTokens: 5, outputTokens: 5, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 0.01, costByCurrency: { USD: 0.01 } },
+					],
+				}),
+			];
+			const out = renderTreeTable(buildTree(items, ['time', 'model']), { title: 'Daily' });
+			expect(out).not.toContain('zero-model');
+			expect(out).toContain('real-model');
+			const totalLine = out.split('\n').find(l => l.startsWith('Total'));
+			expect(totalLine).toContain('$0.01');
+		});
+
+		it('root Total line sums across multiple top-level nodes', () => {
+			const items = [
+				mkItem({ time: '2026-01-01', inputTokens: 10, outputTokens: 5, totalTokens: 15, costByCurrency: { USD: 1 }, modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 10, outputTokens: 5, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 1, costByCurrency: { USD: 1 } }] }),
+				mkItem({ time: '2026-01-02', inputTokens: 20, outputTokens: 10, totalTokens: 30, costByCurrency: { USD: 2 }, modelBreakdowns: [{ modelName: 'm1' as never, inputTokens: 20, outputTokens: 10, cacheCreationTokens: 0, cacheReadTokens: 0, cost: 2, costByCurrency: { USD: 2 } }] }),
+			];
+			const out = renderTreeTable(buildTree(items, ['time']), { title: 'Daily' });
+			const totalLine = out.split('\n').find(l => l.startsWith('Total'));
+			expect(totalLine).toMatch(/^Total\s+\d+\s+15/); // 5 + 10
+			expect(out).toContain('$3.00'); // 1 + 2
 		});
 	});
 

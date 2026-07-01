@@ -10,7 +10,7 @@ import { querySessionUsage } from '../_duckdb-query.ts';
 import { processWithJq } from '../_jq-processor.ts';
 import { buildPlanOverrides, loadProviderProfiles, loadProviderSchedule } from '../_provider-profile-loader.ts';
 import { resolveFormat, sharedCommandConfig } from '../_shared-args.ts';
-import { attachProfileFields, buildTree, detectTreeSeparator, parseGroup, renderTree } from '../_tree-renderer.ts';
+import { attachProfileFields, buildTree, detectTreeSeparator, parseGroup, renderTree, renderTreeTable } from '../_tree-renderer.ts';
 import {
 	calculateTotals,
 	createTotalsObject,
@@ -93,9 +93,9 @@ export const sessionCommand = define({
 			printMismatchReport(mismatchStats, ctx.values.debugSamples);
 		}
 
-		// Tree output format (third format alongside table/json)
+		// Tree / tree-table output format (alongside table/json)
 		const format = resolveFormat(mergedOptions);
-		if (format === 'tree') {
+		if (format === 'tree' || format === 'tree-table') {
 			logger.level = 0;
 			const items = sessionData.map(d => ({
 				time: d.sessionId,
@@ -113,7 +113,7 @@ export const sessionCommand = define({
 			const treeDims = parseGroup(mergedOptions.group ?? mergedOptions.treeGroup, 'session').dims;
 			attachProfileFields(items, await loadProviderProfiles({ ccSwitchDbPath: mergedOptions.ccSwitchDbPath, allAppTypes: treeDims.includes('agent') }), buildPlanOverrides(loadProviderSchedule()));
 			const nodes = buildTree(items, treeDims);
-			log(renderTree(nodes, {
+			const renderOpts = {
 				statsCurrency: mergedOptions.statsCurrency,
 				paymentsPath: mergedOptions.paymentsPath,
 				rate: mergedOptions.rate,
@@ -121,7 +121,8 @@ export const sessionCommand = define({
 				separator: detectTreeSeparator(),
 				wrap: mergedOptions.wrap ?? mergedOptions.treeWrap,
 				title: 'By Session',
-			}));
+			};
+			log(format === 'tree-table' ? renderTreeTable(nodes, renderOpts) : renderTree(nodes, renderOpts));
 			return;
 		}
 

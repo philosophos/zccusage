@@ -225,11 +225,13 @@ export type CostColumn = TupleToUnion<typeof CostColumns>;
 
 /**
  * Output formats for usage reports.
- * - table: cli-table3 tabular view (default)
- * - json:  structured JSON for programmatic consumption
- * - tree:  hierarchical Unicode tree view (per `--tree-group` dimensions)
+ * - table:      cli-table3 tabular view (default)
+ * - json:       structured JSON for programmatic consumption
+ * - tree:       hierarchical Unicode tree view (per `--group` dimensions)
+ * - tree-table: tree skeleton + label on the left, aligned numeric columns
+ *               with a header row on the right (borderless)
  */
-export const OutputFormats = ['table', 'json', 'tree'] as const;
+export const OutputFormats = ['table', 'json', 'tree', 'tree-table'] as const;
 export type OutputFormat = TupleToUnion<typeof OutputFormats>;
 
 /**
