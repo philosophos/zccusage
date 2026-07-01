@@ -16,8 +16,8 @@
  */
 
 import type { DuckDBConnection, DuckDBValue } from '@duckdb/node-api';
-import type { ProviderHistoryEntry } from './_types.ts';
 import type { ProviderResolutionContext } from './_provider-profile-loader.ts';
+import type { ProviderHistoryEntry } from './_types.ts';
 import type { LoadOptions, UsageData } from './data-loader.ts';
 import { createHash } from 'node:crypto';
 import { mkdirSync, rmSync, statSync, utimesSync, writeFileSync } from 'node:fs';
@@ -305,6 +305,12 @@ export async function resolveProviderIds(
 	conn: DuckDBConnection,
 	ctx: ProviderResolutionContext,
 ): Promise<number> {
+	// Preload watcher history into ctx so resolveProviderId stays a pure fn.
+	const history = await loadHistory(conn);
+	const ctxWithHistory: ProviderResolutionContext = {
+		...ctx,
+		history: ctx.history != null ? ctx.history : history,
+	};
 	const rows = await runQuery<{ message_hash: string; ms: number }>(
 		conn,
 		'SELECT message_hash, EPOCH(timestamp) AS ms FROM usage_facts WHERE provider_id IS NULL',
@@ -314,7 +320,7 @@ export async function resolveProviderIds(
 		if (row.ms == null || Number.isNaN(row.ms)) {
 			continue;
 		}
-		const providerId = resolveProviderId(row.ms * 1000, ctx);
+		const providerId = resolveProviderId(row.ms * 1000, ctxWithHistory);
 		if (providerId == null) {
 			continue;
 		}
@@ -823,6 +829,55 @@ if (import.meta.vitest != null) {
 			await insertSwitchHistory(conn, { ts: new Date('2026-06-29T18:41:14Z'), providerId: null, baseUrl: 'https://unknown.com', source: 'watcher:claude' });
 			const history = await loadHistory(conn);
 			expect(history).toHaveLength(0);
+		});
+	});
+
+	describe('resolveProviderIds with history', () => {
+		it('history layer resolves NULL rows that is_current cannot', async () => {
+			const conn = await openDb(':memory:');
+			// Insert a row at 2026-06-30 (after ark switch) with NULL provider_id.
+			await conn.run(
+				`INSERT INTO usage_facts (message_hash, timestamp, model, provider_id, input_tokens, output_tokens, source)
+				 VALUES ('h1', '2026-06-30T00:00:00', 'glm-5.2', NULL, 100, 10, 'claude')`,
+			);
+			// History: ark switch at 2026-06-29 18:41.
+			await insertSwitchHistory(conn, {
+				ts: new Date('2026-06-29T18:41:14Z'),
+				providerId: 'volcengine-ark-beijing-agent-plan',
+				baseUrl: null,
+				source: 'watcher:claude',
+			});
+			// profiles: bailian SG is_current (wrong for 6/30 — history should override).
+			const ctx = {
+				profiles: [{ id: 'bailian-aliyun-singapore', isCurrent: true } as never],
+			};
+			const resolved = await resolveProviderIds(conn, ctx);
+			expect(resolved).toBe(1);
+			const rows = await runQuery<{ provider_id: string }>(conn, 'SELECT provider_id FROM usage_facts WHERE message_hash = \'h1\'');
+			expect(rows[0]?.provider_id).toBe('volcengine-ark-beijing-agent-plan');
+		});
+
+		it('schedule still wins over history', async () => {
+			const conn = await openDb(':memory:');
+			await conn.run(
+				`INSERT INTO usage_facts (message_hash, timestamp, model, provider_id, input_tokens, output_tokens, source)
+				 VALUES ('h2', '2026-06-20T00:00:00', 'glm-5.2', NULL, 100, 10, 'claude')`,
+			);
+			await insertSwitchHistory(conn, {
+				ts: new Date('2026-06-15T00:00:00Z'),
+				providerId: 'poe-philosophos',
+				baseUrl: null,
+				source: 'watcher:claude',
+			});
+			const ctx = {
+				profiles: [],
+				schedule: [
+					{ from: '2026-06-01T00:00:00.000Z', to: '2026-06-30T23:59:59.000Z', providerId: 'claude-official' } as never,
+				],
+			};
+			await resolveProviderIds(conn, ctx);
+			const rows = await runQuery<{ provider_id: string }>(conn, 'SELECT provider_id FROM usage_facts WHERE message_hash = \'h2\'');
+			expect(rows[0]?.provider_id).toBe('claude-official');
 		});
 	});
 }
