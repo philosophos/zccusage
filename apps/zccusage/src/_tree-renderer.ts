@@ -241,15 +241,62 @@ function aggregateNodeTotals(nodes: TreeNode[]): Pick<TreeNode, 'inputTokens' | 
 	};
 }
 
+/**
+ * Platform id → display name map. The `reseller` dimension derives from
+ * `profile.platform` (e.g. `bailian`, `volcengine`) which is a terse internal
+ * token; users expect the branded reseller name. Input is case-insensitive
+ * (matched lowercase), output is the cased display name.
+ */
+const PLATFORM_DISPLAY_NAMES: Record<string, string> = {
+	anthropic: 'Claude',
+	bailian: 'Aliyun_bailian',
+	volcengine: 'Volcengine_ark',
+	poe: 'POE',
+	zhipu: 'Zhipu',
+	moonshot: 'Moonshot',
+	minimax: 'MiniMax',
+	deepseek: 'DeepSeek',
+	openai: 'OpenAI',
+	google: 'Google',
+};
+
+/**
+ * Capitalize only the first character of the string, leaving the rest intact
+ * (so `agent plan` → `Agent plan`, `beijing` → `Beijing`, `pay-as-you-go` →
+ * `Pay-as-you-go`). Underscores, hyphens, and internal casing are preserved.
+ */
+function capitalizeFirst(value: string): string {
+	return value.length === 0 ? value : value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+/**
+ * Format a dimension value for display: reseller maps through the platform
+ * display-name table; region/plan/agent get word-capitalized. `model` and
+ * `time` are returned verbatim (model names have their own casing convention).
+ */
+function formatDimValue(dim: TreeDimension, value: string | undefined | null): string {
+	if (value == null || value === '') {
+		return '(unknown)';
+	}
+	if (dim === 'reseller') {
+		const mapped = PLATFORM_DISPLAY_NAMES[value.toLowerCase()];
+		return mapped ?? capitalizeFirst(value);
+	}
+	if (dim === 'region' || dim === 'plan' || dim === 'agent') {
+		return capitalizeFirst(value);
+	}
+	return value;
+}
+
 function dimKey(row: Row, dim: TreeDimension): string {
 	switch (dim) {
 		case 'time': return row.time;
 		case 'project': return row.project ?? '(no project)';
 		case 'provider': return row.providerId ?? 'unknown';
-		case 'agent': return row.agent ?? '(unknown)';
-		case 'reseller': return row.reseller ?? '(unknown)';
-		case 'region': return row.region ?? '(unknown)';
-		case 'plan': return row.plan ?? '(unknown)';
+		case 'agent': return formatDimValue('agent', row.agent);
+		case 'reseller': return formatDimValue('reseller', row.reseller);
+		case 'region': return formatDimValue('region', row.region);
+		case 'plan': return formatDimValue('plan', row.plan);
 		case 'model': return row.modelLabel ?? '(unknown)';
 	}
 }
@@ -974,10 +1021,12 @@ if (import.meta.vitest != null) {
 				mkItem({ providerId: 'claude-official', reseller: 'anthropic', region: 'us', plan: 'pay-as-you-go' }),
 			];
 			const nodes = buildTree(items, ['reseller', 'region', 'plan']);
-			expect(nodes.map(n => n.label).sort()).toEqual(['anthropic', 'bailian']);
-			const bailian = nodes.find(n => n.label === 'bailian');
-			expect(bailian?.children.map(c => c.label)).toEqual(['singapore']);
-			expect(bailian?.children[0]?.children.map(c => c.label)).toEqual(['coding plan']);
+			// reseller values are formatted via PLATFORM_DISPLAY_NAMES (bailian→Aliyun_bailian,
+			// anthropic→Claude); region/plan are word-capitalized.
+			expect(nodes.map(n => n.label).sort()).toEqual(['Aliyun_bailian', 'Claude']);
+			const bailian = nodes.find(n => n.label === 'Aliyun_bailian');
+			expect(bailian?.children.map(c => c.label)).toEqual(['Singapore']);
+			expect(bailian?.children[0]?.children.map(c => c.label)).toEqual(['Coding plan']);
 		});
 
 		it('rows without profile resolve to (unknown) for reseller/region/plan', () => {
@@ -995,7 +1044,8 @@ if (import.meta.vitest != null) {
 				mkItem({}),
 			];
 			const nodes = buildTree(items, ['agent']);
-			expect(nodes.map(n => n.label).sort()).toEqual(['(unknown)', 'claude', 'codex']);
+			// agent values are word-capitalized: claude→Claude, codex→Codex.
+			expect(nodes.map(n => n.label).sort()).toEqual(['(unknown)', 'Claude', 'Codex']);
 		});
 
 		it('agent dim inherits down to model fragments', () => {
@@ -1007,7 +1057,7 @@ if (import.meta.vitest != null) {
 				}),
 			];
 			const nodes = buildTree(items, ['agent', 'model']);
-			expect(nodes[0]?.label).toBe('claude');
+			expect(nodes[0]?.label).toBe('Claude');
 			expect(nodes[0]?.children[0]?.label).toBe('claude-sonnet-4-6');
 		});
 
