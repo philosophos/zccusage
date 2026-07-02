@@ -442,12 +442,12 @@
 									"type": "string",
 									"enum": [
 										"auto",
-										"better-ccusage",
+										"zccusage",
 										"cc",
 										"both"
 									],
-									"description": "Session cost source: auto (prefer CC then better-ccusage), better-ccusage (always calculate), cc (always use Claude Code cost), both (show both costs)",
-									"markdownDescription": "Session cost source: auto (prefer CC then better-ccusage), better-ccusage (always calculate), cc (always use Claude Code cost), both (show both costs)",
+									"description": "Session cost source: auto (prefer CC then zccusage), zccusage (always calculate), cc (always use Claude Code cost), both (show both costs)",
+									"markdownDescription": "Session cost source: auto (prefer CC then zccusage), zccusage (always calculate), cc (always use Claude Code cost), both (show both costs)",
 									"default": "auto"
 								},
 								"cache": {

@@ -41,7 +41,7 @@ function formatRemainingTime(remaining: number): string {
  * Uses time-based expiry and transcript file modification detection for cache invalidation
  */
 function getSemaphore(sessionId: string): ReturnType<typeof createLimoJson<SemaphoreType | undefined>> {
-	const semaphoreDir = join(tmpdir(), 'better-ccusage-semaphore');
+	const semaphoreDir = join(tmpdir(), 'zccusage-semaphore');
 	const semaphorePath = join(semaphoreDir, `${sessionId}.lock`);
 
 	// Ensure semaphore directory exists
@@ -73,7 +73,7 @@ type SemaphoreType = {
 };
 
 const visualBurnRateChoices = ['off', 'emoji', 'text', 'emoji-text'] as const;
-const costSourceChoices = ['auto', 'better-ccusage', 'cc', 'both'] as const;
+const costSourceChoices = ['auto', 'zccusage', 'cc', 'both'] as const;
 
 // Valibot schema for context threshold validation
 const contextThresholdSchema = v.pipe(
@@ -117,7 +117,7 @@ export const statuslineCommand = define({
 		costSource: {
 			type: 'enum',
 			choices: costSourceChoices,
-			description: 'Session cost source: auto (prefer CC then better-ccusage), better-ccusage (always calculate), cc (always use Claude Code cost), both (show both costs)',
+			description: 'Session cost source: auto (prefer CC then zccusage), zccusage (always calculate), cc (always use Claude Code cost), both (show both costs)',
 			default: 'auto',
 			negatable: false,
 			toKebab: true,
@@ -302,17 +302,17 @@ export const statuslineCommand = define({
 					// Determine session cost display based on cost source
 					const { sessionCost, todayCost, activeBlock } = statuslineData;
 					let ccCost: number | undefined;
-					let betterCcusageCost: number | undefined;
+					let zccusageCost: number | undefined;
 					let displaySessionCost: number | undefined;
 
 					if (costSource === 'both') {
 						ccCost = hookData.cost?.total_cost_usd;
-						betterCcusageCost = sessionCost;
+						zccusageCost = sessionCost;
 					}
 					else if (costSource === 'cc') {
 						displaySessionCost = hookData.cost?.total_cost_usd;
 					}
-					else if (costSource === 'better-ccusage') {
+					else if (costSource === 'zccusage') {
 						displaySessionCost = sessionCost;
 					}
 					else if (costSource === 'auto') {
@@ -379,10 +379,10 @@ export const statuslineCommand = define({
 
 					// Format and output the status line
 					const sessionDisplay = (() => {
-						if (ccCost != null || betterCcusageCost != null) {
+						if (ccCost != null || zccusageCost != null) {
 							const ccDisplay = ccCost != null ? formatCurrency(ccCost) : 'N/A';
-							const betterCcusageDisplay = betterCcusageCost != null ? formatCurrency(betterCcusageCost) : 'N/A';
-							return `(${ccDisplay} cc / ${betterCcusageDisplay} better-ccusage)`;
+							const zccusageDisplay = zccusageCost != null ? formatCurrency(zccusageCost) : 'N/A';
+							return `(${ccDisplay} cc / ${zccusageDisplay} zccusage)`;
 						}
 						return displaySessionCost != null ? formatCurrency(displaySessionCost) : 'N/A';
 					})();
