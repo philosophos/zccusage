@@ -506,7 +506,7 @@ if (import.meta.vitest != null) {
 
 			// Test 2: When local doesn't exist, search in Claude paths
 			await using fixture2 = await createFixture({
-				'no-better-ccusage-dir': '',
+				'no-zccusage-dir': '',
 			});
 
 			vi.spyOn(process, 'cwd').mockReturnValue(fixture2.getPath());
@@ -753,7 +753,7 @@ if (import.meta.vitest != null) {
 			it('should log debug info when loading config with debug=true', async () => {
 				await using fixture = await createFixture({
 					'.zccusage/zccusage.json': JSON.stringify({
-						$schema: 'https://better-ccusage.com/config-schema.json',
+						$schema: 'https://zccusage.com/config-schema.json',
 						defaults: { json: true, mode: 'auto' },
 						commands: { daily: { instances: true } },
 					}),
@@ -769,7 +769,7 @@ if (import.meta.vitest != null) {
 				expect(loggerInfoSpy).toHaveBeenCalledWith(`  • Checking: ${fixture.getPath('.zccusage/zccusage.json')} (found ✓)`);
 				expect(loggerInfoSpy).toHaveBeenCalledWith('');
 				expect(loggerInfoSpy).toHaveBeenCalledWith(`Loaded config from: ${fixture.getPath('.zccusage/zccusage.json')}`);
-				expect(loggerInfoSpy).toHaveBeenCalledWith('  • Schema: https://better-ccusage.com/config-schema.json');
+				expect(loggerInfoSpy).toHaveBeenCalledWith('  • Schema: https://zccusage.com/config-schema.json');
 				expect(loggerInfoSpy).toHaveBeenCalledWith('  • Has defaults: yes (2 options)');
 				expect(loggerInfoSpy).toHaveBeenCalledWith('  • Has command configs: yes (daily)');
 			});

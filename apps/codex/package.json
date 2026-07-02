@@ -16,7 +16,7 @@
   "type": "module",
   "module": "./dist/index.js",
   "bin": {
-    "better-ccusage-codex": "./src/index.ts"
+    "zccusage-codex": "./src/index.ts"
   },
   "files": [
     "dist"
@@ -55,7 +55,7 @@
   },
   "publishConfig": {
     "bin": {
-      "better-ccusage-codex": "./dist/index.js"
+      "zccusage-codex": "./dist/index.js"
     }
   }
 }

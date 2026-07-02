@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Smart integration script for better-ccusage
-# Handles the fact that upstream uses apps/ccusage while we use apps/better-ccusage
+# Smart integration script for zccusage
+# Handles the fact that upstream uses apps/ccusage while we use apps/zccusage
 
 set -euo pipefail
 IFS=$'\n\t'
@@ -37,18 +37,18 @@ git checkout -b "$INTEGRATION_BRANCH"
 # Fetch latest upstream
 git fetch upstream
 
-# Temporarily rename our better-ccusage to match upstream structure
+# Temporarily rename our zccusage to match upstream structure
 echo "📦 Temporarily restructuring to match upstream..."
-if [ ! -d "apps/better-ccusage" ]; then
-  echo "❌ apps/better-ccusage not found."; exit 1i
-git mv apps/better-ccusage apps/ccusage-temp
+if [ ! -d "apps/zccusage" ]; then
+  echo "❌ apps/zccusage not found."; exit 1i
+git mv apps/zccusage apps/ccusage-temp
 
 # Now merge upstream
 echo "🔄 Merging upstream changes..."
 if git merge "$UPSTREAM_COMMIT" --no-edit; then
     echo "✅ Merge completed successfully!"
 
-    # Move upstream ccusage to better-ccusage and merge with our changes
+    # Move upstream ccusage to zccusage and merge with our changes
     echo "🔄 Converting upstream structure to our structure..."
 
     # If upstream ccusage exists, move it aside first
@@ -56,27 +56,27 @@ if git merge "$UPSTREAM_COMMIT" --no-edit; then
         git mv apps/ccusage apps/upstream-ccusage
     fi
 
-    # Move our temp back to better-ccusage
-    git mv apps/ccusage-temp apps/better-ccusage
+    # Move our temp back to zccusage
+    git mv apps/ccusage-temp apps/zccusage
 
     # Commit the structure change
-    git commit -m "chore: restore better-ccusage structure" --no-verify
+    git commit -m "chore: restore zccusage structure" --no-verify
 
-    # If upstream ccusage existed, merge it into our better-ccusage
+    # If upstream ccusage existed, merge it into our zccusage
     if [ -d "apps/upstream-ccusage" ]; then
-        echo "🔄 Merging upstream ccusage changes into better-ccusage..."
+        echo "🔄 Merging upstream ccusage changes into zccusage..."
 
         # Create a temporary branch to merge the upstream ccusage
         git checkout -b temp-merge-ccusage
         git merge "$INTEGRATION_BRANCH" --no-edit
 
-        # Move upstream ccusage content to better-ccusage
-        cp -a apps/upstream-ccusage/. apps/better-ccusage/
+        # Move upstream ccusage content to zccusage
+        cp -a apps/upstream-ccusage/. apps/zccusage/
         rm -rf apps/upstream-ccusage
 
         # Add all changes
         git add .
-        git commit -m "feat: merge upstream ccusage into better-ccusage"  --no-verify
+        git commit -m "feat: merge upstream ccusage into zccusage"  --no-verify
 
         # Go back to integration branch
         git checkout "$INTEGRATION_BRANCH"
@@ -99,7 +99,7 @@ else
     echo "   4. git commit"
     echo ""
     echo "💡 After resolving conflicts:"
-    echo "   1. Restore better-ccusage structure:"
-    echo "      - Move apps/ccusage-temp -> apps/better-ccusage"
+    echo "   1. Restore zccusage structure:"
+    echo "      - Move apps/ccusage-temp -> apps/zccusage"
     echo "      - Remove apps/ccusage if it exists"
 fi

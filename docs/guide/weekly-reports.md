@@ -7,7 +7,7 @@ Weekly reports aggregate your Claude Code usage by week, providing a mid-range v
 Show all weekly usage:
 
 ```bash
-better-ccusage weekly
+zccusage weekly
 ```
 
 ## Example Output
@@ -45,11 +45,11 @@ Configure which day starts the week:
 
 ```bash
 # Start week on Sunday (default)
-better-ccusage weekly --start-of-week sunday
+zccusage weekly --start-of-week sunday
 
 # Start week on Monday
-better-ccusage weekly --start-of-week monday
-better-ccusage weekly -w monday
+zccusage weekly --start-of-week monday
+zccusage weekly -w monday
 
 # Other options: tuesday, wednesday, thursday, friday, saturday
 ```
@@ -60,10 +60,10 @@ Filter by date range:
 
 ```bash
 # Show specific period
-better-ccusage weekly --since 20250601 --until 20250630
+zccusage weekly --since 20250601 --until 20250630
 
 # Show last 4 weeks
-better-ccusage weekly --since 20250501
+zccusage weekly --since 20250501
 ```
 
 ### Sort Order
@@ -72,10 +72,10 @@ Control the order of weeks:
 
 ```bash
 # Newest weeks first (default)
-better-ccusage weekly --order desc
+zccusage weekly --order desc
 
 # Oldest weeks first
-better-ccusage weekly --order asc
+zccusage weekly --order asc
 ```
 
 ### Model Breakdown
@@ -83,7 +83,7 @@ better-ccusage weekly --order asc
 See per-model weekly costs:
 
 ```bash
-better-ccusage weekly --breakdown
+zccusage weekly --breakdown
 ```
 
 ```
@@ -103,7 +103,7 @@ better-ccusage weekly --breakdown
 Export weekly data as JSON:
 
 ```bash
-better-ccusage weekly --json
+zccusage weekly --json
 ```
 
 ```json
@@ -154,10 +154,10 @@ Group weekly usage by project:
 
 ```bash
 # Show weekly usage per project
-better-ccusage weekly --instances
+zccusage weekly --instances
 
 # Filter to specific project
-better-ccusage weekly --project my-project
+zccusage weekly --project my-project
 ```
 
 ### Cost Calculation Modes
@@ -166,13 +166,13 @@ Control cost calculation:
 
 ```bash
 # Auto mode (default)
-better-ccusage weekly --mode auto
+zccusage weekly --mode auto
 
 # Always calculate from tokens
-better-ccusage weekly --mode calculate
+zccusage weekly --mode calculate
 
 # Only use pre-calculated costs
-better-ccusage weekly --mode display
+zccusage weekly --mode display
 ```
 
 ## Common Use Cases
@@ -181,35 +181,35 @@ better-ccusage weekly --mode display
 
 ```bash
 # See usage trends over past months
-better-ccusage weekly --since 20250401
+zccusage weekly --since 20250401
 ```
 
 ### Sprint Analysis
 
 ```bash
 # Track usage during 2-week sprints (Monday start)
-better-ccusage weekly --start-of-week monday --since 20250601
+zccusage weekly --start-of-week monday --since 20250601
 ```
 
 ### Budget Planning
 
 ```bash
 # Export for weekly budget tracking
-better-ccusage weekly --json > weekly-budget.json
+zccusage weekly --json > weekly-budget.json
 ```
 
 ### Compare Workweeks
 
 ```bash
 # Monday-Friday work pattern analysis
-better-ccusage weekly --start-of-week monday --breakdown
+zccusage weekly --start-of-week monday --breakdown
 ```
 
 ### Team Reporting
 
 ```bash
 # Weekly team usage report
-better-ccusage weekly --instances --start-of-week monday
+zccusage weekly --instances --start-of-week monday
 ```
 
 ## Tips

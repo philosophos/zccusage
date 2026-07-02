@@ -1,10 +1,10 @@
 # Installation
 
-better-ccusage can be installed and used in several ways depending on your preferences and use case.
+zccusage can be installed and used in several ways depending on your preferences and use case.
 
 ## Why No Installation Needed?
 
-Thanks to better-ccusage's incredibly small bundle size, you don't need to install it globally. Unlike other CLI tools, we pay extreme attention to bundle size optimization, achieving an impressively small footprint even without minification. This means:
+Thanks to zccusage's incredibly small bundle size, you don't need to install it globally. Unlike other CLI tools, we pay extreme attention to bundle size optimization, achieving an impressively small footprint even without minification. This means:
 
 - ✅ Near-instant startup times
 - ✅ Minimal download overhead
@@ -13,24 +13,24 @@ Thanks to better-ccusage's incredibly small bundle size, you don't need to insta
 
 ## Quick Start (Recommended)
 
-The fastest way to use better-ccusage is to run it directly:
+The fastest way to use zccusage is to run it directly:
 
 ::: code-group
 
 ```bash [bunx (Recommended)]
-bunx better-ccusage
+bunx zccusage
 ```
 
 ```bash [npx]
-npx better-ccusage@latest
+npx zccusage@latest
 ```
 
 ```bash [pnpm]
-pnpm dlx better-ccusage
+pnpm dlx zccusage
 ```
 
 ```bash [deno]
-deno run -E -R=$HOME/.claude/projects/ -S=homedir -N='raw.githubusercontent.com:443' npm:better-ccusage@latest
+deno run -E -R=$HOME/.claude/projects/ -S=homedir -N='raw.githubusercontent.com:443' npm:zccusage@latest
 ```
 
 :::
@@ -56,24 +56,24 @@ Here's why runtime choice matters:
 
 ## Global Installation (Optional)
 
-While not necessary due to our small bundle size, you can still install better-ccusage globally if you prefer:
+While not necessary due to our small bundle size, you can still install zccusage globally if you prefer:
 
 ::: code-group
 
 ```bash [npm]
-npm install -g better-ccusage
+npm install -g zccusage
 ```
 
 ```bash [bun]
-bun install -g better-ccusage
+bun install -g zccusage
 ```
 
 ```bash [yarn]
-yarn global add better-ccusage
+yarn global add zccusage
 ```
 
 ```bash [pnpm]
-pnpm add -g better-ccusage
+pnpm add -g zccusage
 ```
 
 :::
@@ -81,19 +81,19 @@ pnpm add -g better-ccusage
 After global installation, run commands directly:
 
 ```bash
-better-ccusage daily
-better-ccusage monthly --breakdown
-better-ccusage blocks --live
+zccusage daily
+zccusage monthly --breakdown
+zccusage blocks --live
 ```
 
 ## Development Installation
 
-For development or contributing to better-ccusage:
+For development or contributing to zccusage:
 
 ```bash
 # Clone the repository
-git clone https://github.com/cobra91/better-ccusage.git
-cd better-ccusage
+git clone https://github.com/cobra91/zccusage.git
+cd zccusage
 
 # Install dependencies
 bun install
@@ -131,7 +131,7 @@ bun run format
 
 - **Minimum**: Bun 1.2+
 - **Recommended**: Latest stable release
-- Often faster than Node.js for better-ccusage
+- Often faster than Node.js for zccusage
 
 ### Deno
 
@@ -143,22 +143,22 @@ deno run \
   -R=$HOME/.claude/projects/ \
   -S=homedir \
   -N='raw.githubusercontent.com:443' \
-  npm:better-ccusage@latest
+  npm:zccusage@latest
 ```
 
 ## Verification
 
-After installation, verify better-ccusage is working:
+After installation, verify zccusage is working:
 
 ```bash
 # Check version
-better-ccusage --version
+zccusage --version
 
 # Run help command
-better-ccusage --help
+zccusage --help
 
 # Test with daily report
-better-ccusage daily
+zccusage daily
 ```
 
 ## Updating
@@ -171,16 +171,16 @@ Always gets the latest version automatically.
 
 ```bash
 # Update with npm
-npm update -g better-ccusage
+npm update -g zccusage
 
 # Update with bun
-bun update -g better-ccusage
+bun update -g zccusage
 ```
 
 ### Check Current Version
 
 ```bash
-better-ccusage --version
+zccusage --version
 ```
 
 ## Uninstalling
@@ -190,19 +190,19 @@ better-ccusage --version
 ::: code-group
 
 ```bash [npm]
-npm uninstall -g better-ccusage
+npm uninstall -g zccusage
 ```
 
 ```bash [bun]
-bun remove -g better-ccusage
+bun remove -g zccusage
 ```
 
 ```bash [yarn]
-yarn global remove better-ccusage
+yarn global remove zccusage
 ```
 
 ```bash [pnpm]
-pnpm remove -g better-ccusage
+pnpm remove -g zccusage
 ```
 
 :::
@@ -211,7 +211,7 @@ pnpm remove -g better-ccusage
 
 ```bash
 # Remove cloned repository
-rm -rf better-ccusage/
+rm -rf zccusage/
 ```
 
 ## Troubleshooting Installation
@@ -224,7 +224,7 @@ If you get permission errors during global installation:
 
 ```bash [npm]
 # Use npx instead of global install
-npx better-ccusage@latest
+npx zccusage@latest
 
 # Or configure npm to use a different directory
 npm config set prefix ~/.npm-global
@@ -234,11 +234,11 @@ export PATH=~/.npm-global/bin:$PATH
 ```bash [Node Version Managers]
 # Use nvm (recommended)
 nvm install node
-npm install -g better-ccusage
+npm install -g zccusage
 
 # Or use fnm
 fnm install node
-npm install -g better-ccusage
+npm install -g zccusage
 ```
 
 :::
@@ -249,10 +249,10 @@ If installation fails due to network issues:
 
 ```bash
 # Try with different registry
-npm install -g better-ccusage --registry https://registry.npmjs.org
+npm install -g zccusage --registry https://registry.npmjs.org
 
 # Or use bunx
-bunx better-ccusage
+bunx zccusage
 ```
 
 ### Version Conflicts
@@ -261,12 +261,12 @@ If you have multiple versions installed:
 
 ```bash
 # Check which version is being used
-which better-ccusage
-better-ccusage --version
+which zccusage
+zccusage --version
 
 # Uninstall and reinstall
-npm uninstall -g better-ccusage
-npm install -g better-ccusage@latest
+npm uninstall -g zccusage
+npm install -g zccusage@latest
 ```
 
 ## Next Steps
@@ -274,7 +274,7 @@ npm install -g better-ccusage@latest
 After installation, check out:
 
 - [Getting Started Guide](/guide/getting-started) - Your first usage report with multi-provider support
-- [Configuration](/guide/configuration) - Customize better-ccusage behavior
+- [Configuration](/guide/configuration) - Customize zccusage behavior
 - [Daily Reports](/guide/daily-reports) - Understand daily usage patterns
 
-**Note**: better-ccusage automatically detects and supports multiple AI providers including Anthropic (Claude), Moonshot AI (kimi), MiniMax, Zai, and GLM models. No configuration needed!
+**Note**: zccusage automatically detects and supports multiple AI providers including Anthropic (Claude), Moonshot AI (kimi), MiniMax, Zai, and GLM models. No configuration needed!

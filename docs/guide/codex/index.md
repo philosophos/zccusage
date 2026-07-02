@@ -2,9 +2,9 @@
 
 ![Codex CLI daily report](/codex-cli.jpeg)
 
-> ⚠️ The Codex companion CLI is experimental. Expect breaking changes while both better-ccusage and [OpenAI's Codex CLI](https://github.com/openai/codex) continue to evolve.
+> ⚠️ The Codex companion CLI is experimental. Expect breaking changes while both zccusage and [OpenAI's Codex CLI](https://github.com/openai/codex) continue to evolve.
 
-The `@better-ccusage/codex` package reuses better-ccusage's responsive tables, pricing cache, and token accounting to analyze OpenAI Codex CLI session logs.
+The `@better-ccusage/codex` package reuses zccusage's responsive tables, pricing cache, and token accounting to analyze OpenAI Codex CLI session logs.
 
 ## Installation & Launch
 
@@ -30,12 +30,12 @@ Bun 1.2.x's bunx prioritizes binaries matching the package name suffix when give
 Since `npx @better-ccusage/codex@latest` is quite long to type repeatedly, we strongly recommend setting up a shell alias for convenience:
 
 ```bash
-# bash/zsh: alias better-ccusage-codex='bunx @better-ccusage/codex@latest'
-# fish:     alias better-ccusage-codex 'bunx @better-ccusage/codex@latest'
+# bash/zsh: alias zccusage-codex='bunx @better-ccusage/codex@latest'
+# fish:     alias zccusage-codex 'bunx @better-ccusage/codex@latest'
 
 # Then simply run:
-better-ccusage-codex daily
-better-ccusage-codex monthly --json
+zccusage-codex daily
+zccusage-codex monthly --json
 ```
 
 ::: tip
@@ -69,7 +69,7 @@ When Codex emits a model alias (for example `gpt-5-codex`), the CLI automaticall
 - [Daily report command](./daily.md)
 - [Monthly report command](./monthly.md)
 - [Session report command](./session.md)
-- Additional reports will mirror the better-ccusage CLI as the Codex tooling stabilizes.
+- Additional reports will mirror the zccusage CLI as the Codex tooling stabilizes.
 
 Have feedback or ideas? [Open an issue](https://github.com/cobra91/better-ccusage/issues/new) so we can improve the beta.
 

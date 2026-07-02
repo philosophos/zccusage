@@ -1,10 +1,10 @@
 # Command-Line Options
 
-better-ccusage provides extensive command-line options to customize its behavior. These options take precedence over configuration files and environment variables.
+zccusage provides extensive command-line options to customize its behavior. These options take precedence over configuration files and environment variables.
 
 ## Global Options
 
-All better-ccusage commands support these global options:
+All zccusage commands support these global options:
 
 ### Date Filtering
 
@@ -12,13 +12,13 @@ Filter usage data by date range:
 
 ```bash
 # Filter by date range
-better-ccusage daily --since 20250101 --until 20250630
+zccusage daily --since 20250101 --until 20250630
 
 # Show data from a specific date
-better-ccusage monthly --since 20250101
+zccusage monthly --since 20250101
 
 # Show data up to a specific date
-better-ccusage session --until 20250630
+zccusage session --until 20250630
 ```
 
 ### Output Format
@@ -27,15 +27,15 @@ Control how data is displayed:
 
 ```bash
 # JSON output for programmatic use
-better-ccusage daily --json
-better-ccusage daily -j
+zccusage daily --json
+zccusage daily -j
 
 # Show per-model breakdown
-better-ccusage daily --breakdown
-better-ccusage daily -b
+zccusage daily --breakdown
+zccusage daily -b
 
 # Combine options
-better-ccusage daily --json --breakdown
+zccusage daily --json --breakdown
 ```
 
 ### Cost Calculation Mode
@@ -44,13 +44,13 @@ Choose how costs are calculated:
 
 ```bash
 # Auto mode (default) - use costUSD when available
-better-ccusage daily --mode auto
+zccusage daily --mode auto
 
 # Calculate mode - always calculate from tokens
-better-ccusage daily --mode calculate
+zccusage daily --mode calculate
 
 # Display mode - only show pre-calculated costUSD
-better-ccusage daily --mode display
+zccusage daily --mode display
 ```
 
 ### Sort Order
@@ -59,10 +59,10 @@ Control the ordering of results:
 
 ```bash
 # Newest first (default)
-better-ccusage daily --order desc
+zccusage daily --order desc
 
 # Oldest first
-better-ccusage daily --order asc
+zccusage daily --order asc
 ```
 
 ### Timezone
@@ -71,14 +71,14 @@ Set the timezone for date calculations:
 
 ```bash
 # Use UTC timezone
-better-ccusage daily --timezone UTC
+zccusage daily --timezone UTC
 
 # Use specific timezone
-better-ccusage daily --timezone America/New_York
-better-ccusage daily -z Asia/Tokyo
+zccusage daily --timezone America/New_York
+zccusage daily -z Asia/Tokyo
 
 # Short alias
-better-ccusage monthly -z Europe/London
+zccusage monthly -z Europe/London
 ```
 
 #### Timezone Effect
@@ -95,16 +95,16 @@ Control date and time formatting:
 
 ```bash
 # US English (12-hour time format)
-better-ccusage daily --locale en-US
+zccusage daily --locale en-US
 
 # Japanese (24-hour time format)
-better-ccusage blocks --locale ja-JP
+zccusage blocks --locale ja-JP
 
 # German (24-hour time format)
-better-ccusage session -l de-DE
+zccusage session -l de-DE
 
 # Short alias
-better-ccusage daily -l fr-FR
+zccusage daily -l fr-FR
 ```
 
 #### Locale Effects
@@ -129,10 +129,10 @@ Get detailed debugging information:
 
 ```bash
 # Debug mode - show pricing mismatches and config loading
-better-ccusage daily --debug
+zccusage daily --debug
 
 # Show sample discrepancies
-better-ccusage daily --debug --debug-samples 10
+zccusage daily --debug --debug-samples 10
 ```
 
 ### Configuration File
@@ -141,8 +141,8 @@ Use a custom configuration file:
 
 ```bash
 # Specify custom config file
-better-ccusage daily --config ./my-config.json
-better-ccusage monthly --config /path/to/team-config.json
+zccusage daily --config ./my-config.json
+zccusage monthly --config /path/to/team-config.json
 ```
 
 ## Command-Specific Options
@@ -153,15 +153,15 @@ Additional options for daily reports:
 
 ```bash
 # Group by project
-better-ccusage daily --instances
-better-ccusage daily -i
+zccusage daily --instances
+zccusage daily -i
 
 # Filter to specific project
-better-ccusage daily --project myproject
-better-ccusage daily -p myproject
+zccusage daily --project myproject
+zccusage daily -p myproject
 
 # Combine project filtering
-better-ccusage daily --instances --project myproject
+zccusage daily --instances --project myproject
 ```
 
 ### Weekly Command
@@ -170,8 +170,8 @@ Options for weekly reports:
 
 ```bash
 # Set week start day
-better-ccusage weekly --start-of-week monday
-better-ccusage weekly --start-of-week sunday
+zccusage weekly --start-of-week monday
+zccusage weekly --start-of-week sunday
 ```
 
 ### Session Command
@@ -180,10 +180,10 @@ Options for session reports:
 
 ```bash
 # Filter by session ID
-better-ccusage session --id abc123-session
+zccusage session --id abc123-session
 
 # Filter by project
-better-ccusage session --project myproject
+zccusage session --project myproject
 ```
 
 ### Blocks Command
@@ -192,23 +192,23 @@ Options for 5-hour billing blocks:
 
 ```bash
 # Show only active block
-better-ccusage blocks --active
-better-ccusage blocks -a
+zccusage blocks --active
+zccusage blocks -a
 
 # Show recent blocks (last 3 days)
-better-ccusage blocks --recent
-better-ccusage blocks -r
+zccusage blocks --recent
+zccusage blocks -r
 
 # Set token limit for warnings
-better-ccusage blocks --token-limit 500000
-better-ccusage blocks --token-limit max
+zccusage blocks --token-limit 500000
+zccusage blocks --token-limit max
 
 # Live monitoring mode
-better-ccusage blocks --live
-better-ccusage blocks --live --refresh-interval 2
+zccusage blocks --live
+zccusage blocks --live --refresh-interval 2
 
 # Customize session length
-better-ccusage blocks --session-length 5
+zccusage blocks --session-length 5
 ```
 
 > **Note:** The MCP server CLI moved to the dedicated `@better-ccusage/mcp` package. See the [MCP Server guide](/guide/mcp-server) for usage details.
@@ -219,13 +219,13 @@ Options for statusline display:
 
 ```bash
 # Basic statusline
-better-ccusage statusline
+zccusage statusline
 
 # Enable caching
-better-ccusage statusline --cache
+zccusage statusline --cache
 
 # Custom refresh interval
-better-ccusage statusline --refresh-interval 5
+zccusage statusline --refresh-interval 5
 ```
 
 ## JSON Output Options
@@ -234,13 +234,13 @@ When using `--json` output, additional processing options are available:
 
 ```bash
 # Apply jq filter to JSON output
-better-ccusage daily --json --jq ".data[]"
+zccusage daily --json --jq ".data[]"
 
 # Filter high-cost days
-better-ccusage daily --json --jq ".data[] | select(.cost > 10)"
+zccusage daily --json --jq ".data[] | select(.cost > 10)"
 
 # Extract specific fields
-better-ccusage session --json --jq ".data[] | {date, cost}"
+zccusage session --json --jq ".data[] | {date, cost}"
 ```
 
 ## Option Precedence
@@ -249,9 +249,9 @@ Options are applied in this order (highest to lowest priority):
 
 1. **Command-line arguments** - Direct CLI options
 2. **Custom config file** - Via `--config` flag
-3. **Local project config** - `.better-ccusage/better-ccusage.json`
-4. **User config** - `~/.config/claude/better-ccusage.json`
-5. **Legacy config** - `~/.claude/better-ccusage.json`
+3. **Local project config** - `.zccusage/zccusage.json`
+4. **User config** - `~/.config/claude/zccusage.json`
+5. **Legacy config** - `~/.claude/zccusage.json`
 6. **Built-in defaults**
 
 ## Examples
@@ -260,52 +260,52 @@ Options are applied in this order (highest to lowest priority):
 
 ```bash
 # Daily development check
-better-ccusage daily --instances --breakdown
+zccusage daily --instances --breakdown
 
 # Check specific project costs
-better-ccusage daily --project myapp --since 20250101
+zccusage daily --project myapp --since 20250101
 
 # Export for reporting
-better-ccusage monthly --json > monthly-report.json
+zccusage monthly --json > monthly-report.json
 ```
 
 ### Team Collaboration
 
 ```bash
 # Use team configuration
-better-ccusage daily --config ./team-config.json
+zccusage daily --config ./team-config.json
 
 # Consistent timezone for remote team
-better-ccusage daily --timezone UTC --locale en-CA
+zccusage daily --timezone UTC --locale en-CA
 
 # Generate shareable report
-better-ccusage weekly --json --jq ".summary"
+zccusage weekly --json --jq ".summary"
 ```
 
 ### Cost Monitoring
 
 ```bash
 # Monitor active usage
-better-ccusage blocks --active --live
+zccusage blocks --active --live
 
 # Check if approaching limits
-better-ccusage blocks --token-limit 500000
+zccusage blocks --token-limit 500000
 
 # Historical analysis
-better-ccusage monthly --mode calculate --breakdown
+zccusage monthly --mode calculate --breakdown
 ```
 
 ### Debugging Issues
 
 ```bash
 # Debug configuration loading
-better-ccusage daily --debug --config ./test-config.json
+zccusage daily --debug --config ./test-config.json
 
 # Check pricing discrepancies
-better-ccusage daily --debug --debug-samples 20
+zccusage daily --debug --debug-samples 20
 
 # Silent mode for scripts
-LOG_LEVEL=0 better-ccusage daily --json
+LOG_LEVEL=0 zccusage daily --json
 ```
 
 ## Short Aliases

@@ -1,10 +1,10 @@
 # Configuration Overview
 
-better-ccusage provides multiple ways to configure its behavior, allowing you to customize it for your specific needs. Configuration can be done through command-line options, environment variables, configuration files, or a combination of all three.
+zccusage provides multiple ways to configure its behavior, allowing you to customize it for your specific needs. Configuration can be done through command-line options, environment variables, configuration files, or a combination of all three.
 
 ## Configuration Methods
 
-better-ccusage supports four configuration methods, each with its own use case:
+zccusage supports four configuration methods, each with its own use case:
 
 1. **[Command-Line Options](/guide/cli-options)** - Direct control for individual commands
 2. **[Environment Variables](/guide/environment-variables)** - System-wide or session settings
@@ -18,16 +18,16 @@ Settings are applied in this priority order (highest to lowest):
 1. **Command-line arguments** (e.g., `--json`, `--mode`)
 2. **Custom config file** (via `--config` flag)
 3. **Environment variables** (e.g., `CLAUDE_CONFIG_DIR`, `LOG_LEVEL`)
-4. **Local project config** (`.better-ccusage/better-ccusage.json`)
-5. **User config** (`~/.config/claude/better-ccusage.json`)
-6. **Legacy config** (`~/.claude/better-ccusage.json`)
+4. **Local project config** (`.zccusage/zccusage.json`)
+5. **User config** (`~/.config/claude/zccusage.json`)
+6. **Legacy config** (`~/.claude/zccusage.json`)
 7. **Built-in defaults**
 
 ### Priority Example
 
 ```bash
 # Configuration file sets mode to "calculate"
-# .better-ccusage/better-ccusage.json
+# .zccusage/zccusage.json
 {
   "defaults": {
     "mode": "calculate"
@@ -38,7 +38,7 @@ Settings are applied in this priority order (highest to lowest):
 export CCUSAGE_TIMEZONE="Asia/Tokyo"
 
 # Command-line argument takes highest priority
-better-ccusage daily --mode display --timezone UTC
+zccusage daily --mode display --timezone UTC
 # Result: mode=display (CLI), timezone=UTC (CLI)
 ```
 
@@ -56,7 +56,7 @@ export CLAUDE_CONFIG_DIR="$HOME/.config/claude"
 
 ```json
 {
-	"$schema": "https://better-ccusage.com/config-schema.json",
+	"$schema": "https://zccusage.com/config-schema.json",
 	"defaults": {
 		"timezone": "America/New_York",
 		"locale": "en-US",
@@ -68,7 +68,7 @@ export CLAUDE_CONFIG_DIR="$HOME/.config/claude"
 3. **Use command-line options** for one-off changes:
 
 ```bash
-better-ccusage daily --since 20250101 --json
+zccusage daily --since 20250101 --json
 ```
 
 ## Common Configuration Scenarios
@@ -78,9 +78,9 @@ better-ccusage daily --since 20250101 --json
 For individual developers working on multiple projects:
 
 ```json
-// ~/.config/claude/better-ccusage.json
+// ~/.config/claude/zccusage.json
 {
-	"$schema": "https://better-ccusage.com/config-schema.json",
+	"$schema": "https://zccusage.com/config-schema.json",
 	"defaults": {
 		"breakdown": true,
 		"timezone": "local"
@@ -98,9 +98,9 @@ For individual developers working on multiple projects:
 For teams sharing configuration:
 
 ```json
-// .better-ccusage/better-ccusage.json (committed to repo)
+// .zccusage/zccusage.json (committed to repo)
 {
-	"$schema": "https://better-ccusage.com/config-schema.json",
+	"$schema": "https://zccusage.com/config-schema.json",
 	"defaults": {
 		"timezone": "UTC",
 		"locale": "en-CA",
@@ -119,7 +119,7 @@ export CLAUDE_CONFIG_DIR="/ci/claude-data"
 export LOG_LEVEL=1  # Warnings only
 
 # Run with specific options
-better-ccusage daily --json > report.json
+zccusage daily --json > report.json
 ```
 
 ### Multiple Claude Installations
@@ -129,7 +129,7 @@ For users with multiple Claude Code versions:
 ```bash
 # Aggregate from multiple directories
 export CLAUDE_CONFIG_DIR="$HOME/.claude,$HOME/.config/claude"
-better-ccusage daily
+zccusage daily
 ```
 
 ## Configuration by Feature
@@ -142,7 +142,7 @@ Control how costs are calculated:
 - **Breakdown**: Show per-model costs
 
 ```bash
-better-ccusage daily --mode calculate --breakdown
+zccusage daily --mode calculate --breakdown
 ```
 
 ### Date and Time
@@ -154,7 +154,7 @@ Customize date/time handling:
 - **Date Range**: Filter with `--since` and `--until`
 
 ```bash
-better-ccusage daily --timezone UTC --locale en-CA --since 20250101
+zccusage daily --timezone UTC --locale en-CA --since 20250101
 ```
 
 ### Output Format
@@ -166,7 +166,7 @@ Control output presentation:
 - **Debug**: Show detailed information with `--debug`
 
 ```bash
-better-ccusage daily --json --jq ".data[] | select(.cost > 10)"
+zccusage daily --json --jq ".data[] | select(.cost > 10)"
 ```
 
 ### Project Analysis
@@ -178,7 +178,7 @@ Analyze usage by project:
 - **Aliases**: Set custom names via configuration file
 
 ```json
-// .better-ccusage/better-ccusage.json
+// .zccusage/zccusage.json
 {
 	"commands": {
 		"daily": {
@@ -189,7 +189,7 @@ Analyze usage by project:
 ```
 
 ```bash
-better-ccusage daily --instances --project "My App"
+zccusage daily --instances --project "My App"
 ```
 
 ## Debugging Configuration
@@ -198,13 +198,13 @@ Use debug mode to understand configuration loading:
 
 ```bash
 # See which config files are loaded
-better-ccusage daily --debug
+zccusage daily --debug
 
 # Check environment variables
 env | grep -E "CLAUDE|CCUSAGE|LOG_LEVEL"
 
 # Verbose logging
-LOG_LEVEL=5 better-ccusage daily
+LOG_LEVEL=5 zccusage daily
 ```
 
 ### Debug Output
@@ -233,8 +233,8 @@ Share consistent settings across team members:
 
 ```bash
 # Commit to version control
-git add .better-ccusage/better-ccusage.json
-git commit -m "Add team better-ccusage configuration"
+git add .zccusage/zccusage.json
+git commit -m "Add team zccusage configuration"
 ```
 
 ### 3. Document Your Configuration
@@ -242,7 +242,7 @@ git commit -m "Add team better-ccusage configuration"
 Add comments or README files explaining configuration choices:
 
 ```markdown
-# better-ccusage Configuration
+# zccusage Configuration
 
 Our team uses:
 
@@ -257,7 +257,7 @@ Use the schema for validation:
 
 ```json
 {
-	"$schema": "https://better-ccusage.com/config-schema.json"
+	"$schema": "https://zccusage.com/config-schema.json"
 }
 ```
 
@@ -286,7 +286,7 @@ Convert repeated commands to configuration:
 
 ```bash
 # Before: Repeated commands
-better-ccusage daily --breakdown --instances --timezone UTC
+zccusage daily --breakdown --instances --timezone UTC
 
 # After: Configuration file
 {
@@ -302,7 +302,7 @@ better-ccusage daily --breakdown --instances --timezone UTC
 }
 
 # Simplified command
-better-ccusage daily
+zccusage daily
 ```
 
 ## Troubleshooting
@@ -318,10 +318,10 @@ better-ccusage daily
 
 If configuration issues persist:
 
-1. Run with debug mode: `better-ccusage daily --debug`
-2. Check verbose logs: `LOG_LEVEL=5 better-ccusage daily`
-3. Validate JSON config: `jq . < better-ccusage.json`
-4. Report issues on [GitHub](https://github.com/cobra91/better-ccusage/issues)
+1. Run with debug mode: `zccusage daily --debug`
+2. Check verbose logs: `LOG_LEVEL=5 zccusage daily`
+3. Validate JSON config: `jq . < zccusage.json`
+4. Report issues on [GitHub](https://github.com/cobra91/zccusage/issues)
 
 ## Next Steps
 

@@ -24,7 +24,7 @@
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.mts",
   "bin": {
-    "better-ccusage-opencode": "./src/index.ts"
+    "zccusage-opencode": "./src/index.ts"
   },
   "files": [
     "dist"
@@ -60,7 +60,7 @@
   },
   "publishConfig": {
     "bin": {
-      "better-ccusage-opencode": "./dist/index.mjs"
+      "zccusage-opencode": "./dist/index.mjs"
     },
     "exports": {
       ".": "./dist/index.mjs",

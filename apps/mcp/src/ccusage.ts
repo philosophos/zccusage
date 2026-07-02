@@ -19,7 +19,7 @@ export const ccusageParametersShape = {
 	// string via `format: 'tree'` + `treeGroup`.
 	format: z.enum(['table', 'json', 'tree']).optional(),
 	treeGroup: z.string().optional(),
-	// Multi-currency & provider (forwarded to the better-ccusage CLI)
+	// Multi-currency & provider (forwarded to the zccusage CLI)
 	statsCurrency: z.string().optional(),
 	paymentCurrency: z.string().optional(),
 	costColumns: z.string().optional(),
@@ -39,7 +39,7 @@ function getCcusageInvocation(): CliInvocation {
 		return cachedCcusageInvocation;
 	}
 
-	const entryPath = resolveBinaryPath('better-ccusage', 'better-ccusage');
+	const entryPath = resolveBinaryPath('zccusage', 'zccusage');
 	cachedCcusageInvocation = createCliInvocation(entryPath);
 	return cachedCcusageInvocation;
 }
@@ -103,7 +103,7 @@ async function runCcusageCliJson(
 }
 
 /**
- * Retrieve daily usage data by invoking the better-ccusage CLI.
+ * Retrieve daily usage data by invoking the zccusage CLI.
  * Returns an empty result structure on expected errors (missing data, empty directory).
  *
  * @param parameters - Query parameters (since, until, mode, timezone, locale)
@@ -140,7 +140,7 @@ export async function getCcusageDaily(parameters: z.infer<typeof ccusageParamete
 }
 
 /**
- * Retrieve monthly usage data by invoking the better-ccusage CLI.
+ * Retrieve monthly usage data by invoking the zccusage CLI.
  * Returns an empty result structure on expected errors (missing data, empty directory).
  *
  * @param parameters - Query parameters (since, until, mode, timezone, locale)
@@ -177,7 +177,7 @@ export async function getCcusageMonthly(parameters: z.infer<typeof ccusageParame
 }
 
 /**
- * Retrieve session-based usage data by invoking the better-ccusage CLI.
+ * Retrieve session-based usage data by invoking the zccusage CLI.
  * Returns an empty result structure on expected errors (missing data, empty directory).
  *
  * @param parameters - Query parameters (since, until, mode, timezone, locale)
@@ -214,7 +214,7 @@ export async function getCcusageSession(parameters: z.infer<typeof ccusageParame
 }
 
 /**
- * Retrieve 5-hour billing block usage data by invoking the better-ccusage CLI.
+ * Retrieve 5-hour billing block usage data by invoking the zccusage CLI.
  * Returns an empty result structure on expected errors (missing data, empty directory).
  *
  * @param parameters - Query parameters (since, until, mode, timezone, locale)

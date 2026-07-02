@@ -6,21 +6,21 @@ type TypedocConfig = TypeDocOptions & PluginOptions & { docsRoot?: string };
 
 const entryPoints = [
 	...globSync([
-		'./node_modules/better-ccusage/src/*.ts',
-		'!./node_modules/better-ccusage/src/**/*.test.ts', // Exclude test files
-		'!./node_modules/better-ccusage/src/_*.ts', // Exclude internal files with underscore prefix
+		'./node_modules/zccusage/src/*.ts',
+		'!./node_modules/zccusage/src/**/*.test.ts', // Exclude test files
+		'!./node_modules/zccusage/src/_*.ts', // Exclude internal files with underscore prefix
 	], {
 		absolute: false,
 		onlyFiles: true,
 	}),
-	'./node_modules/better-ccusage/src/_consts.ts', // Include constants for documentation
+	'./node_modules/zccusage/src/_consts.ts', // Include constants for documentation
 ];
 
 export default {
 	// typedoc options
 	// ref: https://typedoc.org/documents/Options.html
 	entryPoints,
-	tsconfig: './node_modules/better-ccusage/tsconfig.json',
+	tsconfig: './node_modules/zccusage/tsconfig.json',
 	exclude: [
 		'**/node_modules/**/tsdown.config.ts',
 		'**/node_modules/**/scripts/**',

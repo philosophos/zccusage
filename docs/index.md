@@ -2,19 +2,19 @@
 layout: home
 
 hero:
-  name: better-ccusage
+  name: zccusage
   text: Claude Code/Droid Usage Analysis
   tagline: A powerful CLI tool for analyzing Claude Code/Droid Usage from local JSONL files
   image:
     src: /logo.svg
-    alt: better-ccusage logo
+    alt: zccusage logo
   actions:
     - theme: brand
       text: Get Started
       link: /guide/
     - theme: alt
       text: View on GitHub
-      link: https://github.com/cobra91/better-ccusage
+      link: https://github.com/cobra91/zccusage
 
 features:
   - icon: 📊
@@ -67,8 +67,8 @@ features:
 ---
 
 <div style="text-align: center; margin: 2rem 0;">
-  <h2 style="margin-bottom: 1rem;">Support better-ccusage</h2>
-  <p style="margin-bottom: 1.5rem;">If you find better-ccusage helpful, please consider sponsoring the development!</p>
+  <h2 style="margin-bottom: 1rem;">Support zccusage</h2>
+  <p style="margin-bottom: 1.5rem;">If you find zccusage helpful, please consider sponsoring the development!</p>
 
   <h3 style="margin-bottom: 1rem;">Featured Sponsor</h3>
   <div style="margin-top: 2rem;">

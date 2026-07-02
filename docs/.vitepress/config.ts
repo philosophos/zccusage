@@ -10,7 +10,7 @@ const typedocSidebarJson = fs.readFileSync(path.join(import.meta.dirname, '../ap
 const typedocSidebar = JSON.parse(typedocSidebarJson.toString()) as DefaultTheme.SidebarItem[];
 
 export default defineConfig({
-	title: 'better-ccusage',
+	title: 'zccusage',
 	description: 'Enhanced usage analysis tool for Claude Code with multi-provider support',
 	base: '/',
 	cleanUrls: true,
@@ -21,8 +21,8 @@ export default defineConfig({
 		['meta', { name: 'theme-color', content: '#646cff' }],
 		['meta', { property: 'og:type', content: 'website' }],
 		['meta', { property: 'og:locale', content: 'en' }],
-		['meta', { property: 'og:title', content: 'better-ccusage | Enhanced Claude Code/Droid Usage Analysis with Multi-Provider Support' }],
-		['meta', { property: 'og:site_name', content: 'better-ccusage' }],
+		['meta', { property: 'og:title', content: 'zccusage | Enhanced Claude Code/Droid Usage Analysis with Multi-Provider Support' }],
+		['meta', { property: 'og:site_name', content: 'zccusage' }],
 		['meta', { property: 'og:image', content: 'https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.png' }],
 		['meta', { property: 'og:url', content: 'https://github.com/cobra91/better-ccusage' }],
 	],
@@ -37,10 +37,10 @@ export default defineConfig({
 				text: 'Links',
 				items: [
 					{ text: 'GitHub', link: 'https://github.com/cobra91/better-ccusage' },
-					{ text: 'npm', link: 'https://www.npmjs.com/package/better-ccusage' },
+					{ text: 'npm', link: 'https://www.npmjs.com/package/zccusage' },
 					{ text: 'Changelog', link: 'https://github.com/cobra91/better-ccusage/releases' },
 					{ text: 'DeepWiki', link: 'https://deepwiki.com/cobra91/better-ccusage' },
-					{ text: 'Package Stats', link: 'https://tanstack.com/better-ccusage?npmPackage=better-ccusage' },
+					{ text: 'Package Stats', link: 'https://tanstack.com/zccusage?npmPackage=zccusage' },
 					{ text: 'Sponsor', link: 'https://github.com/sponsors/cobra91' },
 				],
 			},
@@ -117,7 +117,7 @@ export default defineConfig({
 
 		socialLinks: [
 			{ icon: 'github', link: 'https://github.com/cobra91/better-ccusage' },
-			{ icon: 'npm', link: 'https://www.npmjs.com/package/better-ccusage' },
+			{ icon: 'npm', link: 'https://www.npmjs.com/package/zccusage' },
 			{ icon: 'twitter', link: 'https://x.com/cobrax91310' },
 		],
 
@@ -155,7 +155,7 @@ export default defineConfig({
 				mode: 'generate',
 				entries: [
 					{ from: '/gh', to: 'https://github.com/cobra91/better-ccusage', status: 302 },
-					{ from: '/npm', to: 'https://www.npmjs.com/package/better-ccusage', status: 302 },
+					{ from: '/npm', to: 'https://www.npmjs.com/package/zccusage', status: 302 },
 					{ from: '/deepwiki', to: 'https://deepwiki.com/cobra91/better-ccusage', status: 302 },
 					{ from: '/sponsor', to: 'https://github.com/sponsors/cobra91', status: 302 },
 				],

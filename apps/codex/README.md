@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.svg" alt="better-ccusage logo" width="256" height="256">
+    <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.svg" alt="zccusage logo" width="256" height="256">
     <h1>@better-ccusage/codex</h1>
 </div>
 
@@ -15,7 +15,7 @@
   <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/codex-cli.jpeg" alt="Codex CLI usage screenshot" width="640">
 </div>
 
-> Analyze <a href="https://github.com/openai/codex">OpenAI Codex CLI</a> usage logs with the same reporting experience as <code>better-ccusage</code>.
+> Analyze <a href="https://github.com/openai/codex">OpenAI Codex CLI</a> usage logs with the same reporting experience as <code>zccusage</code>.
 
 > ⚠️ <strong>Beta:</strong> The Codex CLI support is experimental. Expect breaking changes until the upstream Codex tooling stabilizes.
 
@@ -41,12 +41,12 @@ deno run -E -R=$HOME/.codex/ -S=homedir -N='raw.githubusercontent.com:443' npm:@
 Since `npx @better-ccusage/codex@latest` is quite long to type repeatedly, we strongly recommend setting up a shell alias:
 
 ```bash
-# bash/zsh: alias better-ccusage-codex='bunx @better-ccusage/codex@latest'
-# fish:     alias better-ccusage-codex 'bunx @better-ccusage/codex@latest'
+# bash/zsh: alias zccusage-codex='bunx @better-ccusage/codex@latest'
+# fish:     alias zccusage-codex 'bunx @better-ccusage/codex@latest'
 
 # Then simply run:
-better-ccusage-codex daily
-better-ccusage-codex monthly --json
+zccusage-codex daily
+zccusage-codex monthly --json
 ```
 
 > 💡 The CLI looks for Codex session JSONL files under `CODEX_HOME` (defaults to `~/.codex`).
@@ -83,7 +83,7 @@ Useful environment variables:
 
 ## Features
 
-- 📊 Responsive terminal tables shared with the `better-ccusage` CLI
+- 📊 Responsive terminal tables shared with the `zccusage` CLI
 - 💵 Offline-first pricing cache with automatic refresh when needed
 - 🤖 Per-model token and cost aggregation, including cached token accounting
 - 📅 Daily and monthly rollups with identical CLI options
@@ -91,7 +91,7 @@ Useful environment variables:
 
 ## Documentation
 
-For detailed guides and examples, visit **[better-ccusage.com/guide/codex](https://better-ccusage.com/guide/codex/)**.
+For detailed guides and examples, visit **[zccusage.com/guide/codex](https://zccusage.com/guide/codex/)**.
 
 ## Sponsors
 

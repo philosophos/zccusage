@@ -1,18 +1,18 @@
 <div align="center">
-    <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.svg" alt="better-ccusage logo" width="256" height="256">
-    <h1>better-ccusage</h1>
+    <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.svg" alt="zccusage logo" width="256" height="256">
+    <h1>zccusage</h1>
 </div>
 
 <p align="center">
-    <a href="https://npmjs.com/package/better-ccusage"><img src="https://img.shields.io/npm/v/better-ccusage?color=yellow" alt="npm version" /></a>
-    <a href="https://packagephobia.com/result?p=better-ccusage"><img src="https://packagephobia.com/badge?p=better-ccusage" alt="install size" /></a>
+    <a href="https://npmjs.com/package/zccusage"><img src="https://img.shields.io/npm/v/zccusage?color=yellow" alt="npm version" /></a>
+    <a href="https://packagephobia.com/result?p=zccusage"><img src="https://packagephobia.com/badge?p=zccusage" alt="install size" /></a>
     <a href="https://zread.ai/cobra91/better-ccusage" target="_blank"><img src="https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff" alt="zread"/></a>
     <a href="https://deepwiki.com/cobra91/better-ccusage"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
     <a href="https://claudelog.com/"><img src="https://claudelog.com/img/claude_log_badge.svg" alt="ClaudeLog - A comprehensive knowledge base for Claude." /></a>
     <img alt="CodeRabbit Pull Request Reviews" src="https://img.shields.io/coderabbit/prs/github/cobra91/better-ccusage">
 </p>
 
-> Analyze [OpenCode](https://github.com/opencode-ai/opencode) usage logs with the same reporting experience as <code>better-ccusage</code>.
+> Analyze [OpenCode](https://github.com/opencode-ai/opencode) usage logs with the same reporting experience as <code>zccusage</code>.
 
 ## Quick Start
 
@@ -34,12 +34,12 @@ deno run -E -R=$HOME/.local/share/opencode/ -S=homedir -N='raw.githubusercontent
 Since `npx @better-ccusage/opencode@latest` is quite long to type repeatedly, we strongly recommend setting up a shell alias:
 
 ```bash
-# bash/zsh: alias better-ccusage-opencode='bunx @better-ccusage/opencode@latest'
-# fish:     alias better-ccusage-opencode 'bunx @better-ccusage/opencode@latest'
+# bash/zsh: alias zccusage-opencode='bunx @better-ccusage/opencode@latest'
+# fish:     alias zccusage-opencode 'bunx @better-ccusage/opencode@latest'
 
 # Then simply run:
-better-ccusage-opencode daily
-better-ccusage-opencode monthly --json
+zccusage-opencode daily
+zccusage-opencode monthly --json
 ```
 
 > 💡 The CLI looks for OpenCode usage data under `OPENCODE_DATA_DIR` (defaults to `~/.local/share/opencode`).
@@ -99,7 +99,7 @@ Each message file contains token counts (`input`, `output`, `cache.read`, `cache
 
 ## Documentation
 
-For detailed guides and examples, visit **[better-ccusage.com/guide/opencode](https://better-ccusage.com/guide/opencode/)**.
+For detailed guides and examples, visit **[zccusage.com/guide/opencode](https://zccusage.com/guide/opencode/)**.
 
 ## Sponsors
 

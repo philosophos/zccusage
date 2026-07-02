@@ -1,8 +1,8 @@
 # Introduction
 
-![better-ccusage daily report showing token usage and costs by date](/screenshot.png)
+![zccusage daily report showing token usage and costs by date](/screenshot.png)
 
-**better-ccusage** (better-claude-code-usage) is a powerful CLI tool that analyzes your Claude Code/Droid Usage from local JSONL files to help you understand your token consumption patterns and estimated costs with multi-provider support.
+**zccusage** (better-claude-code-usage) is a powerful CLI tool that analyzes your Claude Code/Droid Usage from local JSONL files to help you understand your token consumption patterns and estimated costs with multi-provider support.
 
 ## The Problem
 
@@ -15,7 +15,7 @@ Claude Code's Max plan offers unlimited usage, which is fantastic! But many user
 
 ## The Solution
 
-better-ccusage analyzes the local JSONL files that Claude Code automatically generates and provides:
+zccusage analyzes the local JSONL files that Claude Code automatically generates and provides:
 
 - **Detailed Usage Reports** - Daily, monthly, and session-based breakdowns
 - **Cost Analysis** - Estimated costs based on token usage and model pricing
@@ -25,7 +25,7 @@ better-ccusage analyzes the local JSONL files that Claude Code automatically gen
 ## How It Works
 
 1. **Claude Code generates JSONL files** containing usage data
-2. **better-ccusage reads these files** from your local machine
+2. **zccusage reads these files** from your local machine
 3. **Analyzes and aggregates** the data by date, session, or time blocks
 4. **Calculates estimated costs** using model pricing information
 5. **Presents results** in beautiful tables or JSON format
@@ -34,7 +34,7 @@ better-ccusage analyzes the local JSONL files that Claude Code automatically gen
 
 ### 🚀 Ultra-Small Bundle Size
 
-Unlike other CLI tools, we pay extreme attention to bundle size. better-ccusage achieves an incredibly small footprint even without minification, which means you can run it directly without installation using `bunx better-ccusage` for instant access.
+Unlike other CLI tools, we pay extreme attention to bundle size. zccusage achieves an incredibly small footprint even without minification, which means you can run it directly without installation using `bunx zccusage` for instant access.
 
 ### 📊 Multiple Report Types
 
@@ -70,7 +70,7 @@ Unlike other CLI tools, we pay extreme attention to bundle size. better-ccusage 
 
 ## Multi-Provider Support
 
-better-ccusage extends the original ccusage functionality with support for multiple AI providers:
+zccusage extends the original ccusage functionality with support for multiple AI providers:
 
 ### 🔄 Zai Provider Integration
 
@@ -104,9 +104,9 @@ better-ccusage extends the original ccusage functionality with support for multi
 - Token counting and cost calculation for MiniMax models
 - Compatible with existing Claude Code workflows
 
-## Why better-ccusage?
+## Why zccusage?
 
-better-ccusage was created to address a limitation in the original ccusage project: while ccusage focuses exclusively on Claude Code usage with Anthropic models, better-ccusage extends support to external tools/providers that use Claude Code/Droid with different providers like Zai, Dashscope and many models like GLM-xx, kat-coder, kimi, MiniMax etc.
+zccusage was created to address a limitation in the original ccusage project: while ccusage focuses exclusively on Claude Code usage with Anthropic models, zccusage extends support to external tools/providers that use Claude Code/Droid with different providers like Zai, Dashscope and many models like GLM-xx, kat-coder, kimi, MiniMax etc.
 
 The original ccusage project doesn't account for:
 
@@ -116,11 +116,11 @@ The original ccusage project doesn't account for:
 - **MiniMax** models like MiniMax-M2
 - Multi-provider environments where organizations use different AI services through Claude Code
 
-better-ccusage maintains full compatibility with ccusage while adding comprehensive support for these additional providers and models.
+zccusage maintains full compatibility with ccusage while adding comprehensive support for these additional providers and models.
 
 ## Data Sources
 
-better-ccusage reads from Claude Code's local data directories:
+zccusage reads from Claude Code's local data directories:
 
 - **New location**: `~/.config/claude/projects/` (Claude Code v1.0.30+)
 - **Legacy location**: `~/.claude/projects/` (pre-v1.0.30)
@@ -131,7 +131,7 @@ The tool automatically detects and aggregates data from both locations for compa
 
 - **100% Local** - All analysis happens on your machine
 - **No Data Transmission** - Your usage data never leaves your computer
-- **Read-Only** - better-ccusage only reads files, never modifies them
+- **Read-Only** - zccusage only reads files, never modifies them
 - **Open Source** - Full transparency in how your data is processed
 
 ## Limitations

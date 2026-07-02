@@ -9,12 +9,12 @@ Daily reports show token usage and costs aggregated by calendar date, giving you
 Show all daily usage:
 
 ```bash
-better-ccusage daily
+zccusage daily
 # or simply:
-better-ccusage
+zccusage
 ```
 
-The daily command is the default, so you can omit it when running better-ccusage.
+The daily command is the default, so you can omit it when running zccusage.
 
 ## Example Output
 
@@ -37,7 +37,7 @@ The daily command is the default, so you can omit it when running better-ccusage
 
 ### Responsive Display
 
-better-ccusage automatically adapts to your terminal width:
+zccusage automatically adapts to your terminal width:
 
 - **Wide terminals (≥100 chars)**: Shows all columns
 - **Narrow terminals (<100 chars)**: Compact mode with essential columns only
@@ -50,13 +50,13 @@ Filter reports by date range:
 
 ```bash
 # Show usage from December 2024
-better-ccusage daily --since 20241201 --until 20241231
+zccusage daily --since 20241201 --until 20241231
 
 # Show last week
-better-ccusage daily --since 20241215 --until 20241222
+zccusage daily --since 20241215 --until 20241222
 
 # Show usage since a specific date
-better-ccusage daily --since 20241201
+zccusage daily --since 20241201
 ```
 
 ### Sort Order
@@ -65,10 +65,10 @@ Control the order of dates:
 
 ```bash
 # Newest dates first (default)
-better-ccusage daily --order desc
+zccusage daily --order desc
 
 # Oldest dates first
-better-ccusage daily --order asc
+zccusage daily --order asc
 ```
 
 ### Cost Calculation Modes
@@ -77,13 +77,13 @@ Control how costs are calculated:
 
 ```bash
 # Use pre-calculated costs when available (default)
-better-ccusage daily --mode auto
+zccusage daily --mode auto
 
 # Always calculate costs from tokens
-better-ccusage daily --mode calculate
+zccusage daily --mode calculate
 
 # Only show pre-calculated costs
-better-ccusage daily --mode display
+zccusage daily --mode display
 ```
 
 ### Model Breakdown
@@ -91,7 +91,7 @@ better-ccusage daily --mode display
 See per-model cost breakdown:
 
 ```bash
-better-ccusage daily --breakdown
+zccusage daily --breakdown
 ```
 
 This shows costs split by individual models:
@@ -113,7 +113,7 @@ This shows costs split by individual models:
 Export data as JSON for further analysis:
 
 ```bash
-better-ccusage daily --json
+zccusage daily --json
 ```
 
 ```json
@@ -148,8 +148,8 @@ Group usage by project instead of aggregating across all projects:
 
 ```bash
 # Group daily usage by project
-better-ccusage daily --instances
-better-ccusage daily -i
+zccusage daily --instances
+zccusage daily -i
 ```
 
 When using `--instances`, the report shows usage for each project separately:
@@ -176,11 +176,11 @@ Filter to a specific project:
 
 ```bash
 # Show only usage from "my-project"
-better-ccusage daily --project my-project
-better-ccusage daily -p my-project
+zccusage daily --project my-project
+zccusage daily -p my-project
 
 # Combine with instances flag
-better-ccusage daily --instances --project my-project
+zccusage daily --instances --project my-project
 ```
 
 ## Common Use Cases
@@ -189,47 +189,47 @@ better-ccusage daily --instances --project my-project
 
 ```bash
 # See December 2024 usage
-better-ccusage daily --since 20241201 --until 20241231
+zccusage daily --since 20241201 --until 20241231
 ```
 
 ### Find Expensive Days
 
 ```bash
 # Sort by cost (highest first)
-better-ccusage daily --order desc
+zccusage daily --order desc
 ```
 
 ### Export for Spreadsheet Analysis
 
 ```bash
-better-ccusage daily --json > december-usage.json
+zccusage daily --json > december-usage.json
 ```
 
 ### Compare Model Usage
 
 ```bash
 # See which models you use most
-better-ccusage daily --breakdown
+zccusage daily --breakdown
 ```
 
 ### Check Recent Activity
 
 ```bash
 # Last 7 days
-better-ccusage daily --since $(date -d '7 days ago' +%Y%m%d)
+zccusage daily --since $(date -d '7 days ago' +%Y%m%d)
 ```
 
 ### Analyze Project Usage
 
 ```bash
 # See usage breakdown by project
-better-ccusage daily --instances
+zccusage daily --instances
 
 # Track specific project costs
-better-ccusage daily --project my-important-project --since 20250601
+zccusage daily --project my-important-project --since 20250601
 
 # Compare project usage with JSON export
-better-ccusage daily --instances --json > project-analysis.json
+zccusage daily --instances --json > project-analysis.json
 ```
 
 ### Team Usage Analysis
@@ -237,7 +237,7 @@ better-ccusage daily --instances --json > project-analysis.json
 Use project aliases to replace cryptic or long project directory names with readable labels:
 
 ```json
-// .better-ccusage/better-ccusage.json - Set custom project names for better reporting
+// .zccusage/zccusage.json - Set custom project names for better reporting
 {
 	"commands": {
 		"daily": {
@@ -255,7 +255,7 @@ The `projectAliases` setting uses a comma-separated format of `original-name=dis
 
 ```bash
 # Generate team report with readable project names
-better-ccusage daily --instances --since 20250601
+zccusage daily --instances --since 20250601
 # Now shows "Frontend App" instead of "uuid-project"
 ```
 

@@ -2,7 +2,7 @@
 	"name": "@better-ccusage/terminal",
 	"version": "1.4.3",
 	"private": true,
-	"description": "Terminal utilities for better-ccusage",
+	"description": "Terminal utilities for zccusage",
 	"type": "module",
 	"exports": {
 		"./table": "./src/table.ts",

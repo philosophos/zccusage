@@ -1,11 +1,11 @@
 # CLAUDE.md - Terminal Package
 
-This package provides terminal utilities for the better-ccusage toolchain.
+This package provides terminal utilities for the zccusage toolchain.
 
 ## Package Overview
 
 **Name**: `@better-ccusage/terminal`
-**Description**: Terminal utilities for better-ccusage
+**Description**: Terminal utilities for zccusage
 **Type**: Internal library package (private)
 
 ## Development Commands
@@ -19,7 +19,7 @@ This package provides terminal utilities for the better-ccusage toolchain.
 
 ## Architecture
 
-This package contains terminal utilities used across the better-ccusage monorepo:
+This package contains terminal utilities used across the zccusage monorepo:
 
 **Key Modules:**
 
@@ -55,7 +55,7 @@ This package contains terminal utilities used across the better-ccusage monorepo
 
 ## Code Style
 
-Follow the same code style guidelines as the main better-ccusage package:
+Follow the same code style guidelines as the main zccusage package:
 
 - **Error Handling**: Prefer functional error handling patterns
 - **Imports**: Use `.ts` extensions for local imports

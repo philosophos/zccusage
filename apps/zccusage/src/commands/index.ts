@@ -50,7 +50,7 @@ export async function run(): Promise<void> {
 	// When invoked through npx, the binary name might be passed as the first argument
 	// Filter it out if it matches the expected binary name
 	let args = process.argv.slice(2);
-	if (args[0] === 'better-ccusage') {
+	if (args[0] === 'zccusage') {
 		args = args.slice(1);
 	}
 

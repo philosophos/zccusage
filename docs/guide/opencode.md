@@ -1,6 +1,6 @@
 # OpenCode Usage Tracking
 
-better-ccusage provides usage tracking for [OpenCode](https://github.com/sst/opencode), a terminal-based AI coding assistant. This allows you to monitor token usage and costs when using OpenCode with various AI providers.
+zccusage provides usage tracking for [OpenCode](https://github.com/sst/opencode), a terminal-based AI coding assistant. This allows you to monitor token usage and costs when using OpenCode with various AI providers.
 
 ## Installation
 
@@ -74,7 +74,7 @@ export XDG_DATA_HOME=/custom/xdg/data
 
 ## Supported Models
 
-OpenCode supports various AI providers. better-ccusage automatically detects and calculates costs for:
+OpenCode supports various AI providers. zccusage automatically detects and calculates costs for:
 
 - **Anthropic**: Claude models (claude-sonnet-4, claude-opus-4, etc.)
 - **Google**: Gemini models

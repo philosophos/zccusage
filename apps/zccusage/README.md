@@ -1,12 +1,12 @@
 <div align="center">
-    <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.svg" alt="better-ccusage logo" width="256" height="256">
-    <h1>better-ccusage</h1>
+    <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.svg" alt="zccusage logo" width="256" height="256">
+    <h1>zccusage</h1>
 </div>
 
 <p align="center">
-    <a href="https://npmjs.com/package/better-ccusage"><img src="https://img.shields.io/npm/v/better-ccusage?color=yellow" alt="npm version" /></a>
-    <a href="https://npmjs.com/package/better-ccusage"><img src="https://img.shields.io/npm/dt/better-ccusage" alt="npm downloads" /></a>
-    <a href="https://packagephobia.com/result?p=better-ccusage"><img src="https://packagephobia.com/badge?p=better-ccusage" alt="install size" /></a>
+    <a href="https://npmjs.com/package/zccusage"><img src="https://img.shields.io/npm/v/zccusage?color=yellow" alt="npm version" /></a>
+    <a href="https://npmjs.com/package/zccusage"><img src="https://img.shields.io/npm/dt/zccusage" alt="npm downloads" /></a>
+    <a href="https://packagephobia.com/result?p=zccusage"><img src="https://packagephobia.com/badge?p=zccusage" alt="install size" /></a>
     <a href="https://zread.ai/cobra91/better-ccusage" target="_blank"><img src="https://img.shields.io/badge/Ask_Zread-_.svg?style=flat&color=00b0aa&labelColor=000000&logo=data%3Aimage%2Fsvg%2Bxml%3Bbase64%2CPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTQuOTYxNTYgMS42MDAxSDIuMjQxNTZDMS44ODgxIDEuNjAwMSAxLjYwMTU2IDEuODg2NjQgMS42MDE1NiAyLjI0MDFWNC45NjAxQzEuNjAxNTYgNS4zMTM1NiAxLjg4ODEgNS42MDAxIDIuMjQxNTYgNS42MDAxSDQuOTYxNTZDNS4zMTUwMiA1LjYwMDEgNS42MDE1NiA1LjMxMzU2IDUuNjAxNTYgNC45NjAxVjIuMjQwMUM1LjYwMTU2IDEuODg2NjQgNS4zMTUwMiAxLjYwMDEgNC45NjE1NiAxLjYwMDFaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00Ljk2MTU2IDEwLjM5OTlIMi4yNDE1NkMxLjg4ODEgMTAuMzk5OSAxLjYwMTU2IDEwLjY4NjQgMS42MDE1NiAxMS4wMzk5VjEzLjc1OTlDMS42MDE1NiAxNC4xMTM0IDEuODg4MSAxNC4zOTk5IDIuMjQxNTYgMTQuMzk5OUg0Ljk2MTU2QzUuMzE1MDIgMTQuMzk5OSA1LjYwMTU2IDE0LjExMzQgNS42MDE1NiAxMy43NTk5VjExLjAzOTlDNS42MDE1NiAxMC42ODY0IDUuMzE1MDIgMTAuMzk5OSA0Ljk2MTU2IDEwLjM5OTlaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik0xMy43NTg0IDEuNjAwMUgxMS4wMzg0QzEwLjY4NSAxLjYwMDEgMTAuMzk4NCAxLjg4NjY0IDEwLjM5ODQgMi4yNDAxVjQuOTYwMUMxMC4zOTg0IDUuMzEzNTYgMTAuNjg1IDUuNjAwMSAxMS4wMzg0IDUuNjAwMUgxMy43NTg0QzE0LjExMTkgNS42MDAxIDE0LjM5ODQgNS4zMTM1NiAxNC4zOTg0IDQuOTYwMVYyLjI0MDFDMTQuMzk4NCAxLjg4NjY0IDE0LjExMTkgMS42MDAxIDEzLjc1ODQgMS42MDAxWiIgZmlsbD0iI2ZmZiIvPgo8cGF0aCBkPSJNNCAxMkwxMiA0TDQgMTJaIiBmaWxsPSIjZmZmIi8%2BCjxwYXRoIGQ9Ik00IDEyTDEyIDQiIHN0cm9rZT0iI2ZmZiIgc3Ryb2tlLXdpZHRoPSIxLjUiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4K&logoColor=ffffff" alt="zread"/></a>
     <a href="https://deepwiki.com/cobra91/better-ccusage"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
     <a href="https://claudelog.com/"><img src="https://claudelog.com/img/claude_log_badge.svg" alt="ClaudeLog - A comprehensive knowledge base for Claude." /></a>
@@ -19,9 +19,9 @@
 
 > Analyze your Claude Code or Droid token usage and costs from local JSONL files with multi-provider support — incredibly fast and informative!
 
-## About better-ccusage
+## About zccusage
 
-**better-ccusage** is a fork of the original ccusage project that addresses a critical limitation: while ccusage focuses exclusively on Claude Code usage with Anthropic models, better-ccusage extends support to external providers that use Claude Code with different providers like Anthropic, Zai, Dashscope and many models like GLM series from Zai, kat-coder from Kwaipilot, kimi from Moonshot, Minimax, sonnet-4, sonnet-4.5 and Qwen-Max etc.
+**zccusage** is a fork of the original ccusage project that addresses a critical limitation: while ccusage focuses exclusively on Claude Code usage with Anthropic models, zccusage extends support to external providers that use Claude Code with different providers like Anthropic, Zai, Dashscope and many models like GLM series from Zai, kat-coder from Kwaipilot, kimi from Moonshot, Minimax, sonnet-4, sonnet-4.5 and Qwen-Max etc.
 
 ### Why the Fork?
 
@@ -31,46 +31,46 @@ The original ccusage project is designed specifically for Anthropic's Claude Cod
 - **All GLM models (including GLM-5-Turbo), kat-coder, minimax, moonshot** models from other AI providers
 - Multi-provider environments where organizations use different AI services through Claude Code
 
-better-ccusage maintains full compatibility with ccusage while adding comprehensive support for these additional providers and models.
+zccusage maintains full compatibility with ccusage while adding comprehensive support for these additional providers and models.
 
-## better-ccusage Family
+## zccusage Family
 
-### 📊 [better-ccusage](https://www.npmjs.com/package/better-ccusage) - Enhanced Claude Code/Droid Usage Analyzer with Multi-Provider Support
+### 📊 [zccusage](https://www.npmjs.com/package/zccusage) - Enhanced Claude Code/Droid Usage Analyzer with Multi-Provider Support
 
 The main CLI tool for analyzing Claude Code/Droid/OpenCode usage from local JSONL files with support for multiple AI providers including Anthropic, Zai, and all GLM models (including GLM-5-Turbo), kat-coder models. Track daily, weekly, monthly, and session-based usage with beautiful tables and live monitoring.
 
 ### 🤖 [@better-ccusage/codex](https://www.npmjs.com/package/@better-ccusage/codex) - OpenAI Codex Usage Analyzer
 
-Companion tool for analyzing OpenAI Codex usage. Same powerful features as better-ccusage but tailored for Codex users, including GPT-5 support and 1M token context windows.
+Companion tool for analyzing OpenAI Codex usage. Same powerful features as zccusage but tailored for Codex users, including GPT-5 support and 1M token context windows.
 
 ### 🧠 [@better-ccusage/opencode](https://www.npmjs.com/package/@better-ccusage/opencode) - OpenCode Usage Analyzer
 
-Companion tool for analyzing [OpenCode](https://github.com/opencode-ai/opencode) usage. Track token usage and costs from OpenCode sessions with the same reporting capabilities as better-ccusage.
+Companion tool for analyzing [OpenCode](https://github.com/opencode-ai/opencode) usage. Track token usage and costs from OpenCode sessions with the same reporting capabilities as zccusage.
 
 ### 🔌 [@better-ccusage/mcp](https://www.npmjs.com/package/@better-ccusage/mcp) - MCP Server Integration
 
-Model Context Protocol server that exposes better-ccusage data to Claude Desktop and other MCP-compatible tools. Enable real-time usage tracking directly in your AI workflows.
+Model Context Protocol server that exposes zccusage data to Claude Desktop and other MCP-compatible tools. Enable real-time usage tracking directly in your AI workflows.
 
 ## Installation
 
 ### Quick Start (Recommended)
 
-Thanks to better-ccusage's incredibly small bundle size, you can run it directly without installation:
+Thanks to zccusage's incredibly small bundle size, you can run it directly without installation:
 
 ```bash
 # Recommended - always include @latest to ensure you get the newest version
-npx better-ccusage@latest
-bunx better-ccusage
+npx zccusage@latest
+bunx zccusage
 
 # Alternative package runners
-pnpm dlx better-ccusage
-pnpx better-ccusage
+pnpm dlx zccusage
+pnpx zccusage
 
 # Using deno (with security flags)
-deno run -E -R=$HOME/.claude/projects/ -S=homedir -N='raw.githubusercontent.com:443' npm:better-ccusage@latest
+deno run -E -R=$HOME/.claude/projects/ -S=homedir -N='raw.githubusercontent.com:443' npm:zccusage@latest
 ```
 
-> 💡 **Important**: We strongly recommend using `@latest` suffix with npx (e.g., `npx better-ccusage@latest`) to ensure you're running the most recent version with the latest features and bug fixes.
+> 💡 **Important**: We strongly recommend using `@latest` suffix with npx (e.g., `npx zccusage@latest`) to ensure you're running the most recent version with the latest features and bug fixes.
 
 ### Related Tools
 
@@ -95,7 +95,7 @@ deno run -E -R=$HOME/.codex/ -S=homedir -N='raw.githubusercontent.com:443' npm:@
 
 #### MCP Server
 
-Integrate better-ccusage with Claude Desktop using [@better-ccusage/mcp](https://www.npmjs.com/package/@better-ccusage/mcp):
+Integrate zccusage with Claude Desktop using [@better-ccusage/mcp](https://www.npmjs.com/package/@better-ccusage/mcp):
 
 ```bash
 # Start MCP server for Claude Desktop integration
@@ -108,37 +108,37 @@ This enables real-time usage tracking and analysis directly within Claude Deskto
 
 ```bash
 # Basic usage
-npx better-ccusage          # Show daily report (default)
-npx better-ccusage daily    # Daily token usage and costs
-npx better-ccusage weekly   # Weekly aggregated report
-npx better-ccusage monthly  # Monthly aggregated report
-npx better-ccusage session  # Usage by conversation session
-npx better-ccusage blocks   # 5-hour billing windows
-npx better-ccusage statusline  # Compact status line for hooks (Beta)
+npx zccusage          # Show daily report (default)
+npx zccusage daily    # Daily token usage and costs
+npx zccusage weekly   # Weekly aggregated report
+npx zccusage monthly  # Monthly aggregated report
+npx zccusage session  # Usage by conversation session
+npx zccusage blocks   # 5-hour billing windows
+npx zccusage statusline  # Compact status line for hooks (Beta)
 
 # Live monitoring
-npx better-ccusage blocks --live  # Real-time usage dashboard
+npx zccusage blocks --live  # Real-time usage dashboard
 
 # Filters and options
-npx better-ccusage daily --since 20250525 --until 20250530
-npx better-ccusage daily --json  # JSON output
-npx better-ccusage daily --breakdown  # Per-model cost breakdown
-npx better-ccusage daily --timezone UTC  # Use UTC timezone
-npx better-ccusage daily --locale ja-JP  # Use Japanese locale for date/time formatting
+npx zccusage daily --since 20250525 --until 20250530
+npx zccusage daily --json  # JSON output
+npx zccusage daily --breakdown  # Per-model cost breakdown
+npx zccusage daily --timezone UTC  # Use UTC timezone
+npx zccusage daily --locale ja-JP  # Use Japanese locale for date/time formatting
 
 # Project analysis
-npx better-ccusage daily --instances  # Group by project/instance
-npx better-ccusage daily --project myproject  # Filter to specific project
-npx better-ccusage daily --instances --project myproject --json  # Combined usage
+npx zccusage daily --instances  # Group by project/instance
+npx zccusage daily --project myproject  # Filter to specific project
+npx zccusage daily --instances --project myproject --json  # Combined usage
 
 # Compact mode for screenshots/sharing
-npx better-ccusage --compact  # Force compact table mode
-npx better-ccusage monthly --compact  # Compact monthly report
+npx zccusage --compact  # Force compact table mode
+npx zccusage monthly --compact  # Compact monthly report
 ```
 
 ## Multi-Provider Support
 
-better-ccusage extends the original ccusage functionality with automatic support for multiple AI providers:
+zccusage extends the original ccusage functionality with automatic support for multiple AI providers:
 
 ### 🔄 Automatic Provider Detection
 
@@ -213,20 +213,20 @@ better-ccusage extends the original ccusage functionality with automatic support
 
 ## Comparison with ccusage
 
-| Feature                          | ccusage | better-ccusage |
-| -------------------------------- | ------- | -------------- |
-| Anthropic Models                 | ✅      | ✅             |
-| Moonshot (kimi) Models           | ❌      | ✅             |
-| MiniMax Models                   | ❌      | ✅             |
-| GLM\* Models                     | ❌      | ✅             |
-| Zai Provider                     | ❌      | ✅             |
-| kat-coder                        | ❌      | ✅             |
-| **Automatic Provider Detection** | ❌      | ✅             |
-| Multi-Provider Support           | ❌      | ✅             |
-| Cost Calculation by Provider     | ❌      | ✅             |
-| Original ccusage Features        | ✅      | ✅             |
-| Show prompt usage for Coding     | ❌      | ✅             |
-| Droid usage                      | ❌      | ✅             |
+| Feature                          | ccusage | zccusage |
+| -------------------------------- | ------- | -------- |
+| Anthropic Models                 | ✅      | ✅       |
+| Moonshot (kimi) Models           | ❌      | ✅       |
+| MiniMax Models                   | ❌      | ✅       |
+| GLM\* Models                     | ❌      | ✅       |
+| Zai Provider                     | ❌      | ✅       |
+| kat-coder                        | ❌      | ✅       |
+| **Automatic Provider Detection** | ❌      | ✅       |
+| Multi-Provider Support           | ❌      | ✅       |
+| Cost Calculation by Provider     | ❌      | ✅       |
+| Original ccusage Features        | ✅      | ✅       |
+| Show prompt usage for Coding     | ❌      | ✅       |
+| Droid usage                      | ❌      | ✅       |
 
 ## Star History
 

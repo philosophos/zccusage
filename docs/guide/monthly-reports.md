@@ -5,7 +5,7 @@ Monthly reports aggregate your Claude Code/Droid Usage by calendar month, provid
 ## Basic Usage
 
 ```bash
-better-ccusage monthly
+zccusage monthly
 ```
 
 ## Example Output
@@ -54,13 +54,13 @@ Filter by month range:
 
 ```bash
 # Show specific months
-better-ccusage monthly --since 20250101 --until 20250630
+zccusage monthly --since 20250101 --until 20250630
 
 # Show usage from 2024
-better-ccusage monthly --since 20240101 --until 20241231
+zccusage monthly --since 20240101 --until 20241231
 
 # Show last 6 months
-better-ccusage monthly --since $(date -d '6 months ago' +%Y%m%d)
+zccusage monthly --since $(date -d '6 months ago' +%Y%m%d)
 ```
 
 ::: tip Date Filtering
@@ -71,23 +71,23 @@ Even though you specify full dates (YYYYMMDD), monthly reports group by month. T
 
 ```bash
 # Newest months first (default)
-better-ccusage monthly --order desc
+zccusage monthly --order desc
 
 # Oldest months first
-better-ccusage monthly --order asc
+zccusage monthly --order asc
 ```
 
 ### Cost Calculation Modes
 
 ```bash
 # Use pre-calculated costs when available (default)
-better-ccusage monthly --mode auto
+zccusage monthly --mode auto
 
 # Always calculate costs from tokens
-better-ccusage monthly --mode calculate
+zccusage monthly --mode calculate
 
 # Only show pre-calculated costs
-better-ccusage monthly --mode display
+zccusage monthly --mode display
 ```
 
 ### Model Breakdown
@@ -95,7 +95,7 @@ better-ccusage monthly --mode display
 See costs broken down by model:
 
 ```bash
-better-ccusage monthly --breakdown
+zccusage monthly --breakdown
 ```
 
 Example with breakdown:
@@ -115,7 +115,7 @@ Example with breakdown:
 ### JSON Output
 
 ```bash
-better-ccusage monthly --json
+zccusage monthly --json
 ```
 
 ```json
@@ -141,7 +141,7 @@ Monthly reports help with subscription planning:
 
 ```bash
 # Check last year's usage
-better-ccusage monthly --since 20240101 --until 20241231
+zccusage monthly --since 20240101 --until 20241231
 ```
 
 Look at the total cost to understand what you'd pay on usage-based pricing.
@@ -152,8 +152,8 @@ Track how your usage changes over time:
 
 ```bash
 # Compare year over year
-better-ccusage monthly --since 20230101 --until 20231231  # 2023
-better-ccusage monthly --since 20240101 --until 20241231  # 2024
+zccusage monthly --since 20230101 --until 20231231  # 2023
+zccusage monthly --since 20240101 --until 20241231  # 2024
 ```
 
 ### Model Migration Analysis
@@ -161,7 +161,7 @@ better-ccusage monthly --since 20240101 --until 20241231  # 2024
 See how your model usage evolves:
 
 ```bash
-better-ccusage monthly --breakdown
+zccusage monthly --breakdown
 ```
 
 This helps track transitions between Opus, Sonnet, and other models.
@@ -172,14 +172,14 @@ Identify busy/slow periods:
 
 ```bash
 # Academic year analysis
-better-ccusage monthly --since 20240901 --until 20250630
+zccusage monthly --since 20240901 --until 20250630
 ```
 
 ### Export for Business Analysis
 
 ```bash
 # Create quarterly reports
-better-ccusage monthly --since 20241001 --until 20241231 --json > q4-2024.json
+zccusage monthly --since 20241001 --until 20241231 --json > q4-2024.json
 ```
 
 ## Tips for Monthly Analysis

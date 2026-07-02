@@ -104,7 +104,7 @@ export async function run(argv: string[] = process.argv.slice(2)): Promise<void>
 	// When invoked through npx/bunx, the binary name might be passed as the first argument
 	// Filter it out if it matches the expected binary name
 	let args = argv;
-	if (args[0] === 'better-ccusage-mcp') {
+	if (args[0] === 'zccusage-mcp') {
 		args = args.slice(1);
 	}
 

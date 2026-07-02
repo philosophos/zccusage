@@ -5,7 +5,7 @@ Blocks reports show your Claude Code/Droid Usage grouped by 5-hour billing windo
 ## Basic Usage
 
 ```bash
-better-ccusage blocks
+zccusage blocks
 ```
 
 ## Example Output
@@ -62,7 +62,7 @@ Claude Code uses **5-hour billing windows** for session tracking:
 Focus on your current session with detailed projections:
 
 ```bash
-better-ccusage blocks --active
+zccusage blocks --active
 ```
 
 This shows only the currently active block with:
@@ -76,7 +76,7 @@ This shows only the currently active block with:
 Display blocks from the last 3 days (including active):
 
 ```bash
-better-ccusage blocks --recent
+zccusage blocks --recent
 ```
 
 Perfect for understanding recent usage patterns without scrolling through all historical data.
@@ -87,12 +87,12 @@ Set token limits to monitor quota usage:
 
 ```bash
 # Set explicit token limit
-better-ccusage blocks --token-limit 500000
+zccusage blocks --token-limit 500000
 
 # Use highest previous block as limit
-better-ccusage blocks --token-limit max
+zccusage blocks --token-limit max
 # or short form:
-better-ccusage blocks -t max
+zccusage blocks -t max
 ```
 
 When limits are set, blocks display:
@@ -111,13 +111,13 @@ Real-time dashboard with automatic updates:
 
 ```bash
 # Basic live monitoring (uses -t max automatically)
-better-ccusage blocks --live
+zccusage blocks --live
 
 # Live monitoring with explicit token limit
-better-ccusage blocks --live --token-limit 500000
+zccusage blocks --live --token-limit 500000
 
 # Custom refresh interval (1-60 seconds)
-better-ccusage blocks --live --refresh-interval 5
+zccusage blocks --live --refresh-interval 5
 ```
 
 Live monitoring features:
@@ -135,10 +135,10 @@ Change the block duration (default is 5 hours):
 
 ```bash
 # 3-hour blocks
-better-ccusage blocks --session-length 3
+zccusage blocks --session-length 3
 
 # 8-hour blocks
-better-ccusage blocks --session-length 8
+zccusage blocks --session-length 8
 ```
 
 ### Date Filtering
@@ -147,33 +147,33 @@ Filter blocks by date range:
 
 ```bash
 # Show blocks from specific date range
-better-ccusage blocks --since 20250620 --until 20250621
+zccusage blocks --since 20250620 --until 20250621
 
 # Show blocks from last week
-better-ccusage blocks --since $(date -d '7 days ago' +%Y%m%d)
+zccusage blocks --since $(date -d '7 days ago' +%Y%m%d)
 ```
 
 ### Sort Order
 
 ```bash
 # Show newest blocks first (default)
-better-ccusage blocks --order desc
+zccusage blocks --order desc
 
 # Show oldest blocks first
-better-ccusage blocks --order asc
+zccusage blocks --order asc
 ```
 
 ### Cost Calculation Modes
 
 ```bash
 # Use pre-calculated costs when available (default)
-better-ccusage blocks --mode auto
+zccusage blocks --mode auto
 
 # Always calculate costs from tokens
-better-ccusage blocks --mode calculate
+zccusage blocks --mode calculate
 
 # Only show pre-calculated costs
-better-ccusage blocks --mode display
+zccusage blocks --mode display
 ```
 
 ### JSON Output
@@ -181,7 +181,7 @@ better-ccusage blocks --mode display
 Export block data for analysis:
 
 ```bash
-better-ccusage blocks --json
+zccusage blocks --json
 ```
 
 ```json
@@ -214,7 +214,7 @@ Understanding 5-hour windows helps with:
 
 ```bash
 # Check current active block
-better-ccusage blocks --active
+zccusage blocks --active
 ```
 
 - **Time Management**: Know how much time remains in current session
@@ -225,7 +225,7 @@ better-ccusage blocks --active
 
 ```bash
 # Find your highest usage patterns
-better-ccusage blocks -t max --recent
+zccusage blocks -t max --recent
 ```
 
 - **Peak Usage Identification**: Which blocks consumed the most tokens
@@ -236,7 +236,7 @@ better-ccusage blocks -t max --recent
 
 ```bash
 # Monitor active sessions in real-time
-better-ccusage blocks --live -t max
+zccusage blocks --live -t max
 ```
 
 Perfect for:
@@ -249,10 +249,10 @@ Perfect for:
 
 ```bash
 # Export data for detailed analysis
-better-ccusage blocks --json > blocks-history.json
+zccusage blocks --json > blocks-history.json
 
 # Analyze patterns over time
-better-ccusage blocks --since 20250601 --until 20250630
+zccusage blocks --since 20250601 --until 20250630
 ```
 
 ## Block Analysis Tips

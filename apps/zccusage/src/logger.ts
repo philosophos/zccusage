@@ -1,5 +1,5 @@
 /**
- * @fileoverview Logging utilities for the better-ccusage application
+ * @fileoverview Logging utilities for the zccusage application
  *
  * This module provides configured logger instances using consola for consistent
  * logging throughout the application with package name tagging.

@@ -41,7 +41,7 @@ export const dailyCommand = define({
 		},
 		projectAliases: {
 			type: 'string',
-			description: 'Comma-separated project aliases (e.g., \'better-ccusage=Usage Tracker,myproject=My Project\')',
+			description: 'Comma-separated project aliases (e.g., \'zccusage=Usage Tracker,myproject=My Project\')',
 			hidden: true,
 		},
 	},

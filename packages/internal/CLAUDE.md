@@ -1,11 +1,11 @@
 # CLAUDE.md - Internal Package
 
-This package contains shared internal utilities for the better-ccusage monorepo.
+This package contains shared internal utilities for the zccusage monorepo.
 
 ## Package Overview
 
 **Name**: `@better-ccusage/internal`
-**Description**: Shared internal utilities for better-ccusage toolchain with automatic model detection
+**Description**: Shared internal utilities for zccusage toolchain with automatic model detection
 **Type**: Internal library (private package)
 
 **Key Features**:
@@ -20,7 +20,7 @@ This package contains shared internal utilities for the better-ccusage monorepo.
 **CRITICAL**: This is an internal package that gets bundled into the final applications. Therefore:
 
 - **Always add this package as a `devDependency`** in apps that use it, NOT as a regular dependency
-- Apps in this monorepo (better-ccusage, mcp, codex) are bundled CLIs, so all their runtime dependencies should be in `devDependencies`
+- Apps in this monorepo (zccusage, mcp, codex) are bundled CLIs, so all their runtime dependencies should be in `devDependencies`
 - The bundler will include the code from this package in the final output
 
 ## Available Exports
@@ -132,7 +132,7 @@ The current `calculateTieredCost` implementation handles 200k thresholds. Adding
 
 ## Code Style
 
-Follow the same conventions as the main better-ccusage package:
+Follow the same conventions as the main zccusage package:
 
 - Use `.ts` extensions for local imports
 - Prefer `@praha/byethrow Result` type over try-catch

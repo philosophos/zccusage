@@ -11,7 +11,7 @@ Live monitoring provides a real-time dashboard that updates as you use Claude Co
 ## Quick Start
 
 ```bash
-better-ccusage blocks --live
+zccusage blocks --live
 ```
 
 This starts live monitoring with automatic token limit detection based on your usage history.
@@ -40,13 +40,13 @@ Set custom token limits for quota warnings:
 
 ```bash
 # Use specific token limit
-better-ccusage blocks --live -t 500000
+zccusage blocks --live -t 500000
 
 # Use highest previous session as limit (default)
-better-ccusage blocks --live -t max
+zccusage blocks --live -t max
 
 # Explicitly set max (same as default)
-better-ccusage blocks --live -t max
+zccusage blocks --live -t max
 ```
 
 ### Refresh Interval
@@ -55,13 +55,13 @@ Control update frequency:
 
 ```bash
 # Update every 5 seconds
-better-ccusage blocks --live --refresh-interval 5
+zccusage blocks --live --refresh-interval 5
 
 # Update every 10 seconds (lighter on CPU)
-better-ccusage blocks --live --refresh-interval 10
+zccusage blocks --live --refresh-interval 10
 
 # Fast updates (every 0.5 seconds)
-better-ccusage blocks --live --refresh-interval 0.5
+zccusage blocks --live --refresh-interval 0.5
 ```
 
 ::: tip Refresh Rate
@@ -75,10 +75,10 @@ better-ccusage blocks --live --refresh-interval 0.5
 
 ```bash
 # Custom limit with slower refresh
-better-ccusage blocks --live -t 750000 --refresh-interval 3
+zccusage blocks --live -t 750000 --refresh-interval 3
 
 # Maximum responsiveness
-better-ccusage blocks --live -t max --refresh-interval 0.5
+zccusage blocks --live -t max --refresh-interval 0.5
 ```
 
 ## Understanding the Display
@@ -116,7 +116,7 @@ The progress bar shows token usage within the current 5-hour block:
 
 ### Warning System
 
-better-ccusage shows color-coded warnings based on usage:
+zccusage shows color-coded warnings based on usage:
 
 - 🟢 **< 60%**: Normal usage
 - 🟡 **60-80%**: Moderate usage warning
@@ -131,7 +131,7 @@ Monitor usage during intensive coding sessions:
 
 ```bash
 # Monitor with reasonable limit
-better-ccusage blocks --live -t 500000
+zccusage blocks --live -t 500000
 ```
 
 Perfect for:
@@ -146,7 +146,7 @@ Track usage during pair programming:
 
 ```bash
 # Higher limit for team sessions
-better-ccusage blocks --live -t 1000000
+zccusage blocks --live -t 1000000
 ```
 
 ### Budget Management
@@ -155,7 +155,7 @@ Set strict limits for cost control:
 
 ```bash
 # Conservative monitoring
-better-ccusage blocks --live -t 200000
+zccusage blocks --live -t 200000
 ```
 
 ### Learning Sessions
@@ -164,7 +164,7 @@ Monitor while learning new technologies:
 
 ```bash
 # Moderate limit with frequent updates
-better-ccusage blocks --live -t 300000 --refresh-interval 2
+zccusage blocks --live -t 300000 --refresh-interval 2
 ```
 
 ## Tips for Effective Monitoring
@@ -246,7 +246,7 @@ If automatic limit detection fails:
 
 ```bash
 # Manually set a reasonable limit
-better-ccusage blocks --live -t 500000
+zccusage blocks --live -t 500000
 ```
 
 ### Performance Issues
@@ -255,7 +255,7 @@ If monitoring feels slow:
 
 ```bash
 # Reduce refresh frequency
-better-ccusage blocks --live --refresh-interval 5
+zccusage blocks --live --refresh-interval 5
 ```
 
 ## Related Commands
@@ -270,6 +270,6 @@ Combine live monitoring with other tools:
 
 ```bash
 # Monitor in background, export data periodically
-better-ccusage blocks --live &
-better-ccusage session --json > session-backup.json
+zccusage blocks --live &
+zccusage session --json > session-backup.json
 ```

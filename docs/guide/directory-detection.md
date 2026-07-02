@@ -1,23 +1,23 @@
 # Directory Detection
 
-better-ccusage automatically detects and manages Claude Code data directories.
+zccusage automatically detects and manages Claude Code data directories.
 
 ## Default Directory Locations
 
-better-ccusage automatically searches for Claude Code data in these locations:
+zccusage automatically searches for Claude Code data in these locations:
 
 - **`~/.config/claude/projects/`** - New default location (Claude Code v1.0.30+)
 - **`~/.claude/projects/`** - Legacy location (pre-v1.0.30)
 
-When no custom directory is specified, better-ccusage searches both locations and aggregates data from all valid directories found.
+When no custom directory is specified, zccusage searches both locations and aggregates data from all valid directories found.
 
 ::: info Breaking Change
-The directory change from `~/.claude` to `~/.config/claude` in Claude Code v1.0.30 was an undocumented breaking change. better-ccusage handles both locations automatically to ensure backward compatibility.
+The directory change from `~/.claude` to `~/.config/claude` in Claude Code v1.0.30 was an undocumented breaking change. zccusage handles both locations automatically to ensure backward compatibility.
 :::
 
 ## Search Priority
 
-When `CLAUDE_CONFIG_DIR` environment variable is not set, better-ccusage searches in this order:
+When `CLAUDE_CONFIG_DIR` environment variable is not set, zccusage searches in this order:
 
 1. **Primary**: `~/.config/claude/projects/` (preferred for newer installations)
 2. **Fallback**: `~/.claude/projects/` (for legacy installations)
@@ -32,7 +32,7 @@ Override the default search with a specific directory:
 
 ```bash
 export CLAUDE_CONFIG_DIR="/custom/path/to/claude"
-better-ccusage daily
+zccusage daily
 ```
 
 ### Multiple Directories
@@ -41,7 +41,7 @@ Aggregate data from multiple Claude installations:
 
 ```bash
 export CLAUDE_CONFIG_DIR="/path/to/claude1,/path/to/claude2"
-better-ccusage daily
+zccusage daily
 ```
 
 ## Directory Structure
@@ -70,7 +70,7 @@ Each:
 
 ### No Data Found
 
-If better-ccusage reports no data found:
+If zccusage reports no data found:
 
 ```bash
 # Check if directories exist
@@ -82,7 +82,7 @@ echo $CLAUDE_CONFIG_DIR
 
 # Test with explicit directory
 export CLAUDE_CONFIG_DIR="/path/to/claude"
-better-ccusage daily
+zccusage daily
 ```
 
 ### Permission Errors
@@ -102,10 +102,10 @@ chmod -R 755 ~/.config/claude/
 ```bash
 # Force specific directory
 export CLAUDE_CONFIG_DIR="/exact/path/to/claude"
-better-ccusage daily
+zccusage daily
 
 # Verify which directory is being used
-LOG_LEVEL=4 better-ccusage daily
+LOG_LEVEL=4 zccusage daily
 ```
 
 ## Related Documentation

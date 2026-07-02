@@ -1,10 +1,10 @@
 # Environment Variables
 
-better-ccusage supports several environment variables for configuration and customization. Environment variables provide a way to configure better-ccusage without modifying command-line arguments or configuration files.
+zccusage supports several environment variables for configuration and customization. Environment variables provide a way to configure zccusage without modifying command-line arguments or configuration files.
 
 ## CLAUDE_CONFIG_DIR
 
-Specifies where better-ccusage should look for Claude Code data. This is the most important environment variable for better-ccusage.
+Specifies where zccusage should look for Claude Code data. This is the most important environment variable for zccusage.
 
 ### Single Directory
 
@@ -12,7 +12,7 @@ Set a single custom Claude data directory:
 
 ```bash
 export CLAUDE_CONFIG_DIR="/path/to/your/claude/data"
-better-ccusage daily
+zccusage daily
 ```
 
 ### Multiple Directories
@@ -21,14 +21,14 @@ Set multiple directories (comma-separated) to aggregate data from multiple sourc
 
 ```bash
 export CLAUDE_CONFIG_DIR="/path/to/claude1,/path/to/claude2"
-better-ccusage daily
+zccusage daily
 ```
 
-When multiple directories are specified, better-ccusage automatically aggregates usage data from all valid locations.
+When multiple directories are specified, zccusage automatically aggregates usage data from all valid locations.
 
 ### Default Behavior
 
-When `CLAUDE_CONFIG_DIR` is not set, better-ccusage automatically searches in:
+When `CLAUDE_CONFIG_DIR` is not set, zccusage automatically searches in:
 
 1. `~/.config/claude/projects/` (new default, Claude Code v1.0.30+)
 2. `~/.claude/projects/` (legacy location, pre-v1.0.30)
@@ -36,7 +36,7 @@ When `CLAUDE_CONFIG_DIR` is not set, better-ccusage automatically searches in:
 Data from all valid directories is automatically combined.
 
 ::: info Directory Change
-The directory change from `~/.claude` to `~/.config/claude` in Claude Code v1.0.30 was an undocumented breaking change. better-ccusage handles both locations automatically for backward compatibility.
+The directory change from `~/.claude` to `~/.config/claude` in Claude Code v1.0.30 was an undocumented breaking change. zccusage handles both locations automatically for backward compatibility.
 :::
 
 ### Use Cases
@@ -67,12 +67,12 @@ export CLAUDE_CONFIG_DIR="/team-shared/claude-data/$USER"
 ```bash
 # Use specific directory in CI pipeline
 export CLAUDE_CONFIG_DIR="/ci-data/claude-logs"
-better-ccusage daily --json > usage-report.json
+zccusage daily --json > usage-report.json
 ```
 
 ## LOG_LEVEL
 
-Controls the verbosity of log output. better-ccusage uses [consola](https://github.com/unjs/consola) for logging under the hood.
+Controls the verbosity of log output. zccusage uses [consola](https://github.com/unjs/consola) for logging under the hood.
 
 ### Log Levels
 
@@ -89,16 +89,16 @@ Controls the verbosity of log output. better-ccusage uses [consola](https://gith
 
 ```bash
 # Silent mode - only show results
-LOG_LEVEL=0 better-ccusage daily
+LOG_LEVEL=0 zccusage daily
 
 # Warning level - for CI/CD
-LOG_LEVEL=1 better-ccusage monthly
+LOG_LEVEL=1 zccusage monthly
 
 # Debug mode - troubleshooting
-LOG_LEVEL=4 better-ccusage session
+LOG_LEVEL=4 zccusage session
 
 # Trace everything - deep debugging
-LOG_LEVEL=5 better-ccusage blocks
+LOG_LEVEL=5 zccusage blocks
 ```
 
 ### Practical Applications
@@ -107,28 +107,28 @@ LOG_LEVEL=5 better-ccusage blocks
 
 ```bash
 # Get clean JSON output without logs
-LOG_LEVEL=0 better-ccusage daily --json | jq '.summary.totalCost'
+LOG_LEVEL=0 zccusage daily --json | jq '.summary.totalCost'
 ```
 
 #### CI/CD Pipeline
 
 ```bash
 # Show only warnings and errors in CI
-LOG_LEVEL=1 better-ccusage daily --instances
+LOG_LEVEL=1 zccusage daily --instances
 ```
 
 #### Debugging Issues
 
 ```bash
 # Maximum verbosity for troubleshooting
-LOG_LEVEL=5 better-ccusage daily --debug
+LOG_LEVEL=5 zccusage daily --debug
 ```
 
 #### Piping Output
 
 ```bash
 # Silent logs when piping to other commands
-LOG_LEVEL=0 better-ccusage monthly --json | python analyze.py
+LOG_LEVEL=0 zccusage monthly --json | python analyze.py
 ```
 
 ## Additional Environment Variables
@@ -139,7 +139,7 @@ Disable colored output (standard CLI convention):
 
 ```bash
 export NO_COLOR=1
-better-ccusage daily  # No color formatting
+zccusage daily  # No color formatting
 ```
 
 ### FORCE_COLOR
@@ -148,7 +148,7 @@ Force colored output even when piping:
 
 ```bash
 export FORCE_COLOR=1
-better-ccusage daily | less -R  # Preserves colors
+zccusage daily | less -R  # Preserves colors
 ```
 
 ## Setting Environment Variables
@@ -157,11 +157,11 @@ better-ccusage daily | less -R  # Preserves colors
 
 ```bash
 # Set for single command
-LOG_LEVEL=0 better-ccusage daily
+LOG_LEVEL=0 zccusage daily
 
 # Set for current shell session
 export CLAUDE_CONFIG_DIR="/custom/path"
-better-ccusage daily
+zccusage daily
 ```
 
 ### Permanent (Shell Profile)
@@ -212,7 +212,7 @@ Example:
 export LOG_LEVEL=1
 
 # But command-line argument overrides it
-better-ccusage daily --debug  # Shows debug output
+zccusage daily --debug  # Shows debug output
 ```
 
 ## Debugging
@@ -224,7 +224,7 @@ To see which environment variables are being used:
 env | grep -E "CLAUDE|CCUSAGE|LOG_LEVEL"
 
 # Debug mode shows environment variable usage
-LOG_LEVEL=4 better-ccusage daily --debug
+LOG_LEVEL=4 zccusage daily --debug
 ```
 
 ## Related Documentation

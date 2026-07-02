@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.svg" alt="better-ccusage logo" width="256" height="256">
+    <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.svg" alt="zccusage logo" width="256" height="256">
     <h1>@better-ccusage/mcp</h1>
 </div>
 
@@ -15,7 +15,7 @@
     <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/mcp-claude-desktop.avif" alt="Claude Desktop MCP integration screenshot" width="640">
 </div>
 
-> MCP (Model Context Protocol) server implementation for better-ccusage - provides Claude Code/Droid Usage data through the MCP protocol.
+> MCP (Model Context Protocol) server implementation for zccusage - provides Claude Code/Droid Usage data through the MCP protocol.
 
 ## Quick Start
 
@@ -39,7 +39,7 @@ Add to your Claude Desktop MCP configuration:
 ```json
 {
 	"mcpServers": {
-		"better-ccusage": {
+		"zccusage": {
 			"command": "npx",
 			"args": ["@better-ccusage/mcp@latest"],
 			"type": "stdio"
@@ -51,12 +51,12 @@ Add to your Claude Desktop MCP configuration:
 ### Claude Code
 
 ```sh
-claude mcp add better-ccusage npx -- @better-ccusage/mcp@latest
+claude mcp add zccusage npx -- @better-ccusage/mcp@latest
 ```
 
 ## Documentation
 
-For full documentation, visit **[better-ccusage.com/guide/mcp-server](https://better-ccusage.com/guide/mcp-server)**
+For full documentation, visit **[zccusage.com/guide/mcp-server](https://zccusage.com/guide/mcp-server)**
 
 ## Sponsors
 

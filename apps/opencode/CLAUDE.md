@@ -59,7 +59,7 @@ Override with `OPENCODE_DATA_DIR` or `XDG_DATA_HOME` environment variables.
 
 ## Code Style
 
-Follow the same conventions as better-ccusage:
+Follow the same conventions as zccusage:
 
 - Use `.ts` extensions for local imports
 - Prefer `@praha/byethrow Result` type over try-catch

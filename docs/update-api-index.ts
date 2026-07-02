@@ -14,8 +14,8 @@ const descriptions = {
 	'calculate-cost': 'Cost calculation utilities for usage data analysis',
 	'data-loader': 'Data loading utilities for Claude Code/Droid Usage analysis',
 	'debug': 'Debug utilities for cost calculation validation',
-	'index': 'Main entry point for better-ccusage CLI tool',
-	'logger': 'Logging utilities for the better-ccusage application',
+	'index': 'Main entry point for zccusage CLI tool',
+	'logger': 'Logging utilities for the zccusage application',
 	'pricing-fetcher': 'Model pricing data fetcher for cost calculations',
 } as const;
 

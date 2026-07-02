@@ -1,4 +1,4 @@
-# Manual Integration Guide for better-ccusage (WSL Required)
+# Manual Integration Guide for zccusage (WSL Required)
 
 ## Current Situation
 
@@ -10,7 +10,7 @@ This monorepo requires WSL for proper development and integration. Windows has p
 
 ```bash
 # Navigate to your project in WSL
-cd /mnt/d/Dev/better-ccusage
+cd /mnt/d/Dev/zccusage
 
 # Install dependencies
 pnpm install
@@ -21,7 +21,7 @@ pnpm test
 
 ### Repository Structure Differences
 
-- **Your repo**: `apps/better-ccusage/` (with all GLM models, kat-coder custom features)
+- **Your repo**: `apps/zccusage/` (with all GLM models, kat-coder custom features)
 - **Upstream**: `apps/ccusage/` (original ccusage)
 
 This makes automated merging complex. Here's the safest manual approach:
@@ -54,7 +54,7 @@ git log --oneline upstream/main --since="2024-01-01" | head -20
 
 ```bash
 # Always test in WSL first
-cd /mnt/d/Dev/better-ccusage
+cd /mnt/d/Dev/zccusage
 pnpm test
 pnpm typecheck
 ```
@@ -74,15 +74,15 @@ For important files, compare manually:
 
 ```bash
 # Compare specific files
-git diff upstream/main:apps/ccusage/src/commands/daily.ts apps/better-ccusage/src/commands/daily.ts
+git diff upstream/main:apps/ccusage/src/commands/daily.ts apps/zccusage/src/commands/daily.ts
 
 # Compare pricing data (carefully - you have custom additions)
-git diff upstream/main:apps/ccusage/model_prices_and_context_window.json apps/better-ccusage/model_prices_and_context_window.json
+git diff upstream/main:apps/ccusage/model_prices_and_context_window.json apps/zccusage/model_prices_and_context_window.json
 ```
 
 ### 6. Apply changes selectively
 
-Copy improvements from upstream to your `apps/better-ccusage/` directory, preserving:
+Copy improvements from upstream to your `apps/zccusage/` directory, preserving:
 
 - Your Zai provider support
 - GLM-xx, kat-coder model pricing
@@ -111,7 +111,7 @@ If you haven't set up WSL for this project:
 wsl --install
 
 # Once installed, navigate to your project
-cd /mnt/d/Dev/better-ccusage
+cd /mnt/d/Dev/zccusage
 
 # Ensure Node.js (v24) and pnpm are installed in WSL
 curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -

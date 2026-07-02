@@ -35,7 +35,7 @@ export default defineConfig({
 		Macros({
 			include: ['src/index.ts', 'src/pricing-fetcher.ts'],
 		}),
-		copyPricingPlugin('better-ccusage'),
+		copyPricingPlugin('zccusage'),
 	],
 	define: {
 		'import.meta.vitest': 'undefined',

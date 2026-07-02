@@ -17,8 +17,8 @@
  * @example
  * ```typescript
  * // Basic cleanup
- * parseProjectName('-Users-phaedrus-Development-better-ccusage')
- * // → 'better-ccusage'
+ * parseProjectName('-Users-phaedrus-Development-zccusage')
+ * // → 'zccusage'
  *
  * // Complex project with feature branch
  * parseProjectName('-Users-phaedrus-Development-adminifi-edugakko-api--feature-ticket-002-configure-dependabot')
@@ -125,12 +125,12 @@ function parseProjectName(projectName: string): string {
  * @example
  * ```typescript
  * // Without aliases
- * formatProjectName('-Users-phaedrus-Development-better-ccusage')
- * // → 'better-ccusage'
+ * formatProjectName('-Users-phaedrus-Development-zccusage')
+ * // → 'zccusage'
  *
  * // With alias
- * const aliases = new Map([['better-ccusage', 'Usage Tracker']]);
- * formatProjectName('-Users-phaedrus-Development-better-ccusage', aliases)
+ * const aliases = new Map([['zccusage', 'Usage Tracker']]);
+ * formatProjectName('-Users-phaedrus-Development-zccusage', aliases)
  * // → 'Usage Tracker'
  * ```
  */
@@ -162,8 +162,8 @@ if (import.meta.vitest != null) {
 			});
 
 			it('extracts project names from Unix-style paths', () => {
-				expect(formatProjectName('-Users-phaedrus-Development-better-ccusage')).toBe('better-ccusage');
-				expect(formatProjectName('/Users/phaedrus/Development/better-ccusage')).toBe('better-ccusage');
+				expect(formatProjectName('-Users-phaedrus-Development-zccusage')).toBe('zccusage');
+				expect(formatProjectName('/Users/phaedrus/Development/zccusage')).toBe('zccusage');
 			});
 
 			it('handles complex project names with features', () => {
@@ -188,19 +188,19 @@ if (import.meta.vitest != null) {
 		describe('custom aliases', () => {
 			it('uses configured aliases', () => {
 				const aliases = new Map([
-					['better-ccusage', 'Usage Tracker'],
+					['zccusage', 'Usage Tracker'],
 					['test', 'Test Project'],
 				]);
 
-				expect(formatProjectName('better-ccusage', aliases)).toBe('Usage Tracker');
+				expect(formatProjectName('zccusage', aliases)).toBe('Usage Tracker');
 				expect(formatProjectName('test', aliases)).toBe('Test Project');
 				expect(formatProjectName('other', aliases)).toBe('other');
 			});
 
 			it('applies aliases to parsed project names', () => {
-				const aliases = new Map([['better-ccusage', 'Usage Tracker']]);
+				const aliases = new Map([['zccusage', 'Usage Tracker']]);
 
-				expect(formatProjectName('-Users-phaedrus-Development-better-ccusage', aliases)).toBe('Usage Tracker');
+				expect(formatProjectName('-Users-phaedrus-Development-zccusage', aliases)).toBe('Usage Tracker');
 			});
 
 			it('works without aliases', () => {
