@@ -1,4 +1,5 @@
 import type { ModelPricing } from '@better-ccusage/internal/pricing';
+import type { ProviderProfile } from './_types.ts';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -40,7 +41,7 @@ const userPricingFileSchema = v.record(v.string(), userPricingEntrySchema);
  * overrides; omit them for a default that covers all the reseller's regions/plans.
  */
 const userPricingArrayEntrySchema = v.object({
-	reseller: v.string(),
+	reseller: v.pipe(v.string(), v.minLength(1)),
 	model: v.string(),
 	region: v.optional(v.string()),
 	plan: v.optional(v.string()),
@@ -70,6 +71,44 @@ function toModelPricingFromPerM(entry: UserPricingArrayEntry): ModelPricing {
 			: undefined,
 		currency: entry.currency ?? DEFAULT_BILLING_CURRENCY,
 	};
+}
+
+/**
+ * Match a structured pricing rule against loaded provider profiles.
+ *
+ * `reseller` is matched fuzzily (bidirectional substring) against the profile's
+ * platform, id segments, and name — so `Aliyun`, `bailian`, `Aliyun_bailian`
+ * all hit the same bailian profiles. `region`/`plan`, when provided, must match
+ * the profile's derived field exactly; a profile with `region === undefined`
+ * does not match a rule that specifies `region`.
+ */
+function matchProfiles(rule: UserPricingArrayEntry, profiles: ProviderProfile[]): ProviderProfile[] {
+	const resellerLower = rule.reseller.toLowerCase();
+	if (resellerLower === '') {
+		return [];
+	}
+	const regionLower = rule.region?.toLowerCase();
+	const planLower = rule.plan?.toLowerCase();
+	return profiles.filter((p) => {
+		const candidates = [
+			p.platform,
+			...(p.id != null ? p.id.split('-') : []),
+			p.name,
+		]
+			.map(s => (s ?? '').toLowerCase())
+			.filter(s => s !== '');
+		const resellerHit = candidates.some(c => c.includes(resellerLower) || resellerLower.includes(c));
+		if (!resellerHit) {
+			return false;
+		}
+		if (regionLower != null && (p.region == null || p.region.toLowerCase() !== regionLower)) {
+			return false;
+		}
+		if (planLower != null && (p.planType == null || p.planType.toLowerCase() !== planLower)) {
+			return false;
+		}
+		return true;
+	});
 }
 
 /**
@@ -263,6 +302,64 @@ export class CcusagePricingFetcher extends PricingFetcher {
 }
 
 if (import.meta.vitest != null) {
+	const TEST_PROFILES: ProviderProfile[] = [
+		{ id: 'bailian-aliyun-singapore', name: 'Aliyun_bailian-Singapore', appType: 'claude', platform: 'bailian', region: 'singapore', planType: undefined },
+		{ id: 'bailian-aliyun-beijing', name: 'Aliyun_bailian-Beijing', appType: 'claude', platform: 'bailian', region: 'beijing', planType: undefined },
+		{ id: 'aliyun-bailian-beijing-token-plan', name: 'Aliyun_bailian-Beijing-Token_Plan', appType: 'claude', platform: 'bailian', region: 'beijing', planType: 'token plan' },
+		{ id: 'volcengine-ark-beijing-agent-plan', name: 'Volcengine_ark-Beijing-Agent_Plan', appType: 'claude', platform: 'volcengine', region: 'beijing', planType: 'agent plan' },
+	];
+
+	describe('matchProfiles', () => {
+		const baseRule = { model: 'glm-5.2', inputCostPerMTokens: 1, outputCostPerMTokens: 1 };
+
+		it('matches reseller fuzzily across Aliyun / bailian / Aliyun_bailian', () => {
+			for (const reseller of ['Aliyun', 'bailian', 'Aliyun_bailian']) {
+				const hits = matchProfiles({ ...baseRule, reseller }, TEST_PROFILES);
+				expect(hits.map(h => h.id).sort()).toEqual([
+					'aliyun-bailian-beijing-token-plan',
+					'bailian-aliyun-beijing',
+					'bailian-aliyun-singapore',
+				]);
+			}
+		});
+
+		it('filters by region when specified', () => {
+			const hits = matchProfiles({ ...baseRule, reseller: 'bailian', region: 'singapore' }, TEST_PROFILES);
+			expect(hits.map(h => h.id)).toEqual(['bailian-aliyun-singapore']);
+		});
+
+		it('filters by plan when specified', () => {
+			const hits = matchProfiles({ ...baseRule, reseller: 'bailian', plan: 'token plan' }, TEST_PROFILES);
+			expect(hits.map(h => h.id)).toEqual(['aliyun-bailian-beijing-token-plan']);
+		});
+
+		it('does not match region when profile region is undefined', () => {
+			const hits = matchProfiles(
+				{ ...baseRule, reseller: 'bailian', region: 'singapore' },
+				[{ id: 'bailian-x', name: 'b', appType: 'claude', platform: 'bailian', region: undefined, planType: undefined }],
+			);
+			expect(hits).toEqual([]);
+		});
+
+		it('does not match plan when profile planType is undefined', () => {
+			const hits = matchProfiles(
+				{ ...baseRule, reseller: 'bailian', plan: 'saving plan' },
+				[{ id: 'bailian-aliyun-singapore', name: 'Aliyun_bailian-Singapore', appType: 'claude', platform: 'bailian', region: 'singapore', planType: undefined }],
+			);
+			expect(hits).toEqual([]);
+		});
+
+		it('returns empty for an unknown reseller', () => {
+			const hits = matchProfiles({ ...baseRule, reseller: 'NoSuchReseller' }, TEST_PROFILES);
+			expect(hits).toEqual([]);
+		});
+
+		it('returns empty for an empty-string reseller', () => {
+			const hits = matchProfiles({ ...baseRule, reseller: '' }, TEST_PROFILES);
+			expect(hits).toEqual([]);
+		});
+	});
+
 	describe('PricingFetcher', () => {
 		it('loads pricing data successfully', async () => {
 			using fetcher = new CcusagePricingFetcher();
