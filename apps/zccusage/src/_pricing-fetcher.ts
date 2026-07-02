@@ -35,6 +35,44 @@ export type UserPricingEntry = v.InferOutput<typeof userPricingEntrySchema>;
 const userPricingFileSchema = v.record(v.string(), userPricingEntrySchema);
 
 /**
+ * A single structured pricing rule (new array format). Prices are per-million
+ * tokens in the chosen currency. `region`/`plan` are optional specificity
+ * overrides; omit them for a default that covers all the reseller's regions/plans.
+ */
+const userPricingArrayEntrySchema = v.object({
+	reseller: v.string(),
+	model: v.string(),
+	region: v.optional(v.string()),
+	plan: v.optional(v.string()),
+	currency: v.optional(v.string()),
+	inputCostPerMTokens: v.number(),
+	outputCostPerMTokens: v.number(),
+	cacheCreationCostPerMTokens: v.optional(v.number()),
+	cacheReadCostPerMTokens: v.optional(v.number()),
+});
+export type UserPricingArrayEntry = v.InferOutput<typeof userPricingArrayEntrySchema>;
+
+const PER_MILLION = 1_000_000;
+
+/**
+ * Convert a per-million-token array entry into a `ModelPricing` (per-token).
+ * Mirrors `toModelPricing` but divides by 1e6.
+ */
+function toModelPricingFromPerM(entry: UserPricingArrayEntry): ModelPricing {
+	return {
+		input_cost_per_token: entry.inputCostPerMTokens / PER_MILLION,
+		output_cost_per_token: entry.outputCostPerMTokens / PER_MILLION,
+		cache_creation_input_token_cost: entry.cacheCreationCostPerMTokens != null
+			? entry.cacheCreationCostPerMTokens / PER_MILLION
+			: undefined,
+		cache_read_input_token_cost: entry.cacheReadCostPerMTokens != null
+			? entry.cacheReadCostPerMTokens / PER_MILLION
+			: undefined,
+		currency: entry.currency ?? DEFAULT_BILLING_CURRENCY,
+	};
+}
+
+/**
  * Build candidate user-pricing file paths, mirroring the config search order:
  * 1. `./.better-ccusage/better-ccusage-pricing.json`
  * 2. `<each claude config dir>/better-ccusage-pricing.json`
@@ -400,6 +438,52 @@ if (import.meta.vitest != null) {
 
 			const loaded = loadUserPricing(filePath);
 			expect(loaded['prov/m']?.currency).toBe('USD');
+		});
+	});
+
+	describe('toModelPricingFromPerM', () => {
+		it('schema parses valid array entries with optional fields omitted', () => {
+			const result = v.safeParse(userPricingArrayEntrySchema, {
+				reseller: 'bailian',
+				model: 'glm-5.2',
+				inputCostPerMTokens: 30,
+				outputCostPerMTokens: 120,
+			});
+			expect(result.success).toBe(true);
+			if (result.success) {
+				expect(result.output.reseller).toBe('bailian');
+				expect(result.output.region).toBeUndefined();
+				expect(result.output.cacheCreationCostPerMTokens).toBeUndefined();
+			}
+		});
+
+		it('converts per-M token prices to per-token and defaults currency to USD', () => {
+			const mp = toModelPricingFromPerM({
+				reseller: 'bailian',
+				model: 'glm-5.2',
+				inputCostPerMTokens: 30,
+				outputCostPerMTokens: 120,
+				cacheCreationCostPerMTokens: 35,
+				cacheReadCostPerMTokens: 3,
+			});
+			expect(mp.input_cost_per_token).toBeCloseTo(3e-5);
+			expect(mp.output_cost_per_token).toBeCloseTo(1.2e-4);
+			expect(mp.cache_creation_input_token_cost).toBeCloseTo(3.5e-5);
+			expect(mp.cache_read_input_token_cost).toBeCloseTo(3e-6);
+			expect(mp.currency).toBe('USD');
+		});
+
+		it('uses explicit currency and leaves optional cache costs undefined', () => {
+			const mp = toModelPricingFromPerM({
+				reseller: 'bailian',
+				model: 'glm-5.2',
+				currency: 'CNY',
+				inputCostPerMTokens: 30,
+				outputCostPerMTokens: 120,
+			});
+			expect(mp.currency).toBe('CNY');
+			expect(mp.cache_creation_input_token_cost).toBeUndefined();
+			expect(mp.cache_read_input_token_cost).toBeUndefined();
 		});
 	});
 
