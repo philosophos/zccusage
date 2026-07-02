@@ -225,11 +225,20 @@ function toModelPricing(entry: UserPricingEntry): ModelPricing {
 
 /**
  * Load the user-supplied per-platform pricing overrides.
- * Returns an empty object if no file is found or the file is malformed
- * (malformed entries are skipped silently with a warning). Keys are preserved
- * verbatim from the file (`{providerId}/{model_id}`).
+ *
+ * Two formats, auto-detected via `Array.isArray`:
+ *  - Array (new): structured rules `{reseller, model, region?, plan?, ...}`.
+ *    Expanded into `{providerId}/{model}` keys by matching `profiles`. Requires
+ *    `profiles` to resolve reseller→providerId; without profiles, returns `{}`.
+ *  - Record (old, backward compatible): `{providerId}/{model}: {...}` keyed
+ *    verbatim, per-token prices.
+ *
+ * Returns an empty object if no file is found or the file is malformed.
  */
-export function loadUserPricing(pricingPath?: string): Record<string, ModelPricing> {
+export function loadUserPricing(
+	pricingPath?: string,
+	profiles?: ProviderProfile[],
+): Record<string, ModelPricing> {
 	const filePath = resolvePricingPath(pricingPath);
 	if (filePath == null) {
 		return {};
@@ -253,6 +262,25 @@ export function loadUserPricing(pricingPath?: string): Record<string, ModelPrici
 		return {};
 	}
 
+	// New array format.
+	if (Array.isArray(parsed)) {
+		const rulesResult = v.safeParse(v.array(userPricingArrayEntrySchema), parsed);
+		if (rulesResult.success) {
+			return expandArrayRules(rulesResult.output, profiles ?? []);
+		}
+		// Fall back to per-entry validation: keep valid ones, drop the rest.
+		logger.warn(`User pricing file ${filePath}: some array entries are invalid; dropping invalid entries`);
+		const valid: UserPricingArrayEntry[] = [];
+		for (const item of parsed) {
+			const r = v.safeParse(userPricingArrayEntrySchema, item);
+			if (r.success) {
+				valid.push(r.output);
+			}
+		}
+		return expandArrayRules(valid, profiles ?? []);
+	}
+
+	// Old record format (existing logic, unchanged).
 	const result = v.safeParse(userPricingFileSchema, parsed);
 	if (result.success) {
 		const out: Record<string, ModelPricing> = {};
@@ -264,7 +292,7 @@ export function loadUserPricing(pricingPath?: string): Record<string, ModelPrici
 
 	// Fall back to per-entry validation: keep the valid ones, drop the rest.
 	if (typeof parsed !== 'object' || parsed === null) {
-		logger.warn(`User pricing file ${filePath}: expected an object`);
+		logger.warn(`User pricing file ${filePath}: expected an object or array`);
 		return {};
 	}
 	const out: Record<string, ModelPricing> = {};
@@ -707,6 +735,36 @@ if (import.meta.vitest != null) {
 
 			const loaded = loadUserPricing(filePath);
 			expect(loaded['prov/m']?.currency).toBe('USD');
+		});
+
+		it('loads array format and expands to providerId/model keys via profiles', () => {
+			const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'bcu-pricing-'));
+			const filePath = path.join(tmpDir, PRICING_FILE_NAME);
+			writeFileSync(filePath, JSON.stringify([
+				{ reseller: 'bailian', model: 'glm-5.2', currency: 'CNY', inputCostPerMTokens: 30, outputCostPerMTokens: 120 },
+				{ reseller: 'bailian', region: 'singapore', model: 'glm-5.2', currency: 'USD', inputCostPerMTokens: 4, outputCostPerMTokens: 15 },
+			]), 'utf-8');
+
+			const profiles: ProviderProfile[] = [
+				{ id: 'bailian-aliyun-singapore', name: 'Aliyun_bailian-Singapore', appType: 'claude', platform: 'bailian', region: 'singapore', planType: undefined },
+				{ id: 'bailian-aliyun-beijing', name: 'Aliyun_bailian-Beijing', appType: 'claude', platform: 'bailian', region: 'beijing', planType: undefined },
+			];
+			const loaded = loadUserPricing(filePath, profiles);
+			expect(loaded['bailian-aliyun-singapore/glm-5.2']?.input_cost_per_token).toBeCloseTo(4e-6);
+			expect(loaded['bailian-aliyun-singapore/glm-5.2']?.currency).toBe('USD');
+			expect(loaded['bailian-aliyun-beijing/glm-5.2']?.input_cost_per_token).toBeCloseTo(3e-5);
+			expect(loaded['bailian-aliyun-beijing/glm-5.2']?.currency).toBe('CNY');
+		});
+
+		it('array format degrades to empty when profiles not provided', () => {
+			const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'bcu-pricing-'));
+			const filePath = path.join(tmpDir, PRICING_FILE_NAME);
+			writeFileSync(filePath, JSON.stringify([
+				{ reseller: 'bailian', model: 'glm-5.2', inputCostPerMTokens: 30, outputCostPerMTokens: 120 },
+			]), 'utf-8');
+			// No profiles passed → no matches → empty (warns).
+			const loaded = loadUserPricing(filePath);
+			expect(loaded).toEqual({});
 		});
 	});
 
