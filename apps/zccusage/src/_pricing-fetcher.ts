@@ -112,6 +112,75 @@ function matchProfiles(rule: UserPricingArrayEntry, profiles: ProviderProfile[])
 }
 
 /**
+ * Specificity = number of optional discriminators provided. Higher wins;
+ * a tie at the top for the same (providerId, model) is an error.
+ */
+function specificityScore(rule: UserPricingArrayEntry): number {
+	return (rule.region != null ? 1 : 0) + (rule.plan != null ? 1 : 0);
+}
+
+/**
+ * Expand structured array rules into the `{providerId}/{model}` → `ModelPricing`
+ * map. For each key, the highest-specificity rule wins. A tie at the top
+ * specificity throws an error listing the conflicting rules. Rules that match
+ * no profile are warned and skipped. Resolution is order-independent: only a
+ * genuine tie at the highest specificity for a key is a conflict.
+ */
+function expandArrayRules(
+	rules: UserPricingArrayEntry[],
+	profiles: ProviderProfile[],
+): Record<string, ModelPricing> {
+	// Pass 1: collect every (key, rule, pricing, score) hit into a per-key list.
+	const perKey = new Map<string, { rule: UserPricingArrayEntry; pricing: ModelPricing; score: number }[]>();
+	for (const rule of rules) {
+		const hits = matchProfiles(rule, profiles);
+		if (hits.length === 0) {
+			logger.warn(`Pricing rule for reseller "${rule.reseller}" matched no provider profile; skipped`);
+			continue;
+		}
+		const pricing = toModelPricingFromPerM(rule);
+		const score = specificityScore(rule);
+		for (const p of hits) {
+			const key = `${p.id}/${rule.model}`;
+			let bucket = perKey.get(key);
+			if (bucket == null) {
+				bucket = [];
+				perKey.set(key, bucket);
+			}
+			bucket.push({ rule, pricing, score });
+		}
+	}
+
+	// Pass 2: per key, the unique top-score rule wins; ≥2 top-score rules conflict.
+	const out: Record<string, ModelPricing> = {};
+	const conflicts: { key: string; rules: UserPricingArrayEntry[] }[] = [];
+	for (const [key, bucket] of perKey) {
+		let maxScore = -1;
+		for (const e of bucket) {
+			if (e.score > maxScore) {
+				maxScore = e.score;
+			}
+		}
+		const topRules = bucket.filter(e => e.score === maxScore);
+		if (topRules.length === 1) {
+			out[key] = topRules[0]!.pricing;
+		}
+		else {
+			conflicts.push({ key, rules: topRules.map(e => e.rule) });
+		}
+	}
+
+	if (conflicts.length > 0) {
+		const lines = conflicts.map((c) => {
+			const desc = c.rules.map(r => JSON.stringify({ reseller: r.reseller, region: r.region, plan: r.plan, model: r.model })).join(' vs ');
+			return `  ${c.key}: ${desc}`;
+		});
+		throw new Error(`Ambiguous pricing rules (same specificity match same providerId/model):\n${lines.join('\n')}`);
+	}
+	return out;
+}
+
+/**
  * Build candidate user-pricing file paths, mirroring the config search order:
  * 1. `./.better-ccusage/better-ccusage-pricing.json`
  * 2. `<each claude config dir>/better-ccusage-pricing.json`
@@ -357,6 +426,109 @@ if (import.meta.vitest != null) {
 		it('returns empty for an empty-string reseller', () => {
 			const hits = matchProfiles({ ...baseRule, reseller: '' }, TEST_PROFILES);
 			expect(hits).toEqual([]);
+		});
+	});
+
+	describe('expandArrayRules', () => {
+		const baseRule = { model: 'glm-5.2', inputCostPerMTokens: 1, outputCostPerMTokens: 1 };
+
+		it('default rule covers all reseller profiles', () => {
+			const out = expandArrayRules(
+				[{ ...baseRule, reseller: 'bailian', currency: 'CNY', inputCostPerMTokens: 30, outputCostPerMTokens: 120 }],
+				TEST_PROFILES,
+			);
+			expect(Object.keys(out).sort()).toEqual([
+				'aliyun-bailian-beijing-token-plan/glm-5.2',
+				'bailian-aliyun-beijing/glm-5.2',
+				'bailian-aliyun-singapore/glm-5.2',
+			]);
+			expect(out['bailian-aliyun-singapore/glm-5.2']?.input_cost_per_token).toBeCloseTo(3e-5);
+			expect(out['bailian-aliyun-singapore/glm-5.2']?.currency).toBe('CNY');
+		});
+
+		it('region exception overrides default for that region', () => {
+			const out = expandArrayRules(
+				[
+					{ ...baseRule, reseller: 'bailian', inputCostPerMTokens: 30, outputCostPerMTokens: 120 },
+					{ ...baseRule, reseller: 'bailian', region: 'singapore', currency: 'USD', inputCostPerMTokens: 4, outputCostPerMTokens: 15 },
+				],
+				TEST_PROFILES,
+			);
+			expect(out['bailian-aliyun-singapore/glm-5.2']?.input_cost_per_token).toBeCloseTo(4e-6);
+			expect(out['bailian-aliyun-singapore/glm-5.2']?.currency).toBe('USD');
+			expect(out['bailian-aliyun-beijing/glm-5.2']?.input_cost_per_token).toBeCloseTo(3e-5);
+		});
+
+		it('region+plan rule is the most specific and wins', () => {
+			const out = expandArrayRules(
+				[
+					{ ...baseRule, reseller: 'bailian', inputCostPerMTokens: 30, outputCostPerMTokens: 120 },
+					{ ...baseRule, reseller: 'bailian', region: 'beijing', inputCostPerMTokens: 25, outputCostPerMTokens: 100 },
+					{ ...baseRule, reseller: 'bailian', region: 'beijing', plan: 'token plan', currency: 'CNY', inputCostPerMTokens: 18, outputCostPerMTokens: 72 },
+				],
+				TEST_PROFILES,
+			);
+			expect(out['aliyun-bailian-beijing-token-plan/glm-5.2']?.input_cost_per_token).toBeCloseTo(1.8e-5);
+			expect(out['bailian-aliyun-beijing/glm-5.2']?.input_cost_per_token).toBeCloseTo(2.5e-5);
+			expect(out['bailian-aliyun-singapore/glm-5.2']?.input_cost_per_token).toBeCloseTo(3e-5);
+		});
+
+		it('throws on same-specificity tie for the same providerId/model', () => {
+			expect(() => expandArrayRules(
+				[
+					{ ...baseRule, reseller: 'bailian', inputCostPerMTokens: 30, outputCostPerMTokens: 120 },
+					{ ...baseRule, reseller: 'Aliyun', inputCostPerMTokens: 28, outputCostPerMTokens: 110 },
+				],
+				TEST_PROFILES,
+			)).toThrow(/Ambiguous pricing rules/);
+		});
+
+		it('warns and skips when reseller matches no profile', () => {
+			const out = expandArrayRules(
+				[{ ...baseRule, reseller: 'NoSuchReseller', inputCostPerMTokens: 1, outputCostPerMTokens: 1 }],
+				TEST_PROFILES,
+			);
+			expect(out).toEqual({});
+		});
+
+		it('treats glm-5.2 and Zhipu/GLM-5.2 as distinct keys', () => {
+			const out = expandArrayRules(
+				[{ ...baseRule, reseller: 'bailian', model: 'glm-5.2', inputCostPerMTokens: 30, outputCostPerMTokens: 120 }],
+				TEST_PROFILES,
+			);
+			expect(Object.keys(out)).toContain('bailian-aliyun-singapore/glm-5.2');
+			expect(Object.keys(out)).not.toContain('bailian-aliyun-singapore/Zhipu/GLM-5.2');
+		});
+
+		it('does not throw when a lower-score tie is superseded by a higher-score rule', () => {
+			// Two score-0 defaults (bailian + Aliyun both fuzzy-match all bailian profiles)
+			// + score-1 region exceptions. Every key has a clear score-1 winner.
+			expect(() => expandArrayRules(
+				[
+					{ ...baseRule, reseller: 'bailian', inputCostPerMTokens: 30, outputCostPerMTokens: 120 },
+					{ ...baseRule, reseller: 'Aliyun', inputCostPerMTokens: 28, outputCostPerMTokens: 110 },
+					{ ...baseRule, reseller: 'bailian', region: 'singapore', inputCostPerMTokens: 4, outputCostPerMTokens: 15 },
+					{ ...baseRule, reseller: 'bailian', region: 'beijing', inputCostPerMTokens: 25, outputCostPerMTokens: 100 },
+				],
+				TEST_PROFILES,
+			)).not.toThrow();
+		});
+
+		it('resolution is order-independent (score-1 first then score-0 tie)', () => {
+			// Same rules as above but reordered — score-1 exceptions first.
+			const out = expandArrayRules(
+				[
+					{ ...baseRule, reseller: 'bailian', region: 'singapore', inputCostPerMTokens: 4, outputCostPerMTokens: 15 },
+					{ ...baseRule, reseller: 'bailian', region: 'beijing', inputCostPerMTokens: 25, outputCostPerMTokens: 100 },
+					{ ...baseRule, reseller: 'bailian', inputCostPerMTokens: 30, outputCostPerMTokens: 120 },
+					{ ...baseRule, reseller: 'Aliyun', inputCostPerMTokens: 28, outputCostPerMTokens: 110 },
+				],
+				TEST_PROFILES,
+			);
+			// singapore → score-1 winner (4), beijing profiles → score-1 winner (25).
+			expect(out['bailian-aliyun-singapore/glm-5.2']?.input_cost_per_token).toBeCloseTo(4e-6);
+			expect(out['bailian-aliyun-beijing/glm-5.2']?.input_cost_per_token).toBeCloseTo(2.5e-5);
+			expect(out['aliyun-bailian-beijing-token-plan/glm-5.2']?.input_cost_per_token).toBeCloseTo(2.5e-5);
 		});
 	});
 
