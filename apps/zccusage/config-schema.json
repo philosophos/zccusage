@@ -1,7 +1,7 @@
 {
-	"$ref": "#/definitions/better-ccusage-config",
+	"$ref": "#/definitions/zccusage-config",
 	"definitions": {
-		"better-ccusage-config": {
+		"zccusage-config": {
 			"type": "object",
 			"properties": {
 				"$schema": {
@@ -33,10 +33,11 @@
 							"enum": [
 								"table",
 								"json",
-								"tree"
+								"tree",
+								"tree-table"
 							],
-							"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-							"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+							"description": "Output format: table, json, tree, or tree-table. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+							"markdownDescription": "Output format: table, json, tree, or tree-table. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
 							"default": "table"
 						},
 						"tree": {
@@ -45,10 +46,27 @@
 							"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
 							"default": false
 						},
+						"group": {
+							"type": "string",
+							"description": "Group/bucket selector, comma-separated. A time-bucket (daily|weekly|monthly|session) selects the data loader and occupies the time nesting slot at its position; the rest are nesting dims: project,provider,agent,reseller,region,plan,model. Omitting a bucket loads all records with no time aggregation. Default: daily (→ time,model). Example: --group agent,reseller,region,plan,model,weekly",
+							"markdownDescription": "Group/bucket selector, comma-separated. A time-bucket (daily|weekly|monthly|session) selects the data loader and occupies the time nesting slot at its position; the rest are nesting dims: project,provider,agent,reseller,region,plan,model. Omitting a bucket loads all records with no time aggregation. Default: daily (→ time,model). Example: --group agent,reseller,region,plan,model,weekly"
+						},
 						"treeGroup": {
 							"type": "string",
-							"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
-							"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
+							"description": "Alias for --group (deprecated).",
+							"markdownDescription": "Alias for --group (deprecated)."
+						},
+						"wrap": {
+							"type": "boolean",
+							"description": "Tree view: wrap each row after the `out` column onto a second line (cache_create / cache_read / billing / stats). Reduces horizontal width.",
+							"markdownDescription": "Tree view: wrap each row after the `out` column onto a second line (cache_create / cache_read / billing / stats). Reduces horizontal width.",
+							"default": false
+						},
+						"treeWrap": {
+							"type": "boolean",
+							"description": "Alias for --wrap (deprecated).",
+							"markdownDescription": "Alias for --wrap (deprecated).",
+							"default": false
 						},
 						"mode": {
 							"type": "string",
@@ -138,13 +156,13 @@
 						},
 						"paymentsPath": {
 							"type": "string",
-							"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
-							"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
+							"description": "Path to the per-transaction payment log (zccusage-payments.json).",
+							"markdownDescription": "Path to the per-transaction payment log (zccusage-payments.json)."
 						},
 						"pricingPath": {
 							"type": "string",
-							"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
-							"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
+							"description": "Path to the per-platform user pricing overrides (zccusage-pricing.json).",
+							"markdownDescription": "Path to the per-platform user pricing overrides (zccusage-pricing.json)."
 						},
 						"ccSwitchDbPath": {
 							"type": "string",
@@ -163,8 +181,8 @@
 						},
 						"dbPath": {
 							"type": "string",
-							"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
-							"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
+							"description": "Path to the DuckDB OLAP store (zccusage.duckdb). Default: ~/.cc-switch-tui/zccusage.duckdb.",
+							"markdownDescription": "Path to the DuckDB OLAP store (zccusage.duckdb). Default: ~/.cc-switch-tui/zccusage.duckdb."
 						},
 						"noDuckdb": {
 							"type": "boolean",
@@ -186,720 +204,6 @@
 				"commands": {
 					"type": "object",
 					"properties": {
-						"daily": {
-							"type": "object",
-							"properties": {
-								"since": {
-									"type": "string",
-									"description": "Filter from date (YYYYMMDD format)",
-									"markdownDescription": "Filter from date (YYYYMMDD format)"
-								},
-								"until": {
-									"type": "string",
-									"description": "Filter until date (YYYYMMDD format)",
-									"markdownDescription": "Filter until date (YYYYMMDD format)"
-								},
-								"json": {
-									"type": "boolean",
-									"description": "Output in JSON format (shorthand for --format json)",
-									"markdownDescription": "Output in JSON format (shorthand for --format json)",
-									"default": false
-								},
-								"format": {
-									"type": "string",
-									"enum": [
-										"table",
-										"json",
-										"tree"
-									],
-									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-									"default": "table"
-								},
-								"tree": {
-									"type": "boolean",
-									"description": "Output in hierarchical tree view (shorthand for --format tree)",
-									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
-									"default": false
-								},
-								"treeGroup": {
-									"type": "string",
-									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
-									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
-								},
-								"mode": {
-									"type": "string",
-									"enum": [
-										"auto",
-										"calculate",
-										"display"
-									],
-									"description": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
-									"markdownDescription": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
-									"default": "auto"
-								},
-								"debug": {
-									"type": "boolean",
-									"description": "Show pricing mismatch information for debugging",
-									"markdownDescription": "Show pricing mismatch information for debugging",
-									"default": false
-								},
-								"debugSamples": {
-									"type": "number",
-									"description": "Number of sample discrepancies to show in debug output (default: 5)",
-									"markdownDescription": "Number of sample discrepancies to show in debug output (default: 5)",
-									"default": 5
-								},
-								"order": {
-									"type": "string",
-									"enum": [
-										"desc",
-										"asc"
-									],
-									"description": "Sort order: desc (newest first) or asc (oldest first)",
-									"markdownDescription": "Sort order: desc (newest first) or asc (oldest first)",
-									"default": "asc"
-								},
-								"breakdown": {
-									"type": "boolean",
-									"description": "Show per-model cost breakdown",
-									"markdownDescription": "Show per-model cost breakdown",
-									"default": false
-								},
-								"color": {
-									"type": "boolean",
-									"description": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect.",
-									"markdownDescription": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect."
-								},
-								"noColor": {
-									"type": "boolean",
-									"description": "Disable colored output (default: auto). NO_COLOR=1 has the same effect.",
-									"markdownDescription": "Disable colored output (default: auto). NO_COLOR=1 has the same effect."
-								},
-								"timezone": {
-									"type": "string",
-									"description": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone",
-									"markdownDescription": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone"
-								},
-								"locale": {
-									"type": "string",
-									"description": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
-									"markdownDescription": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
-									"default": "en-CA"
-								},
-								"jq": {
-									"type": "string",
-									"description": "Process JSON output with jq command (requires jq binary, implies --json)",
-									"markdownDescription": "Process JSON output with jq command (requires jq binary, implies --json)"
-								},
-								"compact": {
-									"type": "boolean",
-									"description": "Force compact mode for narrow displays (better for screenshots)",
-									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
-									"default": false
-								},
-								"statsCurrency": {
-									"type": "string",
-									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
-									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
-								},
-								"paymentCurrency": {
-									"type": "string",
-									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
-									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
-								},
-								"costColumns": {
-									"type": "string",
-									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
-									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
-								},
-								"paymentsPath": {
-									"type": "string",
-									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
-									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
-								},
-								"pricingPath": {
-									"type": "string",
-									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
-									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
-								},
-								"ccSwitchDbPath": {
-									"type": "string",
-									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
-									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
-								},
-								"rate": {
-									"type": "string",
-									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
-									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
-								},
-								"provider": {
-									"type": "string",
-									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
-									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
-								},
-								"dbPath": {
-									"type": "string",
-									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
-									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
-								},
-								"noDuckdb": {
-									"type": "boolean",
-									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
-									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
-									"default": false
-								},
-								"rebuild": {
-									"type": "boolean",
-									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
-									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
-									"default": false
-								},
-								"instances": {
-									"type": "boolean",
-									"description": "Show usage breakdown by project/instance",
-									"markdownDescription": "Show usage breakdown by project/instance",
-									"default": false
-								},
-								"project": {
-									"type": "string",
-									"description": "Filter to specific project name",
-									"markdownDescription": "Filter to specific project name"
-								},
-								"projectAliases": {
-									"type": "string",
-									"description": "Comma-separated project aliases (e.g., 'better-ccusage=Usage Tracker,myproject=My Project')",
-									"markdownDescription": "Comma-separated project aliases (e.g., 'better-ccusage=Usage Tracker,myproject=My Project')"
-								}
-							},
-							"additionalProperties": false
-						},
-						"monthly": {
-							"type": "object",
-							"properties": {
-								"since": {
-									"type": "string",
-									"description": "Filter from date (YYYYMMDD format)",
-									"markdownDescription": "Filter from date (YYYYMMDD format)"
-								},
-								"until": {
-									"type": "string",
-									"description": "Filter until date (YYYYMMDD format)",
-									"markdownDescription": "Filter until date (YYYYMMDD format)"
-								},
-								"json": {
-									"type": "boolean",
-									"description": "Output in JSON format (shorthand for --format json)",
-									"markdownDescription": "Output in JSON format (shorthand for --format json)",
-									"default": false
-								},
-								"format": {
-									"type": "string",
-									"enum": [
-										"table",
-										"json",
-										"tree"
-									],
-									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-									"default": "table"
-								},
-								"tree": {
-									"type": "boolean",
-									"description": "Output in hierarchical tree view (shorthand for --format tree)",
-									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
-									"default": false
-								},
-								"treeGroup": {
-									"type": "string",
-									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
-									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
-								},
-								"mode": {
-									"type": "string",
-									"enum": [
-										"auto",
-										"calculate",
-										"display"
-									],
-									"description": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
-									"markdownDescription": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
-									"default": "auto"
-								},
-								"debug": {
-									"type": "boolean",
-									"description": "Show pricing mismatch information for debugging",
-									"markdownDescription": "Show pricing mismatch information for debugging",
-									"default": false
-								},
-								"debugSamples": {
-									"type": "number",
-									"description": "Number of sample discrepancies to show in debug output (default: 5)",
-									"markdownDescription": "Number of sample discrepancies to show in debug output (default: 5)",
-									"default": 5
-								},
-								"order": {
-									"type": "string",
-									"enum": [
-										"desc",
-										"asc"
-									],
-									"description": "Sort order: desc (newest first) or asc (oldest first)",
-									"markdownDescription": "Sort order: desc (newest first) or asc (oldest first)",
-									"default": "asc"
-								},
-								"breakdown": {
-									"type": "boolean",
-									"description": "Show per-model cost breakdown",
-									"markdownDescription": "Show per-model cost breakdown",
-									"default": false
-								},
-								"color": {
-									"type": "boolean",
-									"description": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect.",
-									"markdownDescription": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect."
-								},
-								"noColor": {
-									"type": "boolean",
-									"description": "Disable colored output (default: auto). NO_COLOR=1 has the same effect.",
-									"markdownDescription": "Disable colored output (default: auto). NO_COLOR=1 has the same effect."
-								},
-								"timezone": {
-									"type": "string",
-									"description": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone",
-									"markdownDescription": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone"
-								},
-								"locale": {
-									"type": "string",
-									"description": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
-									"markdownDescription": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
-									"default": "en-CA"
-								},
-								"jq": {
-									"type": "string",
-									"description": "Process JSON output with jq command (requires jq binary, implies --json)",
-									"markdownDescription": "Process JSON output with jq command (requires jq binary, implies --json)"
-								},
-								"compact": {
-									"type": "boolean",
-									"description": "Force compact mode for narrow displays (better for screenshots)",
-									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
-									"default": false
-								},
-								"statsCurrency": {
-									"type": "string",
-									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
-									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
-								},
-								"paymentCurrency": {
-									"type": "string",
-									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
-									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
-								},
-								"costColumns": {
-									"type": "string",
-									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
-									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
-								},
-								"paymentsPath": {
-									"type": "string",
-									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
-									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
-								},
-								"pricingPath": {
-									"type": "string",
-									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
-									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
-								},
-								"ccSwitchDbPath": {
-									"type": "string",
-									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
-									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
-								},
-								"rate": {
-									"type": "string",
-									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
-									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
-								},
-								"provider": {
-									"type": "string",
-									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
-									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
-								},
-								"dbPath": {
-									"type": "string",
-									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
-									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
-								},
-								"noDuckdb": {
-									"type": "boolean",
-									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
-									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
-									"default": false
-								},
-								"rebuild": {
-									"type": "boolean",
-									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
-									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
-									"default": false
-								}
-							},
-							"additionalProperties": false
-						},
-						"weekly": {
-							"type": "object",
-							"properties": {
-								"since": {
-									"type": "string",
-									"description": "Filter from date (YYYYMMDD format)",
-									"markdownDescription": "Filter from date (YYYYMMDD format)"
-								},
-								"until": {
-									"type": "string",
-									"description": "Filter until date (YYYYMMDD format)",
-									"markdownDescription": "Filter until date (YYYYMMDD format)"
-								},
-								"json": {
-									"type": "boolean",
-									"description": "Output in JSON format (shorthand for --format json)",
-									"markdownDescription": "Output in JSON format (shorthand for --format json)",
-									"default": false
-								},
-								"format": {
-									"type": "string",
-									"enum": [
-										"table",
-										"json",
-										"tree"
-									],
-									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-									"default": "table"
-								},
-								"tree": {
-									"type": "boolean",
-									"description": "Output in hierarchical tree view (shorthand for --format tree)",
-									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
-									"default": false
-								},
-								"treeGroup": {
-									"type": "string",
-									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
-									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
-								},
-								"mode": {
-									"type": "string",
-									"enum": [
-										"auto",
-										"calculate",
-										"display"
-									],
-									"description": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
-									"markdownDescription": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
-									"default": "auto"
-								},
-								"debug": {
-									"type": "boolean",
-									"description": "Show pricing mismatch information for debugging",
-									"markdownDescription": "Show pricing mismatch information for debugging",
-									"default": false
-								},
-								"debugSamples": {
-									"type": "number",
-									"description": "Number of sample discrepancies to show in debug output (default: 5)",
-									"markdownDescription": "Number of sample discrepancies to show in debug output (default: 5)",
-									"default": 5
-								},
-								"order": {
-									"type": "string",
-									"enum": [
-										"desc",
-										"asc"
-									],
-									"description": "Sort order: desc (newest first) or asc (oldest first)",
-									"markdownDescription": "Sort order: desc (newest first) or asc (oldest first)",
-									"default": "asc"
-								},
-								"breakdown": {
-									"type": "boolean",
-									"description": "Show per-model cost breakdown",
-									"markdownDescription": "Show per-model cost breakdown",
-									"default": false
-								},
-								"color": {
-									"type": "boolean",
-									"description": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect.",
-									"markdownDescription": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect."
-								},
-								"noColor": {
-									"type": "boolean",
-									"description": "Disable colored output (default: auto). NO_COLOR=1 has the same effect.",
-									"markdownDescription": "Disable colored output (default: auto). NO_COLOR=1 has the same effect."
-								},
-								"timezone": {
-									"type": "string",
-									"description": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone",
-									"markdownDescription": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone"
-								},
-								"locale": {
-									"type": "string",
-									"description": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
-									"markdownDescription": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
-									"default": "en-CA"
-								},
-								"jq": {
-									"type": "string",
-									"description": "Process JSON output with jq command (requires jq binary, implies --json)",
-									"markdownDescription": "Process JSON output with jq command (requires jq binary, implies --json)"
-								},
-								"compact": {
-									"type": "boolean",
-									"description": "Force compact mode for narrow displays (better for screenshots)",
-									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
-									"default": false
-								},
-								"statsCurrency": {
-									"type": "string",
-									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
-									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
-								},
-								"paymentCurrency": {
-									"type": "string",
-									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
-									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
-								},
-								"costColumns": {
-									"type": "string",
-									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
-									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
-								},
-								"paymentsPath": {
-									"type": "string",
-									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
-									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
-								},
-								"pricingPath": {
-									"type": "string",
-									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
-									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
-								},
-								"ccSwitchDbPath": {
-									"type": "string",
-									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
-									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
-								},
-								"rate": {
-									"type": "string",
-									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
-									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
-								},
-								"provider": {
-									"type": "string",
-									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
-									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
-								},
-								"dbPath": {
-									"type": "string",
-									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
-									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
-								},
-								"noDuckdb": {
-									"type": "boolean",
-									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
-									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
-									"default": false
-								},
-								"rebuild": {
-									"type": "boolean",
-									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
-									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
-									"default": false
-								},
-								"startOfWeek": {
-									"type": "string",
-									"enum": [
-										"sunday",
-										"monday",
-										"tuesday",
-										"wednesday",
-										"thursday",
-										"friday",
-										"saturday"
-									],
-									"description": "Day to start the week on",
-									"markdownDescription": "Day to start the week on",
-									"default": "sunday"
-								}
-							},
-							"additionalProperties": false
-						},
-						"session": {
-							"type": "object",
-							"properties": {
-								"since": {
-									"type": "string",
-									"description": "Filter from date (YYYYMMDD format)",
-									"markdownDescription": "Filter from date (YYYYMMDD format)"
-								},
-								"until": {
-									"type": "string",
-									"description": "Filter until date (YYYYMMDD format)",
-									"markdownDescription": "Filter until date (YYYYMMDD format)"
-								},
-								"json": {
-									"type": "boolean",
-									"description": "Output in JSON format (shorthand for --format json)",
-									"markdownDescription": "Output in JSON format (shorthand for --format json)",
-									"default": false
-								},
-								"format": {
-									"type": "string",
-									"enum": [
-										"table",
-										"json",
-										"tree"
-									],
-									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-									"default": "table"
-								},
-								"tree": {
-									"type": "boolean",
-									"description": "Output in hierarchical tree view (shorthand for --format tree)",
-									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
-									"default": false
-								},
-								"treeGroup": {
-									"type": "string",
-									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
-									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
-								},
-								"mode": {
-									"type": "string",
-									"enum": [
-										"auto",
-										"calculate",
-										"display"
-									],
-									"description": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
-									"markdownDescription": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
-									"default": "auto"
-								},
-								"debug": {
-									"type": "boolean",
-									"description": "Show pricing mismatch information for debugging",
-									"markdownDescription": "Show pricing mismatch information for debugging",
-									"default": false
-								},
-								"debugSamples": {
-									"type": "number",
-									"description": "Number of sample discrepancies to show in debug output (default: 5)",
-									"markdownDescription": "Number of sample discrepancies to show in debug output (default: 5)",
-									"default": 5
-								},
-								"breakdown": {
-									"type": "boolean",
-									"description": "Show per-model cost breakdown",
-									"markdownDescription": "Show per-model cost breakdown",
-									"default": false
-								},
-								"color": {
-									"type": "boolean",
-									"description": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect.",
-									"markdownDescription": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect."
-								},
-								"noColor": {
-									"type": "boolean",
-									"description": "Disable colored output (default: auto). NO_COLOR=1 has the same effect.",
-									"markdownDescription": "Disable colored output (default: auto). NO_COLOR=1 has the same effect."
-								},
-								"timezone": {
-									"type": "string",
-									"description": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone",
-									"markdownDescription": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone"
-								},
-								"locale": {
-									"type": "string",
-									"description": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
-									"markdownDescription": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
-									"default": "en-CA"
-								},
-								"jq": {
-									"type": "string",
-									"description": "Process JSON output with jq command (requires jq binary, implies --json)",
-									"markdownDescription": "Process JSON output with jq command (requires jq binary, implies --json)"
-								},
-								"compact": {
-									"type": "boolean",
-									"description": "Force compact mode for narrow displays (better for screenshots)",
-									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
-									"default": false
-								},
-								"statsCurrency": {
-									"type": "string",
-									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
-									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
-								},
-								"paymentCurrency": {
-									"type": "string",
-									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
-									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
-								},
-								"costColumns": {
-									"type": "string",
-									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
-									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
-								},
-								"paymentsPath": {
-									"type": "string",
-									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
-									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
-								},
-								"pricingPath": {
-									"type": "string",
-									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
-									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
-								},
-								"ccSwitchDbPath": {
-									"type": "string",
-									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
-									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
-								},
-								"rate": {
-									"type": "string",
-									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
-									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
-								},
-								"provider": {
-									"type": "string",
-									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
-									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
-								},
-								"dbPath": {
-									"type": "string",
-									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
-									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
-								},
-								"noDuckdb": {
-									"type": "boolean",
-									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
-									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
-									"default": false
-								},
-								"rebuild": {
-									"type": "boolean",
-									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
-									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
-									"default": false
-								},
-								"id": {
-									"type": "string",
-									"description": "Load usage data for a specific session ID",
-									"markdownDescription": "Load usage data for a specific session ID"
-								}
-							},
-							"additionalProperties": false
-						},
 						"blocks": {
 							"type": "object",
 							"properties": {
@@ -924,10 +228,11 @@
 									"enum": [
 										"table",
 										"json",
-										"tree"
+										"tree",
+										"tree-table"
 									],
-									"description": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
-									"markdownDescription": "Output format: table, json, or tree. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"description": "Output format: table, json, tree, or tree-table. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"markdownDescription": "Output format: table, json, tree, or tree-table. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
 									"default": "table"
 								},
 								"tree": {
@@ -936,10 +241,27 @@
 									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
 									"default": false
 								},
+								"group": {
+									"type": "string",
+									"description": "Group/bucket selector, comma-separated. A time-bucket (daily|weekly|monthly|session) selects the data loader and occupies the time nesting slot at its position; the rest are nesting dims: project,provider,agent,reseller,region,plan,model. Omitting a bucket loads all records with no time aggregation. Default: daily (→ time,model). Example: --group agent,reseller,region,plan,model,weekly",
+									"markdownDescription": "Group/bucket selector, comma-separated. A time-bucket (daily|weekly|monthly|session) selects the data loader and occupies the time nesting slot at its position; the rest are nesting dims: project,provider,agent,reseller,region,plan,model. Omitting a bucket loads all records with no time aggregation. Default: daily (→ time,model). Example: --group agent,reseller,region,plan,model,weekly"
+								},
 								"treeGroup": {
 									"type": "string",
-									"description": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances).",
-									"markdownDescription": "Tree nesting dimensions, comma-separated: time,project,provider,model. Default: time,model (time,project,model when --instances)."
+									"description": "Alias for --group (deprecated).",
+									"markdownDescription": "Alias for --group (deprecated)."
+								},
+								"wrap": {
+									"type": "boolean",
+									"description": "Tree view: wrap each row after the `out` column onto a second line (cache_create / cache_read / billing / stats). Reduces horizontal width.",
+									"markdownDescription": "Tree view: wrap each row after the `out` column onto a second line (cache_create / cache_read / billing / stats). Reduces horizontal width.",
+									"default": false
+								},
+								"treeWrap": {
+									"type": "boolean",
+									"description": "Alias for --wrap (deprecated).",
+									"markdownDescription": "Alias for --wrap (deprecated).",
+									"default": false
 								},
 								"mode": {
 									"type": "string",
@@ -1029,13 +351,13 @@
 								},
 								"paymentsPath": {
 									"type": "string",
-									"description": "Path to the per-transaction payment log (better-ccusage-payments.json).",
-									"markdownDescription": "Path to the per-transaction payment log (better-ccusage-payments.json)."
+									"description": "Path to the per-transaction payment log (zccusage-payments.json).",
+									"markdownDescription": "Path to the per-transaction payment log (zccusage-payments.json)."
 								},
 								"pricingPath": {
 									"type": "string",
-									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
-									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
+									"description": "Path to the per-platform user pricing overrides (zccusage-pricing.json).",
+									"markdownDescription": "Path to the per-platform user pricing overrides (zccusage-pricing.json)."
 								},
 								"ccSwitchDbPath": {
 									"type": "string",
@@ -1054,8 +376,8 @@
 								},
 								"dbPath": {
 									"type": "string",
-									"description": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.",
-									"markdownDescription": "Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb."
+									"description": "Path to the DuckDB OLAP store (zccusage.duckdb). Default: ~/.cc-switch-tui/zccusage.duckdb.",
+									"markdownDescription": "Path to the DuckDB OLAP store (zccusage.duckdb). Default: ~/.cc-switch-tui/zccusage.duckdb."
 								},
 								"noDuckdb": {
 									"type": "boolean",
@@ -1160,8 +482,204 @@
 								},
 								"pricingPath": {
 									"type": "string",
-									"description": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json).",
-									"markdownDescription": "Path to the per-platform user pricing overrides (better-ccusage-pricing.json)."
+									"description": "Path to the per-platform user pricing overrides (zccusage-pricing.json).",
+									"markdownDescription": "Path to the per-platform user pricing overrides (zccusage-pricing.json)."
+								}
+							},
+							"additionalProperties": false
+						},
+						"watch": {
+							"type": "object",
+							"properties": {
+								"since": {
+									"type": "string",
+									"description": "Filter from date (YYYYMMDD format)",
+									"markdownDescription": "Filter from date (YYYYMMDD format)"
+								},
+								"until": {
+									"type": "string",
+									"description": "Filter until date (YYYYMMDD format)",
+									"markdownDescription": "Filter until date (YYYYMMDD format)"
+								},
+								"json": {
+									"type": "boolean",
+									"description": "Output in JSON format (shorthand for --format json)",
+									"markdownDescription": "Output in JSON format (shorthand for --format json)",
+									"default": false
+								},
+								"format": {
+									"type": "string",
+									"enum": [
+										"table",
+										"json",
+										"tree",
+										"tree-table"
+									],
+									"description": "Output format: table, json, tree, or tree-table. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"markdownDescription": "Output format: table, json, tree, or tree-table. Shorthands --json (=-f json) and --tree (=-f tree) override the default when --format is unset.",
+									"default": "table"
+								},
+								"tree": {
+									"type": "boolean",
+									"description": "Output in hierarchical tree view (shorthand for --format tree)",
+									"markdownDescription": "Output in hierarchical tree view (shorthand for --format tree)",
+									"default": false
+								},
+								"group": {
+									"type": "string",
+									"description": "Group/bucket selector, comma-separated. A time-bucket (daily|weekly|monthly|session) selects the data loader and occupies the time nesting slot at its position; the rest are nesting dims: project,provider,agent,reseller,region,plan,model. Omitting a bucket loads all records with no time aggregation. Default: daily (→ time,model). Example: --group agent,reseller,region,plan,model,weekly",
+									"markdownDescription": "Group/bucket selector, comma-separated. A time-bucket (daily|weekly|monthly|session) selects the data loader and occupies the time nesting slot at its position; the rest are nesting dims: project,provider,agent,reseller,region,plan,model. Omitting a bucket loads all records with no time aggregation. Default: daily (→ time,model). Example: --group agent,reseller,region,plan,model,weekly"
+								},
+								"treeGroup": {
+									"type": "string",
+									"description": "Alias for --group (deprecated).",
+									"markdownDescription": "Alias for --group (deprecated)."
+								},
+								"wrap": {
+									"type": "boolean",
+									"description": "Tree view: wrap each row after the `out` column onto a second line (cache_create / cache_read / billing / stats). Reduces horizontal width.",
+									"markdownDescription": "Tree view: wrap each row after the `out` column onto a second line (cache_create / cache_read / billing / stats). Reduces horizontal width.",
+									"default": false
+								},
+								"treeWrap": {
+									"type": "boolean",
+									"description": "Alias for --wrap (deprecated).",
+									"markdownDescription": "Alias for --wrap (deprecated).",
+									"default": false
+								},
+								"mode": {
+									"type": "string",
+									"enum": [
+										"auto",
+										"calculate",
+										"display"
+									],
+									"description": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
+									"markdownDescription": "Cost calculation mode: auto (use costUSD if exists, otherwise calculate), calculate (always calculate), display (always use costUSD)",
+									"default": "auto"
+								},
+								"debug": {
+									"type": "boolean",
+									"description": "Show pricing mismatch information for debugging",
+									"markdownDescription": "Show pricing mismatch information for debugging",
+									"default": false
+								},
+								"debugSamples": {
+									"type": "number",
+									"description": "Number of sample discrepancies to show in debug output (default: 5)",
+									"markdownDescription": "Number of sample discrepancies to show in debug output (default: 5)",
+									"default": 5
+								},
+								"order": {
+									"type": "string",
+									"enum": [
+										"desc",
+										"asc"
+									],
+									"description": "Sort order: desc (newest first) or asc (oldest first)",
+									"markdownDescription": "Sort order: desc (newest first) or asc (oldest first)",
+									"default": "asc"
+								},
+								"breakdown": {
+									"type": "boolean",
+									"description": "Show per-model cost breakdown",
+									"markdownDescription": "Show per-model cost breakdown",
+									"default": false
+								},
+								"color": {
+									"type": "boolean",
+									"description": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect.",
+									"markdownDescription": "Enable colored output (default: auto). FORCE_COLOR=1 has the same effect."
+								},
+								"noColor": {
+									"type": "boolean",
+									"description": "Disable colored output (default: auto). NO_COLOR=1 has the same effect.",
+									"markdownDescription": "Disable colored output (default: auto). NO_COLOR=1 has the same effect."
+								},
+								"timezone": {
+									"type": "string",
+									"description": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone",
+									"markdownDescription": "Timezone for date grouping (e.g., UTC, America/New_York, Asia/Tokyo). Default: system timezone"
+								},
+								"locale": {
+									"type": "string",
+									"description": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
+									"markdownDescription": "Locale for date/time formatting (e.g., en-US, ja-JP, de-DE)",
+									"default": "en-CA"
+								},
+								"jq": {
+									"type": "string",
+									"description": "Process JSON output with jq command (requires jq binary, implies --json)",
+									"markdownDescription": "Process JSON output with jq command (requires jq binary, implies --json)"
+								},
+								"compact": {
+									"type": "boolean",
+									"description": "Force compact mode for narrow displays (better for screenshots)",
+									"markdownDescription": "Force compact mode for narrow displays (better for screenshots)",
+									"default": false
+								},
+								"statsCurrency": {
+									"type": "string",
+									"description": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Statistics currency (ISO 4217) to project usage costs into, e.g. \"CNY\". Default: USD."
+								},
+								"paymentCurrency": {
+									"type": "string",
+									"description": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD.",
+									"markdownDescription": "Payment currency (ISO 4217) for the payable column, e.g. \"CNY\". Default: USD."
+								},
+								"costColumns": {
+									"type": "string",
+									"description": "Comma-separated cost columns to show: billing,payable,stats. Default: billing.",
+									"markdownDescription": "Comma-separated cost columns to show: billing,payable,stats. Default: billing."
+								},
+								"paymentsPath": {
+									"type": "string",
+									"description": "Path to the per-transaction payment log (zccusage-payments.json).",
+									"markdownDescription": "Path to the per-transaction payment log (zccusage-payments.json)."
+								},
+								"pricingPath": {
+									"type": "string",
+									"description": "Path to the per-platform user pricing overrides (zccusage-pricing.json).",
+									"markdownDescription": "Path to the per-platform user pricing overrides (zccusage-pricing.json)."
+								},
+								"ccSwitchDbPath": {
+									"type": "string",
+									"description": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery.",
+									"markdownDescription": "Path to the cc-switch SQLite DB (provider profiles). Default: auto-discovery."
+								},
+								"rate": {
+									"type": "string",
+									"description": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\".",
+									"markdownDescription": "Exchange rate override as \"FROM/TO=rate\" (comma-separated for multiple), e.g. \"USD/CNY=7.0\"."
+								},
+								"provider": {
+									"type": "string",
+									"description": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\").",
+									"markdownDescription": "Filter/report only the given provider id (e.g. \"bailian-aliyun-singapore\")."
+								},
+								"dbPath": {
+									"type": "string",
+									"description": "Path to the DuckDB OLAP store (zccusage.duckdb). Default: ~/.cc-switch-tui/zccusage.duckdb.",
+									"markdownDescription": "Path to the DuckDB OLAP store (zccusage.duckdb). Default: ~/.cc-switch-tui/zccusage.duckdb."
+								},
+								"noDuckdb": {
+									"type": "boolean",
+									"description": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"markdownDescription": "Bypass the DuckDB store and use the legacy glob+parse path (fallback / verification).",
+									"default": false
+								},
+								"rebuild": {
+									"type": "boolean",
+									"description": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"markdownDescription": "Force a full re-ingest of the DuckDB store (drops and re-imports all rows).",
+									"default": false
+								},
+								"daemon": {
+									"type": "boolean",
+									"description": "Run as background daemon (not yet implemented; foreground only).",
+									"markdownDescription": "Run as background daemon (not yet implemented; foreground only).",
+									"default": false
 								}
 							},
 							"additionalProperties": false
@@ -1176,11 +694,11 @@
 		}
 	},
 	"$schema": "https://json-schema.org/draft-07/schema#",
-	"title": "better-ccusage Configuration",
-	"description": "Configuration file for better-ccusage - Claude Code/Droid Usage analysis tool",
+	"title": "zccusage Configuration",
+	"description": "Configuration file for zccusage - Claude Code/Droid Usage analysis tool",
 	"examples": [
 		{
-			"$schema": "https://better-ccusage.com/config-schema.json",
+			"$schema": "https://zccusage.com/config-schema.json",
 			"defaults": {
 				"json": false,
 				"mode": "auto",

@@ -6,7 +6,7 @@
 		"statsCurrency": "CNY",
 		"costColumns": "billing,stats",
 		"rate": "USD/CNY=7.2",
-		"dbPath": "~/.cc-switch-tui/better-ccusage.duckdb",
+		"dbPath": "~/.cc-switch-tui/zccusage.duckdb",
 		"noDuckdb": false,
 		"rebuild": false
 	},

@@ -4,7 +4,7 @@
  * @fileoverview Generate JSON Schema from args-tokens configuration schema
  *
  * This script generates a JSON Schema file from the args-tokens configuration schema
- * for better-ccusage configuration files. The generated schema enables:
+ * for zccusage configuration files. The generated schema enables:
  * - IDE autocomplete and validation
  * - Documentation of available options
  * - Schema validation for configuration files
@@ -157,9 +157,9 @@ function createConfigSchemaJson() {
 
 	// Main configuration schema
 	return {
-		$ref: '#/definitions/better-ccusage-config',
+		$ref: '#/definitions/zccusage-config',
 		definitions: {
-			'better-ccusage-config': {
+			'zccusage-config': {
 				type: 'object',
 				properties: {
 					$schema: {
@@ -178,11 +178,11 @@ function createConfigSchemaJson() {
 			},
 		},
 		$schema: 'https://json-schema.org/draft-07/schema#',
-		title: 'better-ccusage Configuration',
-		description: 'Configuration file for better-ccusage - Claude Code/Droid Usage analysis tool',
+		title: 'zccusage Configuration',
+		description: 'Configuration file for zccusage - Claude Code/Droid Usage analysis tool',
 		examples: [
 			{
-				$schema: 'https://better-ccusage.com/config-schema.json',
+				$schema: 'https://zccusage.com/config-schema.json',
 				defaults: {
 					json: false,
 					mode: 'auto',
@@ -330,15 +330,15 @@ if (import.meta.vitest != null) {
 			const jsonSchema = createConfigSchemaJson();
 
 			expect(jsonSchema).toBeDefined();
-			expect(jsonSchema.$ref).toBe('#/definitions/better-ccusage-config');
+			expect(jsonSchema.$ref).toBe('#/definitions/zccusage-config');
 			expect(jsonSchema.definitions).toBeDefined();
-			expect(jsonSchema.definitions['better-ccusage-config']).toBeDefined();
-			expect(jsonSchema.definitions['better-ccusage-config'].type).toBe('object');
+			expect(jsonSchema.definitions['zccusage-config']).toBeDefined();
+			expect(jsonSchema.definitions['zccusage-config'].type).toBe('object');
 		});
 
 		it('should include all expected properties', () => {
 			const jsonSchema = createConfigSchemaJson();
-			const mainSchema = jsonSchema.definitions['better-ccusage-config'];
+			const mainSchema = jsonSchema.definitions['zccusage-config'];
 
 			expect(mainSchema.properties).toHaveProperty('$schema');
 			expect(mainSchema.properties).toHaveProperty('defaults');
@@ -347,7 +347,7 @@ if (import.meta.vitest != null) {
 
 		it('should include all command schemas', () => {
 			const jsonSchema = createConfigSchemaJson();
-			const commandsSchema = jsonSchema.definitions['better-ccusage-config'].properties.commands;
+			const commandsSchema = jsonSchema.definitions['zccusage-config'].properties.commands;
 
 			expect(commandsSchema.properties).toHaveProperty('daily');
 			expect(commandsSchema.properties).toHaveProperty('monthly');

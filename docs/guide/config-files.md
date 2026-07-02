@@ -285,7 +285,7 @@ This is useful for:
 
 ## Configuration Example
 
-For a complete configuration example, see [`/better-ccusage.example.json`](/better-ccusage.example.json) in the repository root, which demonstrates:
+For a complete configuration example, see [`/zccusage.example.json`](/zccusage.example.json) in the repository root, which demonstrates:
 
 - Global defaults configuration
 - Command-specific overrides
