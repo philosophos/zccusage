@@ -205,9 +205,10 @@ function toModelPricingFromPerM(entry: UserPricingArrayEntry): ModelPricing {
 - Change `loadUserPricing(pricingPath?, profiles?)` — accept profiles, branch on format type.
 - Change `mergedOfflineLoader` — `await loadProviderProfiles({})` and pass to `loadUserPricing`.
 - Keep `toModelPricing` (old format) unchanged; add `toModelPricingFromPerM` (new format).
+- Change `getModelPricingForProvider` — replace `Result.unwrap(this.fetchModelPricing(), new Map())` (which silently swallowed loader errors) with an explicit `isFailure` check that `logger.error`s the underlying cause (unwrapped from the base fetcher's "Failed to load pricing data" wrapper via `error.cause`) before falling back to static pricing. This surfaces ambiguity/config errors to the user instead of silently producing USD numbers.
 
 **No changes** to:
-- `getModelPricingForProvider`, `CcusagePricingFetcher` constructor, `calculateProviderAwareCost`, `calculateCostForEntry`, all command files.
+- `CcusagePricingFetcher` constructor, `calculateProviderAwareCost`, `calculateCostForEntry`, all command files.
 
 ### 8. Tests (`if (import.meta.vitest != null)` block in `_pricing-fetcher.ts`)
 

@@ -399,10 +399,24 @@ export class CcusagePricingFetcher extends PricingFetcher {
 	 */
 	async getModelPricingForProvider(providerId: string | undefined, modelName: string): Promise<Result.Result<ModelPricing | null, Error>> {
 		if (providerId != null && providerId !== '') {
-			const map = await Result.unwrap(this.fetchModelPricing(), new Map<string, ModelPricing>());
-			const qualified = map.get(`${providerId}/${modelName}`);
-			if (qualified != null) {
-				return Result.succeed(qualified);
+			const fetched = await this.fetchModelPricing();
+			// fetchModelPricing wraps mergedOfflineLoader, which throws when the
+			// user pricing file is ambiguous (same-specificity rules) or otherwise
+			// invalid. Surface that error before falling back to static pricing so
+			// the user sees the problem instead of silently getting USD numbers.
+			if (Result.isFailure(fetched)) {
+				// The base fetcher wraps loader errors as "Failed to load pricing data"
+				// with the original error on `.cause` — unwrap it so the user sees the
+				// real reason (e.g. an "Ambiguous pricing rules" throw from expandArrayRules).
+				const cause = (fetched.error as Error & { cause?: unknown }).cause;
+				const detail = cause instanceof Error ? cause.message : fetched.error.message;
+				logger.error(`Failed to load pricing overrides (falling back to bundled static pricing): ${detail}`);
+			}
+			else {
+				const qualified = fetched.value.get(`${providerId}/${modelName}`);
+				if (qualified != null) {
+					return Result.succeed(qualified);
+				}
 			}
 		}
 		return this.getModelPricing(modelName);
