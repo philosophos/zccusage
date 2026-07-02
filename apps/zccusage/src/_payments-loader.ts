@@ -10,7 +10,7 @@ import { logger } from './logger.ts';
 
 /**
  * Payment records loader — reads the per-transaction payment log
- * (`better-ccusage-payments.json`) from the same directories searched for the
+ * (`zccusage-payments.json`) from the same directories searched for the
  * Claude config, or from an explicit path.
  *
  * Payments are decoupled from usage entries (payment time ≠ usage time). Each
@@ -22,11 +22,11 @@ const paymentsFileSchema = v.array(paymentRecordSchema);
 
 /**
  * Build candidate payments file paths, mirroring the config search order:
- * 1. `./.better-ccusage/better-ccusage-payments.json`
- * 2. `<each claude config dir>/better-ccusage-payments.json`
+ * 1. `./.zccusage/zccusage-payments.json`
+ * 2. `<each claude config dir>/zccusage-payments.json`
  */
 function buildPaymentsSearchPaths(): string[] {
-	const dirs = [path.join(process.cwd(), '.better-ccusage')];
+	const dirs = [path.join(process.cwd(), '.zccusage')];
 	try {
 		dirs.push(...getClaudePaths());
 	}

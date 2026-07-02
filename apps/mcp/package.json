@@ -1,18 +1,17 @@
 {
   "name": "@better-ccusage/mcp",
   "version": "1.4.3",
-  "description": "MCP server implementation for better-ccusage data with multi-provider support",
-  "homepage": "https://github.com/cobra91/better-ccusage#readme",
+  "description": "MCP server implementation for zccusage data with multi-provider support",
+  "homepage": "https://github.com/philosophos/zccusage#readme",
   "bugs": {
-    "url": "https://github.com/cobra91/better-ccusage/issues"
+    "url": "https://github.com/philosophos/zccusage/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cobra91/better-ccusage.git"
+    "url": "git+https://github.com/philosophos/zccusage.git"
   },
-  "funding": "https://github.com/cobra91/better-ccusage?sponsor=1",
   "license": "MIT",
-  "author": "cobra91",
+  "author": "philosophos",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -22,7 +21,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "better-ccusage-mcp": "./src/index.ts"
+    "zccusage-mcp": "./src/index.ts"
   },
   "files": [
     "dist"
@@ -43,7 +42,6 @@
     "@modelcontextprotocol/sdk": "catalog:runtime",
     "@ryoppippi/eslint-config": "catalog:lint",
     "@typescript/native-preview": "catalog:types",
-    "better-ccusage": "workspace:*",
     "clean-pkg-json": "catalog:release",
     "eslint": "catalog:lint",
     "fs-fixture": "catalog:testing",
@@ -54,6 +52,7 @@
     "unplugin-macros": "catalog:build",
     "unplugin-unused": "catalog:build",
     "vitest": "catalog:testing",
+    "zccusage": "workspace:*",
     "zod": "catalog:runtime"
   },
   "engines": {
@@ -61,7 +60,7 @@
   },
   "publishConfig": {
     "bin": {
-      "better-ccusage-mcp": "./dist/index.js"
+      "zccusage-mcp": "./dist/index.js"
     },
     "exports": {
       ".": "./dist/index.js",

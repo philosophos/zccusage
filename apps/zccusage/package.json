@@ -1,18 +1,17 @@
 {
-	"name": "better-ccusage",
+	"name": "zccusage",
 	"version": "1.4.3",
 	"description": "Enhanced usage analysis tool for Claude Code with multi-provider support",
-	"homepage": "https://github.com/cobra91/better-ccusage#readme",
+	"homepage": "https://github.com/philosophos/zccusage#readme",
 	"bugs": {
-		"url": "https://github.com/cobra91/better-ccusage/issues"
+		"url": "https://github.com/philosophos/zccusage/issues"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/cobra91/better-ccusage.git"
+		"url": "git+https://github.com/philosophos/zccusage.git"
 	},
-	"funding": "https://github.com/cobra91/better-ccusage?sponsor=1",
 	"license": "MIT",
-	"author": "cobra91",
+	"author": "philosophos",
 	"type": "module",
 	"exports": {
 		".": "./src/index.ts",
@@ -27,7 +26,7 @@
 	"module": "./dist/index.js",
 	"types": "./dist/index.d.ts",
 	"bin": {
-		"better-ccusage": "./src/index.ts"
+		"zccusage": "./src/index.ts"
 	},
 	"files": [
 		"config-schema.json",
@@ -88,7 +87,7 @@
 	},
 	"publishConfig": {
 		"bin": {
-			"better-ccusage": "./dist/index.js"
+			"zccusage": "./dist/index.js"
 		},
 		"exports": {
 			".": "./dist/index.js",

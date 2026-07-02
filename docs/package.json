@@ -20,7 +20,6 @@
 		"@types/bun": "catalog:types",
 		"@types/react": "catalog:types",
 		"@typescript/native-preview": "catalog:types",
-		"better-ccusage": "workspace:^",
 		"eslint": "catalog:lint",
 		"eslint-plugin-format": "catalog:lint",
 		"tinyglobby": "catalog:runtime",
@@ -30,7 +29,8 @@
 		"vitepress": "catalog:docs",
 		"vitepress-plugin-group-icons": "catalog:docs",
 		"vitepress-plugin-llms": "catalog:docs",
-		"wrangler": "catalog:docs"
+		"wrangler": "catalog:docs",
+		"zccusage": "workspace:^"
 	},
 	"devEngines": {
 		"runtime": [

@@ -2,7 +2,7 @@
  * @fileoverview Droid data adapter for processing droid session data
  *
  * This module provides functions for parsing and transforming droid session data
- * to match the better-ccusage expected format. It handles provider-to-model mapping
+ * to match the zccusage expected format. It handles provider-to-model mapping
  * and token field transformations.
  *
  * @module droid-adapter
@@ -80,7 +80,7 @@ function mapProviderToModel(provider: string | undefined, apiProvider: string | 
 }
 
 /**
- * Parse droid session files and transform to better-ccusage format
+ * Parse droid session files and transform to zccusage format
  * @param sessionPath - Path to droid session directory
  * @param sessionId - Session ID (directory name)
  * @param _options - Load options for processing
@@ -189,7 +189,7 @@ export async function parseDroidSession(
 			}
 		}
 
-		// Transform to better-ccusage format
+		// Transform to zccusage format
 		const transformedEntry = {
 			timestamp: createISOTimestamp(timestamp),
 			sessionId: createSessionId(sessionId),
@@ -204,7 +204,7 @@ export async function parseDroidSession(
 				model,
 				id: createMessageId(sessionId), // Use session id as message id for droid
 			},
-			// Cost will be calculated by better-ccusage based on model pricing
+			// Cost will be calculated by zccusage based on model pricing
 			requestId: createRequestId(sessionId), // Use session id as request id for droid
 			cwd: path.join('droid', projectName), // Virtual working directory for droid
 			source: createSource('droid'), // Mark as droid source

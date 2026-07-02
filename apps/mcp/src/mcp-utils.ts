@@ -1,5 +1,5 @@
-import type { LoadOptions } from 'better-ccusage/data-loader';
-import { getClaudePaths } from 'better-ccusage/data-loader';
+import type { LoadOptions } from 'zccusage/data-loader';
+import { getClaudePaths } from 'zccusage/data-loader';
 
 /**
  * Create default loading options using the first available Claude data path.

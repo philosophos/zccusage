@@ -146,11 +146,11 @@ export const sharedArgs = {
 	},
 	paymentsPath: {
 		type: 'string',
-		description: 'Path to the per-transaction payment log (better-ccusage-payments.json).',
+		description: 'Path to the per-transaction payment log (zccusage-payments.json).',
 	},
 	pricingPath: {
 		type: 'string',
-		description: 'Path to the per-platform user pricing overrides (better-ccusage-pricing.json).',
+		description: 'Path to the per-platform user pricing overrides (zccusage-pricing.json).',
 	},
 	ccSwitchDbPath: {
 		type: 'string',
@@ -167,7 +167,7 @@ export const sharedArgs = {
 	// ─── DuckDB OLAP store args ─────────────────────────────────────────────
 	dbPath: {
 		type: 'string',
-		description: 'Path to the DuckDB OLAP store (better-ccusage.duckdb). Default: ~/.cc-switch-tui/better-ccusage.duckdb.',
+		description: 'Path to the DuckDB OLAP store (zccusage.duckdb). Default: ~/.cc-switch-tui/zccusage.duckdb.',
 	},
 	noDuckdb: {
 		type: 'boolean',

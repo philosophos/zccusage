@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 /**
- * @fileoverview Main entry point for better-ccusage CLI tool
+ * @fileoverview Main entry point for zccusage CLI tool
  *
- * This is the main entry point for the better-ccusage command-line interface tool.
+ * This is the main entry point for the zccusage command-line interface tool.
  * It provides analysis of Claude Code/Droid Usage data from local JSONL files with multi-provider support.
  *
  * @module index

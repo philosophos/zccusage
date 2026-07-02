@@ -161,7 +161,7 @@ export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
  * Default configuration file name for storing usage data
  * Used to load and save configuration settings
  */
-export const CONFIG_FILE_NAME = 'better-ccusage.json';
+export const CONFIG_FILE_NAME = 'zccusage.json';
 
 /**
  * Default locale for date formatting (en-CA provides YYYY-MM-DD ISO format)
@@ -181,14 +181,14 @@ export const DEFAULT_BILLING_CURRENCY = 'USD';
  * Default file name for the per-transaction payment log (dual-currency).
  * Searched for in the same directories as the Claude config.
  */
-export const PAYMENTS_FILE_NAME = 'better-ccusage-payments.json';
+export const PAYMENTS_FILE_NAME = 'zccusage-payments.json';
 
 /**
  * Default file name for the user-supplied per-platform pricing overrides.
  * Keys are `{providerId}/{model_id}` and values carry `currency` + per-token
  * prices in that currency.
  */
-export const PRICING_FILE_NAME = 'better-ccusage-pricing.json';
+export const PRICING_FILE_NAME = 'zccusage-pricing.json';
 
 /**
  * Resolve `$CC_SWITCH_CONFIG_DIR` env var (cc-switch-cli's config override).
@@ -219,7 +219,7 @@ export const CC_SWITCH_DB_PATHS: string[] = (() => {
 /**
  * Resolve the cc-switch config directory: `$CC_SWITCH_CONFIG_DIR` if set, else
  * the first existing legacy candidate's parent dir. Used to anchor sibling
- * files (better-ccusage.duckdb, provider_schedule.json, watcher pid).
+ * files (zccusage.duckdb, provider_schedule.json, watcher pid).
  */
 export function resolveCcSwitchConfigDir(): string {
 	const envDir = getCcSwitchConfigDir();
@@ -237,4 +237,4 @@ export function resolveCcSwitchConfigDir(): string {
  * ad-hoc queries. Sits alongside the cc-switch DB (logical grouping).
  * Override via `--db-path` / config `dbPath`.
  */
-export const DEFAULT_DUCKDB_PATH = path.join(resolveCcSwitchConfigDir(), 'better-ccusage.duckdb');
+export const DEFAULT_DUCKDB_PATH = path.join(resolveCcSwitchConfigDir(), 'zccusage.duckdb');

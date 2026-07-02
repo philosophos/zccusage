@@ -1,11 +1,11 @@
 # CLAUDE.md - MCP Package
 
-This package provides the MCP (Model Context Protocol) server implementation for better-ccusage data.
+This package provides the MCP (Model Context Protocol) server implementation for zccusage data.
 
 ## Package Overview
 
 **Name**: `@better-ccusage/mcp`
-**Description**: MCP server implementation for better-ccusage data
+**Description**: MCP server implementation for zccusage data
 **Type**: MCP server with CLI and library exports
 
 ## Development Commands
@@ -36,12 +36,12 @@ pnpm dlx @better-ccusage/mcp@latest -- --type http --port 8080
 
 ```bash
 # Run the CLI directly
-better-ccusage-mcp --help
+zccusage-mcp --help
 ```
 
 ## Architecture
 
-This package implements an MCP server that exposes better-ccusage functionality through the Model Context Protocol:
+This package implements an MCP server that exposes zccusage functionality through the Model Context Protocol:
 
 **Key Modules:**
 
@@ -68,7 +68,7 @@ This package implements an MCP server that exposes better-ccusage functionality 
 - `@hono/mcp` - MCP implementation for Hono
 - `@hono/node-server` - Node.js server adapter for Hono
 - `@modelcontextprotocol/sdk` - Official MCP SDK
-- `better-ccusage` - Main better-ccusage package (workspace dependency)
+- `zccusage` - Main zccusage package (workspace dependency)
 - `gunshi` - CLI framework
 - `hono` - Web framework
 - `zod` - Schema validation
@@ -82,7 +82,7 @@ This package implements an MCP server that exposes better-ccusage functionality 
 
 ## Integration with Claude Desktop
 
-This MCP server can be integrated with Claude Desktop to provide usage analysis directly within Claude conversations. Configure it in your Claude Desktop MCP settings to access better-ccusage data through the MCP protocol.
+This MCP server can be integrated with Claude Desktop to provide usage analysis directly within Claude conversations. Configure it in your Claude Desktop MCP settings to access zccusage data through the MCP protocol.
 
 ## Testing
 
@@ -93,7 +93,7 @@ This MCP server can be integrated with Claude Desktop to provide usage analysis 
 
 ## Code Style
 
-Follow the same code style guidelines as the main better-ccusage package:
+Follow the same code style guidelines as the main zccusage package:
 
 - **Error Handling**: Prefer `@praha/byethrow Result` type over try-catch
 - **Imports**: Use `.ts` extensions for local imports
@@ -117,4 +117,4 @@ The package provides multiple exports:
 
 ## Binary
 
-The package includes a binary `better-ccusage-mcp` that can be used to start the MCP server from the command line.
+The package includes a binary `zccusage-mcp` that can be used to start the MCP server from the command line.

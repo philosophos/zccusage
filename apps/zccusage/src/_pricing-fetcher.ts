@@ -183,11 +183,11 @@ function expandArrayRules(
 
 /**
  * Build candidate user-pricing file paths, mirroring the config search order:
- * 1. `./.better-ccusage/better-ccusage-pricing.json`
- * 2. `<each claude config dir>/better-ccusage-pricing.json`
+ * 1. `./.zccusage/zccusage-pricing.json`
+ * 2. `<each claude config dir>/zccusage-pricing.json`
  */
 function buildPricingSearchPaths(): string[] {
-	const dirs = [path.join(process.cwd(), '.better-ccusage')];
+	const dirs = [path.join(process.cwd(), '.zccusage')];
 	try {
 		dirs.push(...getClaudePaths());
 	}

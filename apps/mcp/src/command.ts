@@ -1,9 +1,9 @@
-import type { LoadOptions } from 'better-ccusage/data-loader';
+import type { LoadOptions } from 'zccusage/data-loader';
 import process from 'node:process';
 import { serve } from '@hono/node-server';
-import { getClaudePaths } from 'better-ccusage/data-loader';
-import { logger } from 'better-ccusage/logger';
-import { DEFAULT_DUCKDB_PATH, resolveCcSwitchConfigDir, startSwitchWatcher } from 'better-ccusage/switch-watcher';
+import { getClaudePaths } from 'zccusage/data-loader';
+import { logger } from 'zccusage/logger';
+import { DEFAULT_DUCKDB_PATH, resolveCcSwitchConfigDir, startSwitchWatcher } from 'zccusage/switch-watcher';
 import { cli, define } from 'gunshi';
 import packageJson from '../package.json' with { type: 'json' };
 import { createMcpHttpApp, createMcpServer, startMcpServerStdio } from './mcp.ts';
