@@ -1,5 +1,5 @@
 import type { ModelPricing } from '@better-ccusage/internal/pricing';
-import type { ProviderProfile } from './_types.ts';
+import type { PlanType, ProviderProfile } from './_types.ts';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -9,6 +9,7 @@ import { loadMergedPricing } from '@better-ccusage/internal/remote-pricing';
 import { Result } from '@praha/byethrow';
 import * as v from 'valibot';
 import { DEFAULT_BILLING_CURRENCY, PRICING_FILE_NAME } from './_consts.ts';
+import { buildPlanOverrides, loadProviderProfiles, loadProviderSchedule } from './_provider-profile-loader.ts';
 import { getClaudePaths } from './data-loader.ts';
 import { logger } from './logger.ts';
 
@@ -317,7 +318,17 @@ export function loadUserPricing(
 
 async function mergedOfflineLoader(pricingPath?: string): Promise<Record<string, ModelPricing>> {
 	const base = await loadMergedPricing();
-	const userPricing = loadUserPricing(pricingPath);
+	const profiles = await loadProviderProfiles({});
+	// Apply schedule planType overrides so `plan` matching sees e.g. saving plan
+	// for provider ids that carry no plan token (bailian-aliyun-singapore).
+	const planOverrides = buildPlanOverrides(loadProviderSchedule());
+	for (const p of profiles) {
+		const ov = planOverrides.get(p.id);
+		if (ov != null) {
+			p.planType = ov as PlanType | undefined;
+		}
+	}
+	const userPricing = loadUserPricing(pricingPath, profiles);
 	// User entries (keyed `providerId/model_id`) override base entries keyed by
 	// bare model name only when the keys collide; in practice they coexist —
 	// provider-aware lookup in `data-loader` queries the qualified key directly.
@@ -832,6 +843,20 @@ if (import.meta.vitest != null) {
 			expect(entry).not.toBeUndefined();
 			expect(entry?.currency).toBe('CNY');
 			expect(entry?.input_cost_per_token).toBe(0.000001);
+		});
+	});
+
+	describe('mergedOfflineLoader', () => {
+		it('expands array-format user pricing using loaded profiles', async () => {
+			const tmpDir = mkdtempSync(path.join(os.tmpdir(), 'bcu-pricing-'));
+			const filePath = path.join(tmpDir, PRICING_FILE_NAME);
+			writeFileSync(filePath, JSON.stringify([
+				{ reseller: 'bailian', model: 'glm-5.2', currency: 'CNY', inputCostPerMTokens: 30, outputCostPerMTokens: 120 },
+			]), 'utf-8');
+
+			const map = await mergedOfflineLoader(filePath);
+			expect(map).toBeDefined();
+			expect(typeof map).toBe('object');
 		});
 	});
 }
