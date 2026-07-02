@@ -1,8 +1,8 @@
-import type { ModelPricing } from '@better-ccusage/internal/pricing';
+import type { ModelPricing } from '@zccusage/internal/pricing';
 import {
 	createPricingDataset,
 	loadLocalPricingDataset,
-} from '@better-ccusage/internal/pricing-fetch-utils';
+} from '@zccusage/internal/pricing-fetch-utils';
 
 /**
  * Load all pricing data from the local dataset.

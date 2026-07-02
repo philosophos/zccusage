@@ -4,7 +4,7 @@ This package provides the MCP (Model Context Protocol) server implementation for
 
 ## Package Overview
 
-**Name**: `@better-ccusage/mcp`
+**Name**: `@zccusage/mcp`
 **Description**: MCP server implementation for zccusage data
 **Type**: MCP server with CLI and library exports
 
@@ -28,8 +28,8 @@ This package provides the MCP (Model Context Protocol) server implementation for
 
 ```bash
 # Install and run as MCP server
-pnpm dlx @better-ccusage/mcp@latest -- --help
-pnpm dlx @better-ccusage/mcp@latest -- --type http --port 8080
+pnpm dlx @zccusage/mcp@latest -- --help
+pnpm dlx @zccusage/mcp@latest -- --type http --port 8080
 ```
 
 **Direct Usage:**

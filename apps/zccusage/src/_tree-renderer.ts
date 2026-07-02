@@ -16,7 +16,7 @@ import type { ConversionContext } from './_currency-convert.ts';
 import type { ProviderProfile, TreeBucket, TreeDimension } from './_types.ts';
 import type { ModelBreakdown } from './data-loader.ts';
 import process from 'node:process';
-import { formatMoney } from '@better-ccusage/terminal/table';
+import { formatMoney } from '@zccusage/terminal/table';
 import stringWidth from 'string-width';
 import { sumToCurrency } from './_currency-convert.ts';
 import { loadPaymentRecords } from './_payments-loader.ts';

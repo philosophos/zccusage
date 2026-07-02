@@ -1,7 +1,7 @@
-import type { ModelPricing as InternalModelPricing } from '@better-ccusage/internal/pricing';
+import type { ModelPricing as InternalModelPricing } from '@zccusage/internal/pricing';
 import type { ModelPricing, PricingSource } from './_types.ts';
-import { PricingFetcher } from '@better-ccusage/internal/pricing';
-import { loadMergedPricing } from '@better-ccusage/internal/remote-pricing';
+import { PricingFetcher } from '@zccusage/internal/pricing';
+import { loadMergedPricing } from '@zccusage/internal/remote-pricing';
 import { Result } from '@praha/byethrow';
 import { MILLION } from './_consts.ts';
 import { logger } from './logger.ts';

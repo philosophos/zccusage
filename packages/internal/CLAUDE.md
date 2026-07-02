@@ -4,7 +4,7 @@ This package contains shared internal utilities for the zccusage monorepo.
 
 ## Package Overview
 
-**Name**: `@better-ccusage/internal`
+**Name**: `@zccusage/internal`
 **Description**: Shared internal utilities for zccusage toolchain with automatic model detection
 **Type**: Internal library (private package)
 
@@ -50,12 +50,12 @@ When adding new shared utilities:
    <!-- eslint-skip -->
    ```json
    "devDependencies": {
-     "@better-ccusage/internal": "workspace:*"
+     "@zccusage/internal": "workspace:*"
    }
    ```
 4. Use the utility:
    ```typescript
-   import { createLogger } from '@better-ccusage/internal/logger';
+   import { createLogger } from '@zccusage/internal/logger';
    ```
 
 ## Dependencies

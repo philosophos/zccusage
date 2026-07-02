@@ -1,5 +1,5 @@
 {
-  "name": "@better-ccusage/opencode",
+  "name": "@zccusage/opencode",
   "version": "1.4.3",
   "description": "Usage analysis tool for OpenCode AI assistant",
   "homepage": "https://github.com/cobra91/better-ccusage#readme",
@@ -39,11 +39,11 @@
     "typecheck": "tsgo --noEmit"
   },
   "devDependencies": {
-    "@better-ccusage/internal": "workspace:*",
-    "@better-ccusage/terminal": "workspace:*",
     "@praha/byethrow": "catalog:runtime",
     "@ryoppippi/eslint-config": "catalog:lint",
     "@typescript/native-preview": "catalog:types",
+    "@zccusage/internal": "workspace:*",
+    "@zccusage/terminal": "workspace:*",
     "clean-pkg-json": "catalog:release",
     "consola": "catalog:runtime",
     "es-toolkit": "catalog:runtime",

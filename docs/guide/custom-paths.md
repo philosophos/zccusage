@@ -295,14 +295,14 @@ When using the standalone MCP CLI with custom paths:
 	"mcpServers": {
 		"zccusage": {
 			"command": "npx",
-			"args": ["@better-ccusage/mcp@latest"],
+			"args": ["@zccusage/mcp@latest"],
 			"env": {
 				"CLAUDE_CONFIG_DIR": "/path/to/your/claude/data"
 			}
 		},
 		"zccusage-archive": {
 			"command": "npx",
-			"args": ["@better-ccusage/mcp@latest"],
+			"args": ["@zccusage/mcp@latest"],
 			"env": {
 				"CLAUDE_CONFIG_DIR": "/archive/claude-2024,/archive/claude-2025"
 			}

@@ -1,13 +1,13 @@
 <div align="center">
     <img src="https://cdn.jsdelivr.net/gh/cobra91/better-ccusage@main/docs/public/logo.svg" alt="zccusage logo" width="256" height="256">
-    <h1>@better-ccusage/codex</h1>
+    <h1>@zccusage/codex</h1>
 </div>
 
 <p align="center">
-    <a href="https://socket.dev/api/npm/package/@better-ccusage/codex"><img src="https://socket.dev/api/badge/npm/package/@better-ccusage/codex" alt="Socket Badge" /></a>
-    <a href="https://npmjs.com/package/@better-ccusage/codex"><img src="https://img.shields.io/npm/v/@better-ccusage/codex?color=yellow" alt="npm version" /></a>
-    <a href="https://tanstack.com/stats/npm?packageGroups=%5B%7B%22packages%22:%5B%7B%22name%22:%22@better-ccusage/codex%22%7D%5D%7D%5D&range=30-days&transform=none&binType=daily&showDataMode=all&height=400"><img src="https://img.shields.io/npm/dy/@better-ccusage/codex" alt="NPM Downloads" /></a>
-    <a href="https://packagephobia.com/result?p=@better-ccusage/codex"><img src="https://packagephobia.com/badge?p=@better-ccusage/codex" alt="install size" /></a>
+    <a href="https://socket.dev/api/npm/package/@zccusage/codex"><img src="https://socket.dev/api/badge/npm/package/@zccusage/codex" alt="Socket Badge" /></a>
+    <a href="https://npmjs.com/package/@zccusage/codex"><img src="https://img.shields.io/npm/v/@zccusage/codex?color=yellow" alt="npm version" /></a>
+    <a href="https://tanstack.com/stats/npm?packageGroups=%5B%7B%22packages%22:%5B%7B%22name%22:%22@zccusage/codex%22%7D%5D%7D%5D&range=30-days&transform=none&binType=daily&showDataMode=all&height=400"><img src="https://img.shields.io/npm/dy/@zccusage/codex" alt="NPM Downloads" /></a>
+    <a href="https://packagephobia.com/result?p=@zccusage/codex"><img src="https://packagephobia.com/badge?p=@zccusage/codex" alt="install size" /></a>
     <a href="https://deepwiki.com/cobra91/better-ccusage"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 
@@ -23,26 +23,26 @@
 
 ```bash
 # Recommended - always include @latest
-npx @better-ccusage/codex@latest --help
-bunx @better-ccusage/codex@latest --help  # ⚠️ MUST include @latest with bunx
+npx @zccusage/codex@latest --help
+bunx @zccusage/codex@latest --help  # ⚠️ MUST include @latest with bunx
 
 # Alternative package runners
-pnpm dlx @better-ccusage/codex
-pnpx @better-ccusage/codex
+pnpm dlx @zccusage/codex
+pnpx @zccusage/codex
 
 # Using deno (with security flags)
-deno run -E -R=$HOME/.codex/ -S=homedir -N='raw.githubusercontent.com:443' npm:@better-ccusage/codex@latest --help
+deno run -E -R=$HOME/.codex/ -S=homedir -N='raw.githubusercontent.com:443' npm:@zccusage/codex@latest --help
 ```
 
-> ⚠️ **Critical for bunx users**: Bun 1.2.x's bunx prioritizes binaries matching the package name suffix when given a scoped package. For `@better-ccusage/codex`, it looks for a `codex` binary in PATH first. If you have an existing `codex` command installed (e.g., GitHub Copilot's codex), that will be executed instead. **Always use `bunx @better-ccusage/codex@latest` with the version tag** to force bunx to fetch and run the correct package.
+> ⚠️ **Critical for bunx users**: Bun 1.2.x's bunx prioritizes binaries matching the package name suffix when given a scoped package. For `@zccusage/codex`, it looks for a `codex` binary in PATH first. If you have an existing `codex` command installed (e.g., GitHub Copilot's codex), that will be executed instead. **Always use `bunx @zccusage/codex@latest` with the version tag** to force bunx to fetch and run the correct package.
 
 ### Recommended: Shell Alias
 
-Since `npx @better-ccusage/codex@latest` is quite long to type repeatedly, we strongly recommend setting up a shell alias:
+Since `npx @zccusage/codex@latest` is quite long to type repeatedly, we strongly recommend setting up a shell alias:
 
 ```bash
-# bash/zsh: alias zccusage-codex='bunx @better-ccusage/codex@latest'
-# fish:     alias zccusage-codex 'bunx @better-ccusage/codex@latest'
+# bash/zsh: alias zccusage-codex='bunx @zccusage/codex@latest'
+# fish:     alias zccusage-codex 'bunx @zccusage/codex@latest'
 
 # Then simply run:
 zccusage-codex daily
@@ -55,22 +55,22 @@ zccusage-codex monthly --json
 
 ```bash
 # Daily usage grouped by date (default command)
-npx @better-ccusage/codex@latest daily
+npx @zccusage/codex@latest daily
 
 # Date range filtering
-npx @better-ccusage/codex@latest daily --since 20250911 --until 20250917
+npx @zccusage/codex@latest daily --since 20250911 --until 20250917
 
 # JSON output for scripting
-npx @better-ccusage/codex@latest daily --json
+npx @zccusage/codex@latest daily --json
 
 # Monthly usage grouped by month
-npx @better-ccusage/codex@latest monthly
+npx @zccusage/codex@latest monthly
 
 # Monthly JSON report for integrations
-npx @better-ccusage/codex@latest monthly --json
+npx @zccusage/codex@latest monthly --json
 
 # Session-level detailed report
-npx @better-ccusage/codex@latest sessions
+npx @zccusage/codex@latest sessions
 ```
 
 Useful environment variables:

@@ -1,8 +1,8 @@
 import type { CostMode } from '../_types.ts';
 import type { UsageData } from '../data-loader.ts';
 import process from 'node:process';
-import { formatCurrency, formatNumber, ResponsiveTable } from '@better-ccusage/terminal/table';
 import { Result } from '@praha/byethrow';
+import { formatCurrency, formatNumber, ResponsiveTable } from '@zccusage/terminal/table';
 import { formatDateCompact } from '../_date-utils.ts';
 import { processWithJq } from '../_jq-processor.ts';
 import { loadSessionUsageById } from '../data-loader.ts';

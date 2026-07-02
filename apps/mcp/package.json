@@ -1,5 +1,5 @@
 {
-  "name": "@better-ccusage/mcp",
+  "name": "@zccusage/mcp",
   "version": "1.4.3",
   "description": "MCP server implementation for zccusage data with multi-provider support",
   "homepage": "https://github.com/philosophos/zccusage#readme",
@@ -36,12 +36,12 @@
     "typecheck": "tsgo --noEmit"
   },
   "devDependencies": {
-    "@better-ccusage/internal": "workspace:*",
     "@hono/mcp": "catalog:runtime",
     "@hono/node-server": "catalog:runtime",
     "@modelcontextprotocol/sdk": "catalog:runtime",
     "@ryoppippi/eslint-config": "catalog:lint",
     "@typescript/native-preview": "catalog:types",
+    "@zccusage/internal": "workspace:*",
     "clean-pkg-json": "catalog:release",
     "eslint": "catalog:lint",
     "fs-fixture": "catalog:testing",

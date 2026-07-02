@@ -77,12 +77,12 @@ function processUsageData(data: UsageData[]): void {
 
 ## MCP Server Integration
 
-You can also create your own MCP server using the dedicated `@better-ccusage/mcp` package:
+You can also create your own MCP server using the dedicated `@zccusage/mcp` package:
 
-> **Note**: Install `zccusage` and `@better-ccusage/mcp` together, for example with `pnpm add zccusage @better-ccusage/mcp`.
+> **Note**: Install `zccusage` and `@zccusage/mcp` together, for example with `pnpm add zccusage @zccusage/mcp`.
 
 ```typescript
-import { createMcpServer } from '@better-ccusage/mcp';
+import { createMcpServer } from '@zccusage/mcp';
 
 // Create an MCP server instance
 const server = createMcpServer();

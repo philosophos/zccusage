@@ -21,7 +21,7 @@
  * arrays + lastActivity; blocks needs 5-hour window logic — see main spec step 7).
  */
 
-import type { Money } from '@better-ccusage/internal/pricing';
+import type { Money } from '@zccusage/internal/pricing';
 import type { CostMode, Source } from './_types.ts';
 import type { DailyUsage, LoadOptions, ModelBreakdown, MonthlyUsage, SessionUsage, UsageData, WeeklyUsage } from './data-loader.ts';
 import { rmSync } from 'node:fs';

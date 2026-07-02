@@ -97,7 +97,7 @@ After applying upstream changes, verify:
 - [ ] Zai provider functionality preserved
 - [ ] GLM-xx, kat-coder models still recognized
 - [ ] Custom pricing data intact
-- [ ] MCP server operational: `pnpm dlx @better-ccusage/mcp@latest -- --help`
+- [ ] MCP server operational: `pnpm dlx @zccusage/mcp@latest -- --help`
 - [ ] Test suite passes: `pnpm test`
 - [ ] Type checking passes: `pnpm typecheck`
 - [ ] Build succeeds: `pnpm build`

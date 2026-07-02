@@ -6,10 +6,10 @@ The `monthly` command mirrors ccusage's monthly report while operating on Codex 
 
 ```bash
 # Recommended (fastest)
-bunx @better-ccusage/codex@latest monthly
+bunx @zccusage/codex@latest monthly
 
 # Using npx
-npx @better-ccusage/codex@latest monthly
+npx @zccusage/codex@latest monthly
 ```
 
 ## Options

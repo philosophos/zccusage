@@ -1,9 +1,9 @@
-import type { ModelPricing } from '@better-ccusage/internal/pricing';
+import type { ModelPricing } from '@zccusage/internal/pricing';
 import {
 	createPricingDataset,
 	filterPricingDataset,
 	loadLocalPricingDataset,
-} from '@better-ccusage/internal/pricing-fetch-utils';
+} from '@zccusage/internal/pricing-fetch-utils';
 
 const CODEX_MODEL_PREFIXES = [
 	'gpt-5',

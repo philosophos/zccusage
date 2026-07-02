@@ -18,24 +18,24 @@
 
 ```bash
 # Recommended - always include @latest
-npx @better-ccusage/opencode@latest --help
-bunx @better-ccusage/opencode@latest --help
+npx @zccusage/opencode@latest --help
+bunx @zccusage/opencode@latest --help
 
 # Alternative package runners
-pnpm dlx @better-ccusage/opencode
-pnpx @better-ccusage/opencode
+pnpm dlx @zccusage/opencode
+pnpx @zccusage/opencode
 
 # Using deno (with security flags)
-deno run -E -R=$HOME/.local/share/opencode/ -S=homedir -N='raw.githubusercontent.com:443' npm:@better-ccusage/opencode@latest --help
+deno run -E -R=$HOME/.local/share/opencode/ -S=homedir -N='raw.githubusercontent.com:443' npm:@zccusage/opencode@latest --help
 ```
 
 ### Recommended: Shell Alias
 
-Since `npx @better-ccusage/opencode@latest` is quite long to type repeatedly, we strongly recommend setting up a shell alias:
+Since `npx @zccusage/opencode@latest` is quite long to type repeatedly, we strongly recommend setting up a shell alias:
 
 ```bash
-# bash/zsh: alias zccusage-opencode='bunx @better-ccusage/opencode@latest'
-# fish:     alias zccusage-opencode 'bunx @better-ccusage/opencode@latest'
+# bash/zsh: alias zccusage-opencode='bunx @zccusage/opencode@latest'
+# fish:     alias zccusage-opencode 'bunx @zccusage/opencode@latest'
 
 # Then simply run:
 zccusage-opencode daily
@@ -48,22 +48,22 @@ zccusage-opencode monthly --json
 
 ```bash
 # Daily usage grouped by date (default command)
-npx @better-ccusage/opencode@latest daily
+npx @zccusage/opencode@latest daily
 
 # Weekly usage grouped by ISO week
-npx @better-ccusage/opencode@latest weekly
+npx @zccusage/opencode@latest weekly
 
 # Monthly usage grouped by month
-npx @better-ccusage/opencode@latest monthly
+npx @zccusage/opencode@latest monthly
 
 # Session-level detailed report
-npx @better-ccusage/opencode@latest session
+npx @zccusage/opencode@latest session
 
 # JSON output for scripting
-npx @better-ccusage/opencode@latest daily --json
+npx @zccusage/opencode@latest daily --json
 
 # Compact mode for screenshots/sharing
-npx @better-ccusage/opencode@latest daily --compact
+npx @zccusage/opencode@latest daily --compact
 ```
 
 Useful environment variables:

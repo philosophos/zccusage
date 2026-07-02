@@ -4,10 +4,10 @@ The `daily` command mirrors zccusage's daily report but operates on Codex CLI se
 
 ```bash
 # Recommended (fastest)
-bunx @better-ccusage/codex@latest daily
+bunx @zccusage/codex@latest daily
 
 # Using npx
-npx @better-ccusage/codex@latest daily
+npx @zccusage/codex@latest daily
 ```
 
 ## Options

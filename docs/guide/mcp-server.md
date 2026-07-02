@@ -1,27 +1,27 @@
 # MCP Server
 
-The zccusage MCP server now lives in the dedicated `@better-ccusage/mcp` package. This keeps the main CLI lightweight while still giving you full access to MCP tools for daily, session, monthly, and billing-block analytics.
+The zccusage MCP server now lives in the dedicated `@zccusage/mcp` package. This keeps the main CLI lightweight while still giving you full access to MCP tools for daily, session, monthly, and billing-block analytics.
 
 ## Running the MCP CLI
 
 Execute the MCP CLI directly without installation using `bunx` or `npx`:
 
 ```bash
-bunx @better-ccusage/mcp@latest --help
+bunx @zccusage/mcp@latest --help
 # or
-npx @better-ccusage/mcp@latest --help
+npx @zccusage/mcp@latest --help
 ```
 
-All examples below use `bunx @better-ccusage/mcp@latest` (you can substitute with `npx @better-ccusage/mcp@latest` if preferred).
+All examples below use `bunx @zccusage/mcp@latest` (you can substitute with `npx @zccusage/mcp@latest` if preferred).
 
 ## Starting the MCP Server
 
 ### stdio transport (default)
 
 ```bash
-bunx @better-ccusage/mcp@latest
+bunx @zccusage/mcp@latest
 # equivalent:
-bunx @better-ccusage/mcp@latest --type stdio
+bunx @zccusage/mcp@latest --type stdio
 ```
 
 The stdio transport is ideal when the MCP client spawns the process directly (for example, Claude Desktop on the same machine).
@@ -29,7 +29,7 @@ The stdio transport is ideal when the MCP client spawns the process directly (fo
 ### HTTP Stream Transport
 
 ```bash
-bunx @better-ccusage/mcp@latest --type http --port 8080
+bunx @zccusage/mcp@latest --type http --port 8080
 ```
 
 HTTP mode is useful when you need to expose the server to other hosts or run it as a background service.
@@ -40,13 +40,13 @@ Control how costs are calculated when generating reports:
 
 ```bash
 # Use cached costUSD values when present, otherwise calculate from tokens (default)
-bunx @better-ccusage/mcp@latest --mode auto
+bunx @zccusage/mcp@latest --mode auto
 
 # Always calculate from tokens using local pricing data
-bunx @better-ccusage/mcp@latest --mode calculate
+bunx @zccusage/mcp@latest --mode calculate
 
 # Only use pre-calculated costUSD values and default to 0 when missing
-bunx @better-ccusage/mcp@latest --mode display
+bunx @zccusage/mcp@latest --mode display
 ```
 
 All options from the original command remain available, including `CLAUDE_CONFIG_DIR` for custom data locations.
@@ -67,9 +67,9 @@ Each tool accepts `since`, `until`, and `mode` parameters, plus timezone/locale 
 ### With MCP Inspector
 
 ```bash
-bunx @modelcontextprotocol/inspector bunx @better-ccusage/mcp@latest
+bunx @modelcontextprotocol/inspector bunx @zccusage/mcp@latest
 # or
-npx @modelcontextprotocol/inspector npx @better-ccusage/mcp@latest
+npx @modelcontextprotocol/inspector npx @zccusage/mcp@latest
 ```
 
 The Inspector lets you:
@@ -82,7 +82,7 @@ The Inspector lets you:
 ### Manual JSON-RPC Testing
 
 ```bash
-bunx @better-ccusage/mcp@latest
+bunx @zccusage/mcp@latest
 # Now send JSON-RPC to stdin, e.g. list available tools
 {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
 ```
@@ -98,7 +98,7 @@ Update your Claude Desktop configuration to use direct execution:
 	"mcpServers": {
 		"zccusage": {
 			"command": "bunx",
-			"args": ["@better-ccusage/mcp@latest"],
+			"args": ["@zccusage/mcp@latest"],
 			"env": {}
 		}
 	}
@@ -112,7 +112,7 @@ Or using `npx`:
 	"mcpServers": {
 		"zccusage": {
 			"command": "npx",
-			"args": ["@better-ccusage/mcp@latest"],
+			"args": ["@zccusage/mcp@latest"],
 			"env": {}
 		}
 	}
@@ -127,7 +127,7 @@ Need custom paths or cost modes? Pass them as arguments:
 		"zccusage": {
 			"command": "bunx",
 			"args": [
-				"@better-ccusage/mcp@latest",
+				"@zccusage/mcp@latest",
 				"--mode",
 				"calculate",
 				"--type",
@@ -156,7 +156,7 @@ After updating the file, restart Claude Desktop so it picks up the new MCP serve
 Prefer to embed the MCP server directly? Import it from the library just like before:
 
 ```ts
-import { createMcpServer } from '@better-ccusage/mcp';
+import { createMcpServer } from '@zccusage/mcp';
 
 const server = createMcpServer();
 // ...connect it to the transport of your choice

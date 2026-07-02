@@ -6,10 +6,10 @@ zccusage provides usage tracking for [OpenCode](https://github.com/sst/opencode)
 
 ```bash
 # Install the opencode package
-pnpm add @better-ccusage/opencode
+pnpm add @zccusage/opencode
 
 # Or use directly with npx
-pnpm dlx @better-ccusage/opencode daily
+pnpm dlx @zccusage/opencode daily
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ pnpm dlx @better-ccusage/opencode daily
 ### Daily Reports
 
 ```bash
-pnpm dlx @better-ccusage/opencode daily
+pnpm dlx @zccusage/opencode daily
 ```
 
 Shows token usage and costs aggregated by day.
@@ -25,7 +25,7 @@ Shows token usage and costs aggregated by day.
 ### Weekly Reports
 
 ```bash
-pnpm dlx @better-ccusage/opencode weekly
+pnpm dlx @zccusage/opencode weekly
 ```
 
 Shows usage aggregated by ISO week (format: `YYYY-Www`).
@@ -33,7 +33,7 @@ Shows usage aggregated by ISO week (format: `YYYY-Www`).
 ### Monthly Reports
 
 ```bash
-pnpm dlx @better-ccusage/opencode monthly
+pnpm dlx @zccusage/opencode monthly
 ```
 
 Shows usage aggregated by month (format: `YYYY-MM`).
@@ -41,7 +41,7 @@ Shows usage aggregated by month (format: `YYYY-MM`).
 ### Session Reports
 
 ```bash
-pnpm dlx @better-ccusage/opencode session
+pnpm dlx @zccusage/opencode session
 ```
 
 Shows usage grouped by session, with subagent hierarchy displayed.
@@ -128,7 +128,7 @@ Default output shows a formatted table with:
 You can also use the package programmatically:
 
 ```typescript
-import { loadDailyUsageData, loadMonthlyUsageData, loadWeeklyUsageData } from '@better-ccusage/opencode/data-loader';
+import { loadDailyUsageData, loadMonthlyUsageData, loadWeeklyUsageData } from '@zccusage/opencode/data-loader';
 
 // Load daily usage data
 const dailyData = await loadDailyUsageData();

@@ -4,7 +4,7 @@ This package provides terminal utilities for the zccusage toolchain.
 
 ## Package Overview
 
-**Name**: `@better-ccusage/terminal`
+**Name**: `@zccusage/terminal`
 **Description**: Terminal utilities for zccusage
 **Type**: Internal library package (private)
 

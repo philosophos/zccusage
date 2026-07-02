@@ -15,7 +15,7 @@ import { logger } from './logger.ts';
  * into `provider_switch_history`.
  *
  * Lifecycle:
- *  - W3: embedded in @better-ccusage/mcp server (always-on for MCP users).
+ *  - W3: embedded in @zccusage/mcp server (always-on for MCP users).
  *  - W1: `zccusage watch` CLI subcommand (manual fallback for pure-CLI users).
  */
 

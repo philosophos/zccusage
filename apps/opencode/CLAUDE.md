@@ -4,7 +4,7 @@ This package provides usage analysis for OpenCode AI assistant.
 
 ## Package Overview
 
-**Name**: `@better-ccusage/opencode`
+**Name**: `@zccusage/opencode`
 **Description**: Usage analysis tool for OpenCode AI assistant
 **Type**: CLI tool and library with TypeScript exports
 

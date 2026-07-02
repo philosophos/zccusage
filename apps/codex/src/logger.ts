@@ -1,4 +1,4 @@
-import { createLogger, log as internalLog } from '@better-ccusage/internal/logger';
+import { createLogger, log as internalLog } from '@zccusage/internal/logger';
 
 import packageJson from '../package.json' with { type: 'json' };
 

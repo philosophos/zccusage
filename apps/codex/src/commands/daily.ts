@@ -5,7 +5,7 @@ import {
 	formatModelsDisplayMultiline,
 	formatNumber,
 	ResponsiveTable,
-} from '@better-ccusage/terminal/table';
+} from '@zccusage/terminal/table';
 import { define } from 'gunshi';
 import pc from 'picocolors';
 import { DEFAULT_TIMEZONE } from '../_consts.ts';

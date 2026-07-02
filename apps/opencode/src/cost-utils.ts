@@ -1,4 +1,4 @@
-import type { PricingFetcher } from '@better-ccusage/internal/pricing';
+import type { PricingFetcher } from '@zccusage/internal/pricing';
 import { Result } from '@praha/byethrow';
 
 /**

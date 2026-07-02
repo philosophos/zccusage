@@ -6,10 +6,10 @@ Sessions are listed oldest-to-newest by their last activity timestamp so the out
 
 ```bash
 # Recommended (fastest)
-bunx @better-ccusage/codex@latest session
+bunx @zccusage/codex@latest session
 
 # Using npx
-npx @better-ccusage/codex@latest session
+npx @zccusage/codex@latest session
 ```
 
 ## Options

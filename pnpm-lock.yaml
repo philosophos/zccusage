@@ -226,12 +226,6 @@ importers:
 
   apps/codex:
     devDependencies:
-      '@better-ccusage/internal':
-        specifier: workspace:*
-        version: link:../../packages/internal
-      '@better-ccusage/terminal':
-        specifier: workspace:*
-        version: link:../../packages/terminal
       '@praha/byethrow':
         specifier: catalog:runtime
         version: 0.6.3
@@ -241,6 +235,12 @@ importers:
       '@typescript/native-preview':
         specifier: catalog:types
         version: 7.0.0-dev.20251201.1
+      '@zccusage/internal':
+        specifier: workspace:*
+        version: link:../../packages/internal
+      '@zccusage/terminal':
+        specifier: workspace:*
+        version: link:../../packages/terminal
       clean-pkg-json:
         specifier: catalog:release
         version: 1.4.1
@@ -283,9 +283,6 @@ importers:
 
   apps/mcp:
     devDependencies:
-      '@better-ccusage/internal':
-        specifier: workspace:*
-        version: link:../../packages/internal
       '@hono/mcp':
         specifier: catalog:runtime
         version: 0.1.5(@modelcontextprotocol/sdk@1.23.0(zod@3.25.76))(hono@4.12.12)
@@ -301,6 +298,9 @@ importers:
       '@typescript/native-preview':
         specifier: catalog:types
         version: 7.0.0-dev.20251201.1
+      '@zccusage/internal':
+        specifier: workspace:*
+        version: link:../../packages/internal
       clean-pkg-json:
         specifier: catalog:release
         version: 1.4.1
@@ -340,12 +340,6 @@ importers:
 
   apps/opencode:
     devDependencies:
-      '@better-ccusage/internal':
-        specifier: workspace:*
-        version: link:../../packages/internal
-      '@better-ccusage/terminal':
-        specifier: workspace:*
-        version: link:../../packages/terminal
       '@praha/byethrow':
         specifier: catalog:runtime
         version: 0.6.3
@@ -355,6 +349,12 @@ importers:
       '@typescript/native-preview':
         specifier: catalog:types
         version: 7.0.0-dev.20251201.1
+      '@zccusage/internal':
+        specifier: workspace:*
+        version: link:../../packages/internal
+      '@zccusage/terminal':
+        specifier: workspace:*
+        version: link:../../packages/terminal
       clean-pkg-json:
         specifier: catalog:release
         version: 1.4.1
@@ -395,12 +395,6 @@ importers:
       '@antfu/utils':
         specifier: catalog:runtime
         version: 9.3.0
-      '@better-ccusage/internal':
-        specifier: workspace:*
-        version: link:../../packages/internal
-      '@better-ccusage/terminal':
-        specifier: workspace:*
-        version: link:../../packages/terminal
       '@praha/byethrow':
         specifier: catalog:runtime
         version: 0.6.3
@@ -419,6 +413,12 @@ importers:
       '@typescript/native-preview':
         specifier: catalog:types
         version: 7.0.0-dev.20251201.1
+      '@zccusage/internal':
+        specifier: workspace:*
+        version: link:../../packages/internal
+      '@zccusage/terminal':
+        specifier: workspace:*
+        version: link:../../packages/terminal
       ansi-escapes:
         specifier: catalog:runtime
         version: 7.2.0

@@ -1,7 +1,7 @@
 import type { SessionBlock } from '../_session-blocks.ts';
 import process from 'node:process';
-import { formatCurrency, formatModelsDisplayMultiline, formatNumber, ResponsiveTable } from '@better-ccusage/terminal/table';
 import { Result } from '@praha/byethrow';
+import { formatCurrency, formatModelsDisplayMultiline, formatNumber, ResponsiveTable } from '@zccusage/terminal/table';
 import { define } from 'gunshi';
 import pc from 'picocolors';
 import { loadConfig, mergeConfigWithArgs } from '../_config-loader-tokens.ts';

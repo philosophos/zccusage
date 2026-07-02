@@ -1,7 +1,7 @@
-import type { UsageReportConfig } from '@better-ccusage/terminal/table';
+import type { UsageReportConfig } from '@zccusage/terminal/table';
 import process from 'node:process';
-import { addEmptySeparatorRow, createUsageReportTable, formatTotalsRow, formatUsageDataRow, pushBreakdownRows } from '@better-ccusage/terminal/table';
 import { Result } from '@praha/byethrow';
+import { addEmptySeparatorRow, createUsageReportTable, formatTotalsRow, formatUsageDataRow, pushBreakdownRows } from '@zccusage/terminal/table';
 import { define } from 'gunshi';
 import pc from 'picocolors';
 import { loadConfig, mergeConfigWithArgs } from '../_config-loader-tokens.ts';

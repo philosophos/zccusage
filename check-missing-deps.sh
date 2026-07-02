@@ -8,7 +8,7 @@ cd apps/better-ccusage
 echo "Imports trouvés:"
 find src -name "*.ts" -exec grep -h "from '" {} \; | \
   grep -v "from '\." | \
-  grep -v "from '@better-ccusage" | \
+  grep -v "from '@zccusage" | \
   sed "s/.*from '\([^']*\)'.*/\1/" | \
   sort -u > /tmp/imports.txt
 

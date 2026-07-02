@@ -8,7 +8,7 @@
  * @module data-loader
  */
 
-import type { Money } from '@better-ccusage/internal/pricing';
+import type { Money } from '@zccusage/internal/pricing';
 import type { WeekDay } from './_consts.ts';
 import type { ConversionContext } from './_currency-convert.ts';
 import type { LoadedUsageEntry, SessionBlock } from './_session-blocks.ts';

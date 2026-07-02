@@ -39,15 +39,15 @@ zccusage maintains full compatibility with ccusage while adding comprehensive su
 
 The main CLI tool for analyzing Claude Code/Droid/OpenCode usage from local JSONL files with support for multiple AI providers including Anthropic, Zai, and all GLM models (including GLM-5-Turbo), kat-coder models. Track daily, weekly, monthly, and session-based usage with beautiful tables and live monitoring.
 
-### 🤖 [@better-ccusage/codex](https://www.npmjs.com/package/@better-ccusage/codex) - OpenAI Codex Usage Analyzer
+### 🤖 [@zccusage/codex](https://www.npmjs.com/package/@zccusage/codex) - OpenAI Codex Usage Analyzer
 
 Companion tool for analyzing OpenAI Codex usage. Same powerful features as zccusage but tailored for Codex users, including GPT-5 support and 1M token context windows.
 
-### 🧠 [@better-ccusage/opencode](https://www.npmjs.com/package/@better-ccusage/opencode) - OpenCode Usage Analyzer
+### 🧠 [@zccusage/opencode](https://www.npmjs.com/package/@zccusage/opencode) - OpenCode Usage Analyzer
 
 Companion tool for analyzing [OpenCode](https://github.com/opencode-ai/opencode) usage. Track token usage and costs from OpenCode sessions with the same reporting capabilities as zccusage.
 
-### 🔌 [@better-ccusage/mcp](https://www.npmjs.com/package/@better-ccusage/mcp) - MCP Server Integration
+### 🔌 [@zccusage/mcp](https://www.npmjs.com/package/@zccusage/mcp) - MCP Server Integration
 
 Model Context Protocol server that exposes zccusage data to Claude Desktop and other MCP-compatible tools. Enable real-time usage tracking directly in your AI workflows.
 
@@ -76,30 +76,30 @@ deno run -E -R=$HOME/.claude/projects/ -S=homedir -N='raw.githubusercontent.com:
 
 #### Codex CLI
 
-Analyze OpenAI Codex usage with our companion tool [@better-ccusage/codex](https://www.npmjs.com/package/@better-ccusage/codex):
+Analyze OpenAI Codex usage with our companion tool [@zccusage/codex](https://www.npmjs.com/package/@zccusage/codex):
 
 ```bash
 # Recommended - always include @latest
-npx @better-ccusage/codex@latest
-bunx @better-ccusage/codex@latest  # ⚠️ MUST include @latest with bunx
+npx @zccusage/codex@latest
+bunx @zccusage/codex@latest  # ⚠️ MUST include @latest with bunx
 
 # Alternative package runners
-pnpm dlx @better-ccusage/codex
-pnpx @better-ccusage/codex
+pnpm dlx @zccusage/codex
+pnpx @zccusage/codex
 
 # Using deno (with security flags)
-deno run -E -R=$HOME/.codex/ -S=homedir -N='raw.githubusercontent.com:443' npm:@better-ccusage/codex@latest
+deno run -E -R=$HOME/.codex/ -S=homedir -N='raw.githubusercontent.com:443' npm:@zccusage/codex@latest
 ```
 
-> ⚠️ **Critical for bunx users**: Bun 1.2.x's bunx prioritizes binaries matching the package name suffix when given a scoped package. For `@better-ccusage/codex`, it looks for a `codex` binary in PATH first. If you have an existing `codex` command installed (e.g., GitHub Copilot's codex), that will be executed instead. **Always use `bunx @better-ccusage/codex@latest` with the version tag** to force bunx to fetch and run the correct package.
+> ⚠️ **Critical for bunx users**: Bun 1.2.x's bunx prioritizes binaries matching the package name suffix when given a scoped package. For `@zccusage/codex`, it looks for a `codex` binary in PATH first. If you have an existing `codex` command installed (e.g., GitHub Copilot's codex), that will be executed instead. **Always use `bunx @zccusage/codex@latest` with the version tag** to force bunx to fetch and run the correct package.
 
 #### MCP Server
 
-Integrate zccusage with Claude Desktop using [@better-ccusage/mcp](https://www.npmjs.com/package/@better-ccusage/mcp):
+Integrate zccusage with Claude Desktop using [@zccusage/mcp](https://www.npmjs.com/package/@zccusage/mcp):
 
 ```bash
 # Start MCP server for Claude Desktop integration
-npx @better-ccusage/mcp@latest --type http --port 8080
+npx @zccusage/mcp@latest --type http --port 8080
 ```
 
 This enables real-time usage tracking and analysis directly within Claude Desktop conversations.

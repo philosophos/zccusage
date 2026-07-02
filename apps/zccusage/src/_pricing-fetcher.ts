@@ -1,12 +1,12 @@
-import type { ModelPricing } from '@better-ccusage/internal/pricing';
+import type { ModelPricing } from '@zccusage/internal/pricing';
 import type { PlanType, ProviderProfile } from './_types.ts';
 import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
-import { PricingFetcher } from '@better-ccusage/internal/pricing';
-import { loadMergedPricing } from '@better-ccusage/internal/remote-pricing';
 import { Result } from '@praha/byethrow';
+import { PricingFetcher } from '@zccusage/internal/pricing';
+import { loadMergedPricing } from '@zccusage/internal/remote-pricing';
 import * as v from 'valibot';
 import { DEFAULT_BILLING_CURRENCY, PRICING_FILE_NAME } from './_consts.ts';
 import { buildPlanOverrides, loadProviderProfiles, loadProviderSchedule } from './_provider-profile-loader.ts';

@@ -1,5 +1,5 @@
 {
-	"name": "@better-ccusage/internal",
+	"name": "@zccusage/internal",
 	"version": "1.4.3",
 	"private": true,
 	"description": "Shared internal utilities for zccusage toolchain",

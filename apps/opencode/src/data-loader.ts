@@ -1,10 +1,10 @@
-import type { ModelPricing } from '@better-ccusage/internal/pricing';
+import type { ModelPricing } from '@zccusage/internal/pricing';
 import type { LoadedUsageEntry } from './cost-utils.ts';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
-import { PricingFetcher } from '@better-ccusage/internal/pricing';
-import { loadMergedPricing } from '@better-ccusage/internal/remote-pricing';
+import { PricingFetcher } from '@zccusage/internal/pricing';
+import { loadMergedPricing } from '@zccusage/internal/remote-pricing';
 import { Result } from '@praha/byethrow';
 import { groupBy, sortBy } from 'es-toolkit';
 import { glob } from 'tinyglobby';

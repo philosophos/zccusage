@@ -1,6 +1,6 @@
-import type { UsageReportConfig } from '@better-ccusage/terminal/table';
+import type { UsageReportConfig } from '@zccusage/terminal/table';
 import process from 'node:process';
-import { addEmptySeparatorRow, createUsageReportTable, formatTotalsRow, formatUsageDataRow } from '@better-ccusage/terminal/table';
+import { addEmptySeparatorRow, createUsageReportTable, formatTotalsRow, formatUsageDataRow } from '@zccusage/terminal/table';
 import { define } from 'gunshi';
 import { loadOpenCodeMessages, loadOpenCodeSessions } from '../data-loader.ts';
 import { log, logger } from '../logger.ts';

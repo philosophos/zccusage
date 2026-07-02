@@ -164,10 +164,10 @@ Always prefer indexed searches (tools with `_from_index` suffix) over reading en
 - `pnpm run start blocks --token-limit <limit>` - Token limit for quota warnings (number or "max")
 - `node ./src/index.ts` - Direct execution for development
 
-**MCP Server Usage:** (now provided by the `@better-ccusage/mcp` package)
+**MCP Server Usage:** (now provided by the `@zccusage/mcp` package)
 
-- `pnpm dlx @better-ccusage/mcp@latest -- --help` - Show available options
-- `pnpm dlx @better-ccusage/mcp@latest -- --type http --port 8080` - Start HTTP transport
+- `pnpm dlx @zccusage/mcp@latest -- --help` - Show available options
+- `pnpm dlx @zccusage/mcp@latest -- --type http --port 8080` - Start HTTP transport
 
 **Cost Calculation Modes:**
 
