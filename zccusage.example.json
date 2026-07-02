@@ -1,29 +1,30 @@
 {
 	"$schema": "./apps/zccusage/config-schema.json",
 	"defaults": {
-		"json": true,
 		"mode": "auto",
-		"timezone": "Asia/Tokyo",
-		"locale": "ja-JP",
-		"breakdown": false
+		"format": "tree",
+		"group": "agent,reseller,region,plan,model,monthly",
+		"statsCurrency": "CNY",
+		"costColumns": "billing,stats",
+		"rate": "USD/CNY=7.2",
+		"dbPath": "~/.config/cc-switch/zccusage.duckdb",
+		"noDuckdb": false,
+		"rebuild": false,
+		"timezone": "Asia/Shanghai",
+		"locale": "zh-CN",
+		"breakdown": false,
+		"order": "desc"
 	},
 	"commands": {
-		"daily": {
-			"instances": true,
-			"order": "desc",
-			"projectAliases": "zccusage=Usage Tracker,my-long-project-name=Project X"
-		},
-		"monthly": {
-			"breakdown": true
-		},
-		"weekly": {
-			"startOfWeek": "monday"
-		},
 		"blocks": {
+			"refreshInterval": 5,
 			"tokenLimit": "500000",
 			"sessionLength": 5,
 			"active": false
 		},
-		"statusline": {}
+		"statusline": {
+			"costSource": "auto",
+			"cache": true
+		}
 	}
 }
