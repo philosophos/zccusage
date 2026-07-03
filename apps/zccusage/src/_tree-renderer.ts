@@ -494,7 +494,7 @@ export type RenderTreeOptions = {
 };
 
 function formatBilling(costByCurrency: Record<string, number>, locale?: string): string {
-	const entries = Object.entries(costByCurrency);
+	const entries = Object.entries(costByCurrency).sort(([a], [b]) => a.localeCompare(b));
 	if (entries.length === 0) {
 		return formatMoney(0, 'USD', locale);
 	}
