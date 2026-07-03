@@ -8,7 +8,7 @@ import { Result } from '@praha/byethrow';
 import { PricingFetcher } from '@zccusage/internal/pricing';
 import { loadMergedPricing } from '@zccusage/internal/remote-pricing';
 import * as v from 'valibot';
-import { DEFAULT_BILLING_CURRENCY, PRICING_FILE_NAME } from './_consts.ts';
+import { DEFAULT_BILLING_CURRENCY, PRICING_FILE_NAME, resolveCcSwitchConfigDir } from './_consts.ts';
 import { buildPlanOverrides, loadProviderProfiles, loadProviderSchedule } from './_provider-profile-loader.ts';
 import { getClaudePaths } from './data-loader.ts';
 import { logger } from './logger.ts';
@@ -195,6 +195,9 @@ function buildPricingSearchPaths(): string[] {
 		// getClaudePaths throws if no valid Claude dir exists — user pricing is
 		// optional, so fall back to just the local cwd candidate.
 	}
+	// The cc-switch config dir ($CC_SWITCH_CONFIG_DIR, else legacy ~/.cc-switch-tui
+	// or ~/.cc-switch) is the canonical home for per-platform pricing overrides.
+	dirs.push(resolveCcSwitchConfigDir());
 	return dirs.map(dir => path.join(dir, PRICING_FILE_NAME));
 }
 
