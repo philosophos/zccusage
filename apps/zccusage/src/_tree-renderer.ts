@@ -1678,7 +1678,7 @@ if (import.meta.vitest != null) {
 			const out = renderTree(buildTree(items, ['time', 'model']), { title: 'Daily' });
 			expect(out).toContain('$1.00'); // USD
 			expect(out).toContain('7.00'); // CNY
-			expect(out).toContain(' / '); // billing join separator
+			expect(out).toContain(' + '); // billing join separator
 		});
 
 		it('stats with no rate for a currency → unconverted label', () => {
