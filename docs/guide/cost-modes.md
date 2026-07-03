@@ -372,7 +372,7 @@ When a report spans providers with different billing currencies, zccusage output
 CN¥152.30 + $4.50
 ```
 
-### `mode=auto` No Longer Prefers `cost_usd`
+### `mode=auto` No Longer Prefers `total_cost_usd`
 
 Previously, `mode=auto` would prefer `cc-switch`'s `total_cost_usd` (a USD figure) when present. This was misleading for non-USD providers. Now `mode=auto` uses the provider's pricing currency (from structured pricing or bundled pricing), not the cc-switch USD column.
 
