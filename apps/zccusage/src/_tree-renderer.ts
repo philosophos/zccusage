@@ -509,8 +509,8 @@ function gray(s: string, level: number): string {
  * - digits 4-6 from the end (thousands..hundred-thousands): mid gray (246)
  * - higher-order digits: default (brightest)
  */
-const GRAY_LOW = 238;
-const GRAY_MID = 246;
+const GRAY_LOW = 245;
+const GRAY_MID = 251;
 
 /**
  * Dim the decimal-fraction part of a money string (`.XX`) so the integer part
