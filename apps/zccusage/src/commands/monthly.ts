@@ -29,8 +29,9 @@ export const monthlyCommand = define({
 		const config = loadConfig(ctx.values.config, ctx.values.debug);
 		const mergedOptions = mergeConfigWithArgs(ctx, config, ctx.values.debug);
 
-		// --jq implies --json
-		const useJson = Boolean(mergedOptions.json) || mergedOptions.jq != null;
+		// Resolve effective format: --format json, --json shorthand, or --jq all select JSON output.
+		const format = resolveFormat(mergedOptions);
+		const useJson = format === 'json' || mergedOptions.jq != null;
 		if (useJson) {
 			logger.level = 0;
 		}
@@ -70,7 +71,6 @@ export const monthlyCommand = define({
 		}
 
 		// Tree / tree-table output format (alongside table/json)
-		const format = resolveFormat(mergedOptions);
 		if (format === 'tree' || format === 'tree-table') {
 			logger.level = 0;
 			const items = monthlyData.map(d => ({
