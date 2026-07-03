@@ -857,12 +857,15 @@ export function renderTreeTable(nodes: TreeNode[], opts: RenderTreeOptions): str
 	}
 	const w = (sel: (r: CellRow) => string): number => rows.reduce((m, r) => Math.max(m, stringWidth(sel(r))), 0);
 	const wLabel = w(r => `${r.skeleton}${r.label}`);
-	const wIn = w(r => r.in);
-	const wOut = w(r => r.out);
-	const wCc = w(r => r.cacheCreate);
-	const wCr = w(r => r.cacheRead);
-	const wBilling = w(r => r.billing);
-	const wStats = rows.some(r => r.stats != null) ? w(r => r.stats ?? '') : 0;
+	// Column width must cover both the data values AND the header label, otherwise
+	// a wide header (e.g. `cache_create` = 12 chars) overflows a narrow data
+	// column (e.g. `5,466,485` = 9 chars) and misaligns headers from body rows.
+	const wIn = Math.max(w(r => r.in), stringWidth('in'));
+	const wOut = Math.max(w(r => r.out), stringWidth('out'));
+	const wCc = Math.max(w(r => r.cacheCreate), stringWidth('cache_create'));
+	const wCr = Math.max(w(r => r.cacheRead), stringWidth('cache_read'));
+	const wBilling = Math.max(w(r => r.billing), stringWidth('billing'));
+	const wStats = rows.some(r => r.stats != null) ? Math.max(w(r => r.stats ?? ''), stringWidth('stats')) : 0;
 	const pad = (s: string, width: number): string => padLeftToWidth(s, width);
 	const lines: string[] = [];
 	lines.push(`Claude Code Token Usage Report - ${opts.title} (Tree-Table)`);
