@@ -38,6 +38,68 @@ zccusage daily -b
 zccusage daily --json --breakdown
 ```
 
+#### `--format` / `-f`
+
+Select the output format explicitly:
+
+```bash
+zccusage daily -f table       # Default — pretty-printed table
+zccusage daily -f json        # Structured JSON
+zccusage daily -f tree        # Hierarchical tree view
+zccusage daily -f tree-table  # Column-aligned tree + table
+```
+
+- `--json` / `-j` is a shorthand for `-f json`.
+- `--tree` is a shorthand for `-f tree`.
+- An explicit `--format` value wins over `--json` / `--tree` when both are set.
+
+#### `tree-table`
+
+`-f tree-table` renders the hierarchical tree with aligned columns (input/output/cache-create/cache-read/billing). Useful when you want both the nesting overview and precise per-row numbers. Token digits and currency symbols are dimmed by tier — see [Billing Display Behavior](./cost-modes.md#billing-display-behavior).
+
+### Group & Nesting
+
+`--group` selects both the time bucket (which data loader runs) and the nesting dimensions of the tree/tree-table output. It is a comma-separated list:
+
+```
+--group <dim1>,<dim2>,...,<time-bucket>
+```
+
+- **Time bucket** (one of `daily`, `weekly`, `monthly`, `session`): selects the data loader and occupies the time nesting slot at its position.
+- **Nesting dims** (any of `project`, `provider`, `agent`, `reseller`, `region`, `plan`, `model`): control how rows are nested around the time bucket.
+- Omitting a time bucket loads all records with no time aggregation.
+- Default: `daily` (→ `time, model`).
+
+```bash
+# Default daily report
+zccusage daily
+
+# Weekly, nested by agent → reseller → region → plan → model
+zccusage --group agent,reseller,region,plan,model,weekly
+
+# Session bucket only
+zccusage --group session
+```
+
+### DuckDB OLAP Store
+
+By default zccusage persists usage facts into a DuckDB columnar store for fast ad-hoc queries, and reads from it on subsequent runs.
+
+```bash
+# Use a custom DuckDB path
+zccusage daily --db-path /data/zccusage.duckdb
+
+# Bypass DuckDB and read JSONL transcripts directly (legacy glob+parse path)
+zccusage daily --no-duckdb
+
+# Force a full re-ingest (drops and re-imports all rows)
+zccusage daily --rebuild
+```
+
+- `--db-path`: defaults to `~/.cc-switch-tui/zccusage.duckdb` (or `~/.cc-switch/zccusage.duckdb`), overridable via `$CC_SWITCH_CONFIG_DIR`.
+- `--no-duckdb`: bypass the store and use the legacy direct-read path — useful for debugging or verifying DuckDB results against raw transcripts.
+- `--rebuild`: drop and re-import all rows; use after schema changes or if the store is corrupted.
+
 ### Cost Calculation Mode
 
 Choose how costs are calculated:
