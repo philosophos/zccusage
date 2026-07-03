@@ -37,9 +37,6 @@ pnpm run generate:schema || exit 1
 echo "Build avec tsdown..."
 pnpm tsdown || exit 1
 
-echo "Copy pricing file..."
-cp model_prices_and_context_window.json dist/ || exit 1
-
 # 4. Test de pnpm pack
 echo ""
 echo "4️⃣  Test de pnpm pack..."

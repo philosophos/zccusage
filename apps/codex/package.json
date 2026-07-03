@@ -2,17 +2,17 @@
   "name": "@zccusage/codex",
   "version": "1.4.3",
   "description": "Usage analysis tool for OpenAI Codex sessions",
-  "homepage": "https://github.com/cobra91/better-ccusage#readme",
+  "homepage": "https://github.com/philosophos/zccusage#readme",
   "bugs": {
-    "url": "https://github.com/cobra91/better-ccusage/issues"
+    "url": "https://github.com/philosophos/zccusage/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cobra91/better-ccusage.git"
+    "url": "git+https://github.com/philosophos/zccusage.git"
   },
   "funding": "https://github.com/cobra91/better-ccusage?sponsor=1",
   "license": "MIT",
-  "author": "cobra91",
+  "author": "philosophos",
   "type": "module",
   "module": "./dist/index.js",
   "bin": {
