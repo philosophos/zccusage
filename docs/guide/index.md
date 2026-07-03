@@ -68,6 +68,22 @@ Unlike other CLI tools, we pay extreme attention to bundle size. zccusage achiev
 - **Custom Date Filtering** - Flexible time range selection and sorting
 - **Offline Mode** - Cached pricing data for air-gapped environments
 
+### 🗄️ DuckDB OLAP Acceleration
+
+zccusage persists usage facts into a DuckDB columnar store for fast ad-hoc queries. Subsequent runs read from the store instead of re-parsing raw transcripts. Use `--no-duckdb` to bypass and `--rebuild` to re-ingest.
+
+### 🌳 tree-table Output & `--group` Nesting
+
+`-f tree-table` renders a hierarchical tree with aligned columns. `--group` selects both the time bucket (`daily`/`weekly`/`monthly`/`session`) and nesting dimensions (`project`/`provider`/`agent`/`reseller`/`region`/`plan`/`model`) for multi-dimensional analysis.
+
+### 💲 Structured Pricing Configuration
+
+Define per-reseller, per-region, per-plan pricing in your billing currency via `zccusage-pricing.json`. Override the bundled USD pricing with platform-accurate costs; conflicts are surfaced, not silently swallowed.
+
+### 🎨 Billing Display Polish
+
+Currency symbols and token digits are dimmed by tier so significant figures stand out. Multi-currency totals are joined with ` + ` and sorted for stable display.
+
 ## Multi-Provider Support
 
 zccusage extends the original ccusage functionality with support for multiple AI providers:
