@@ -87,6 +87,11 @@ zccusage searches for configuration files in these locations (in priority order)
 1. **Local project**: `.zccusage/zccusage.json` (higher priority)
 2. **User config**: `~/.claude/zccusage.json` or `~/.config/claude/zccusage.json` (lower priority)
 
+Pricing and payments files use the same search paths under their respective names:
+
+- `zccusage-pricing.json` — `.zccusage/` (local) or Claude config dir (user)
+- `zccusage-payments.json` — `.zccusage/` (local) or Claude config dir (user)
+
 Configuration files are merged in priority order, with local project settings overriding user settings.
 If you pass a custom config file using `--config`, it will override both local and user configs.
 Note that configuration files are not required; if none are found, zccusage will use built-in defaults.
@@ -290,6 +295,56 @@ For a complete configuration example, see [`/zccusage.example.json`](/zccusage.e
 - Global defaults configuration
 - Command-specific overrides
 - All available options with proper types
+
+## Structured Pricing
+
+`zccusage-pricing.json` overrides the bundled USD pricing with per-platform billing-currency prices. It is a JSON array of rules:
+
+```json
+[
+  {
+    "reseller": "aliyun",
+    "model": "glm-5.2",
+    "currency": "CNY",
+    "inputCostPerMTokens": 8,
+    "outputCostPerMTokens": 28
+  },
+  {
+    "reseller": "aliyun",
+    "model": "glm-5.2",
+    "region": "singapore",
+    "inputCostPerMTokens": 6,
+    "outputCostPerMTokens": 22
+  }
+]
+```
+
+### Fields
+
+| Field | Required | Description |
+|---|---|---|
+| `reseller` | ✅ | Reseller keyword (min length 1); matched fuzzily as a bidirectional substring against the provider profile. |
+| `model` | ✅ | Model name to match. |
+| `region` | ⬜ | Optional region override (exact match). |
+| `plan` | ⬜ | Optional plan override (exact match). |
+| `currency` | ⬜ | Billing currency code (e.g. `CNY`, `USD`). Defaults to the bundled default. |
+| `inputCostPerMTokens` | ✅ | Input price per million tokens (in `currency`). |
+| `outputCostPerMTokens` | ✅ | Output price per million tokens. |
+| `cacheCreationCostPerMTokens` | ⬜ | Cache-create price per million tokens. |
+| `cacheReadCostPerMTokens` | ⬜ | Cache-read price per million tokens. |
+
+Prices are per-million tokens; zccusage converts them to per-token internally.
+
+### Matching & Specificity
+
+- `reseller` is matched fuzzily (bidirectional substring) against the provider profile.
+- `region` and `plan` match exactly when present; omit them for a default covering all the reseller's regions/plans.
+- **Specificity** = number of `region` + `plan` present. A higher-specificity rule overrides a lower one for the same `reseller` + `model`.
+- **Conflict**: if two or more rules share the top specificity for the same key, zccusage throws an error (surfaced — not silently swallowed).
+
+### Currency
+
+Costs are reported in the rule's `currency` as-is; zccusage does not convert between currencies. Multi-currency totals are joined with ` + ` — see [Billing Display Behavior](./cost-modes.md#billing-display-behavior).
 
 ## Configuration Priority
 
