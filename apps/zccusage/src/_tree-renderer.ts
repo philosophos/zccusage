@@ -495,24 +495,40 @@ export type RenderTreeOptions = {
 };
 
 /**
- * Dim the last 3 characters of `s` (the hundreds/tens/units digits of a token
- * count) so the eye lands on the high-order digits. No-op when colors are
- * disabled (picocolors auto-detects TTY).
+ * 256-color grayscale wrapper. `level` is the xterm 256 palette gray index
+ * (0=bright, 255=dark). Lower level = brighter. Falls back to plain when
+ * colors are disabled (picocolors auto-detects TTY).
  */
-function dimLast3(s: string): string {
-	if (s.length <= 3) {
-		return pc.dim(s);
-	}
-	return s.slice(0, -3) + pc.dim(s.slice(-3));
+function gray(s: string, level: number): string {
+	return pc.isColorSupported ? `[38;5;${level}m${s}[39m` : s;
 }
 
 /**
+ * Token-digit visual hierarchy:
+ * - last 3 digits (hundreds/tens/units): darkest gray (238)
+ * - digits 4-6 from the end (thousands..hundred-thousands): mid gray (246)
+ * - higher-order digits: default (brightest)
+ */
+const GRAY_LOW = 238;
+const GRAY_MID = 246;
+
+/**
  * Dim the decimal-fraction part of a money string (`.XX`) so the integer part
- * stands out. Handles `$12.34` (dim `.34`) and `¥85.00 CNY` (dim `.00`, leave
- * ` CNY`).
+ * stands out. Currency symbol (`$`, `¥`, `CN¥`) is mid-gray; the decimal
+ * fraction is darkest gray. Handles `$12.34` (sym `.34` dim, `$` mid) and
+ * `¥85.00 CNY` (`.00` dim, `¥` mid, ` CNY` left).
  */
 function dimMoney(s: string): string {
-	return s.replace(/(\.\d+)/, m => pc.dim(m));
+	// Currency symbol(s) at the start: mid gray.
+	const symMatch = s.match(/^\D+/);
+	const sym = symMatch != null ? symMatch[0] : '';
+	const rest = sym.length > 0 ? s.slice(sym.length) : s;
+	// Decimal fraction: darkest gray.
+	const fracMatch = rest.match(/(\.\d+)/);
+	const head = fracMatch != null ? rest.slice(0, fracMatch.index) : rest;
+	const frac = fracMatch != null ? fracMatch[0] : '';
+	const tail = fracMatch != null ? rest.slice((fracMatch.index ?? 0) + frac.length) : '';
+	return gray(sym, GRAY_MID) + head + gray(frac, GRAY_LOW) + tail;
 }
 
 function formatBilling(costByCurrency: Record<string, number>, locale?: string): string {
@@ -543,7 +559,7 @@ function formatTokens(n: number, separator: TreeSeparator): string {
 	const abs = Math.abs(Math.trunc(n));
 	const s = String(abs);
 	if (s.length <= 3) {
-		return dimLast3(`${sign}${s}`);
+		return gray(`${sign}${s}`, GRAY_LOW);
 	}
 	const sep = separator === 'combining' ? COMBINING_LOW_LINE : ',';
 	// Group from the right in threes. For the combining style, the separator
@@ -554,12 +570,25 @@ function formatTokens(n: number, separator: TreeSeparator): string {
 		groups.push(s.slice(Math.max(0, i - 3), i));
 	}
 	groups.reverse();
+	// Grayscale hierarchy by group position from the right:
+	//   last group (digits 1-3)   -> GRAY_LOW (darkest)
+	//   2nd-last group (digits 4-6) -> GRAY_MID
+	//   earlier groups (high-order) -> default (brightest)
+	const styledGroups = groups.map((g, i) => {
+		if (i === groups.length - 1) {
+			return gray(g, GRAY_LOW);
+		}
+		if (i === groups.length - 2) {
+			return gray(g, GRAY_MID);
+		}
+		return g;
+	});
 	if (separator === 'combining') {
 		// Overlay underline under the last digit of each group except the final
 		// group (no trailing separator). e.g. ["1","063","628"] → "1̲063̲628".
-		return dimLast3(`${sign}${groups.map((g, i) => i < groups.length - 1 ? `${g}${sep}` : g).join('')}`);
+		return `${sign}${styledGroups.map((g, i) => i < styledGroups.length - 1 ? `${g}${sep}` : g).join('')}`;
 	}
-	return dimLast3(`${sign}${groups.join(',')}`);
+	return `${sign}${styledGroups.join(',')}`;
 }
 
 /**
