@@ -17,6 +17,7 @@ import type { ProviderProfile, TreeBucket, TreeDimension } from './_types.ts';
 import type { ModelBreakdown } from './data-loader.ts';
 import process from 'node:process';
 import { formatMoney } from '@zccusage/terminal/table';
+import pc from 'picocolors';
 import stringWidth from 'string-width';
 import { sumToCurrency } from './_currency-convert.ts';
 import { loadPaymentRecords } from './_payments-loader.ts';
@@ -493,12 +494,33 @@ export type RenderTreeOptions = {
 	wrap?: boolean;
 };
 
+/**
+ * Dim the last 3 characters of `s` (the hundreds/tens/units digits of a token
+ * count) so the eye lands on the high-order digits. No-op when colors are
+ * disabled (picocolors auto-detects TTY).
+ */
+function dimLast3(s: string): string {
+	if (s.length <= 3) {
+		return pc.dim(s);
+	}
+	return s.slice(0, -3) + pc.dim(s.slice(-3));
+}
+
+/**
+ * Dim the decimal-fraction part of a money string (`.XX`) so the integer part
+ * stands out. Handles `$12.34` (dim `.34`) and `¥85.00 CNY` (dim `.00`, leave
+ * ` CNY`).
+ */
+function dimMoney(s: string): string {
+	return s.replace(/(\.\d+)/, m => pc.dim(m));
+}
+
 function formatBilling(costByCurrency: Record<string, number>, locale?: string): string {
 	const entries = Object.entries(costByCurrency).sort(([a], [b]) => a.localeCompare(b));
 	if (entries.length === 0) {
-		return formatMoney(0, 'USD', locale);
+		return dimMoney(formatMoney(0, 'USD', locale));
 	}
-	return entries.map(([currency, amount]) => formatMoney(amount, currency, locale)).join(' + ');
+	return entries.map(([currency, amount]) => dimMoney(formatMoney(amount, currency, locale))).join(' + ');
 }
 
 const COMBINING_LOW_LINE = '̲';
@@ -521,7 +543,7 @@ function formatTokens(n: number, separator: TreeSeparator): string {
 	const abs = Math.abs(Math.trunc(n));
 	const s = String(abs);
 	if (s.length <= 3) {
-		return `${sign}${s}`;
+		return dimLast3(`${sign}${s}`);
 	}
 	const sep = separator === 'combining' ? COMBINING_LOW_LINE : ',';
 	// Group from the right in threes. For the combining style, the separator
@@ -535,9 +557,9 @@ function formatTokens(n: number, separator: TreeSeparator): string {
 	if (separator === 'combining') {
 		// Overlay underline under the last digit of each group except the final
 		// group (no trailing separator). e.g. ["1","063","628"] → "1̲063̲628".
-		return `${sign}${groups.map((g, i) => i < groups.length - 1 ? `${g}${sep}` : g).join('')}`;
+		return dimLast3(`${sign}${groups.map((g, i) => i < groups.length - 1 ? `${g}${sep}` : g).join('')}`);
 	}
-	return `${sign}${groups.join(',')}`;
+	return dimLast3(`${sign}${groups.join(',')}`);
 }
 
 /**
