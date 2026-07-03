@@ -498,7 +498,7 @@ function formatBilling(costByCurrency: Record<string, number>, locale?: string):
 	if (entries.length === 0) {
 		return formatMoney(0, 'USD', locale);
 	}
-	return entries.map(([currency, amount]) => formatMoney(amount, currency, locale)).join(' / ');
+	return entries.map(([currency, amount]) => formatMoney(amount, currency, locale)).join(' + ');
 }
 
 const COMBINING_LOW_LINE = '̲';

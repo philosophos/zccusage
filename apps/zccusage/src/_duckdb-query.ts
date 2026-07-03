@@ -203,10 +203,14 @@ async function queryByPeriod(options: QueryOptions | undefined, kind: PeriodKind
 						cache_read_input_tokens: row.cache_read_tokens,
 					},
 				},
-				costUSD: row.cost_usd ?? undefined,
+				costUSD: undefined,
 			} as unknown as UsageData;
+			// mode=auto must NOT fall back to cc-switch's precomputed cost_usd (USD) —
+			// that mixes USD into per-provider billing-currency totals and misleads.
+			// Always compute from the provider's pricing currency; fetcher==null means
+			// no pricing source at all, so 0 rather than a misleading USD figure.
 			const money = fetcher == null
-				? { amount: row.cost_usd ?? 0, currency: 'USD' } as Money
+				? { amount: 0, currency: 'USD' } as Money
 				: await calculateCostForEntry(synth, mode, fetcher, row.provider_id ?? undefined);
 			rowCostMap.set(row, money);
 		}));
@@ -495,10 +499,14 @@ export async function querySessionUsage(options?: QueryOptions): Promise<Session
 						cache_read_input_tokens: row.cache_read_tokens,
 					},
 				},
-				costUSD: row.cost_usd ?? undefined,
+				costUSD: undefined,
 			} as unknown as UsageData;
+			// mode=auto must NOT fall back to cc-switch's precomputed cost_usd (USD) —
+			// that mixes USD into per-provider billing-currency totals and misleads.
+			// Always compute from the provider's pricing currency; fetcher==null means
+			// no pricing source at all, so 0 rather than a misleading USD figure.
 			const money = fetcher == null
-				? { amount: row.cost_usd ?? 0, currency: 'USD' } as Money
+				? { amount: 0, currency: 'USD' } as Money
 				: await calculateCostForEntry(synth, mode, fetcher, row.provider_id ?? undefined);
 			rowCostMap.set(row, money);
 		}));
