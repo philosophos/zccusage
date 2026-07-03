@@ -2,7 +2,7 @@
 
 echo "🔍 Vérification des dépendances manquantes..."
 echo "============================================="
-cd apps/better-ccusage
+cd apps/zccusage
 
 # Lister tous les imports depuis les fichiers TypeScript
 echo "Imports trouvés:"

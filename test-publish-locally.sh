@@ -9,20 +9,20 @@ echo "===================================="
 echo ""
 echo "1️⃣  Vérification erreurs TypeScript..."
 echo "===================================="
-cd apps/better-ccusage
+cd apps/zccusage
 if pnpm typecheck 2>&1 | grep -q "error TS"; then
     echo "❌ Erreurs TypeScript trouvées!"
     pnpm typecheck 2>&1 | grep "error TS"
     exit 1
 else
-    echo "✅ Aucune erreur TypeScript dans better-ccusage"
+    echo "✅ Aucune erreur TypeScript dans zccusage"
 fi
 cd ../..
 
 echo ""
-echo "2️⃣  Exécution de pnpm pack sure better-ccusage..."
+echo "2️⃣  Exécution de pnpm pack sure zccusage..."
 echo "==============================================="
-cd apps/better-ccusage
+cd apps/zccusage
 
 # Créer un répertoire temporaire pour tester
 TEST_DIR="../../test-pack-$$"

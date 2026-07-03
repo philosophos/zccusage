@@ -6,13 +6,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a monorepo containing multiple packages. For package-specific guidance, refer to the individual CLAUDE.md files:
 
-- **Main CLI Package**: @apps/better-ccusage/CLAUDE.md - Core better-ccusage CLI tool and library
-- **MCP Server Package**: @apps/mcp/CLAUDE.md - MCP server implementation for better-ccusage data
+- **Main CLI Package**: @apps/zccusage/CLAUDE.md - Core zccusage CLI tool and library
+- **MCP Server Package**: @apps/mcp/CLAUDE.md - MCP server implementation for zccusage data
 - **Documentation**: @docs/CLAUDE.md - VitePress-based documentation website
 
-## About better-ccusage
+## About zccusage
 
-better-ccusage is a fork of the original ccusage project that addresses a critical limitation: while ccusage focuses exclusively on Claude Code usage with Anthropic models, better-ccusage extends support to external providers that use Claude Code with different providers like Anthropic, Zai, Dashscope, and many models like GLM-xx, kat-coder.
+zccusage is a fork of the original ccusage project that addresses a critical limitation: while ccusage focuses exclusively on Claude Code usage with Anthropic models, zccusage extends support to external providers that use Claude Code with different providers like Anthropic, Zai, Dashscope, and many models like GLM-xx, kat-coder.
 
 ### Why the Fork?
 
@@ -22,28 +22,28 @@ The original ccusage project is designed specifically for Anthropic's Claude Cod
 - **GLM-xx, kat-coder, kimi and Minimax** models from other AI providers
 - Multi-provider environments where organizations use different AI services through Claude Code
 
-better-ccusage maintains full compatibility with ccusage while adding comprehensive support for these additional providers and models.
+zccusage maintains full compatibility with ccusage while adding comprehensive support for these additional providers and models.
 
 ### Key Differences
 
-| Feature                      | Original ccusage | better-ccusage |
-| ---------------------------- | ---------------- | -------------- |
-| Anthropic Models             | ✅               | ✅             |
-| Zai Provider                 | ❌               | ✅             |
-| GLM\* Models                 | ❌               | ✅             |
-| kat-coder                    | ❌               | ✅             |
-| kimi\* Models                | ❌               | ✅             |
-| MiniMax Models               | ❌               | ✅             |
-| Multi-Provider Support       | ❌               | ✅             |
-| Automatic Provider Detection | ❌               | ✅             |
-| Cost Calculation by Provider | ❌               | ✅             |
-| Original ccusage Features    | ✅               | ✅             |
+| Feature                      | Original ccusage | zccusage |
+| ---------------------------- | ---------------- | -------- |
+| Anthropic Models             | ✅               | ✅       |
+| Zai Provider                 | ❌               | ✅       |
+| GLM\* Models                 | ❌               | ✅       |
+| kat-coder                    | ❌               | ✅       |
+| kimi\* Models                | ❌               | ✅       |
+| MiniMax Models               | ❌               | ✅       |
+| Multi-Provider Support       | ❌               | ✅       |
+| Automatic Provider Detection | ❌               | ✅       |
+| Cost Calculation by Provider | ❌               | ✅       |
+| Original ccusage Features    | ✅               | ✅       |
 
 ### Automatic Model Detection
 
 **No Manual Provider Prefix Management Required**
 
-better-ccusage automatically detects and supports new AI providers without code changes. The pricing system uses intelligent fallback matching:
+zccusage automatically detects and supports new AI providers without code changes. The pricing system uses intelligent fallback matching:
 
 1. **Exact Match**: Direct lookup for model name (e.g., `"kimi-for-coding"`)
 2. **Provider Prefix Match**: Suffix matching for qualified names (e.g., `"moonshot/kimi-for-coding"`)
@@ -136,7 +136,7 @@ Always prefer indexed searches (tools with `_from_index` suffix) over reading en
 
 **Publishing gotchas:**
 
-- `better-ccusage` has no build script — run `pnpm tsdown` directly
+- `zccusage` has no build script — run `pnpm tsdown` directly
 - `consola` embeds the version at build time in a hashed chunk — must rebuild AFTER bumping version
 - npm forbids overwriting published versions — always bump to a new version
 - `prepack` script rebuilds on publish — verify the prepack build produces correct output
@@ -257,10 +257,10 @@ Follow the Conventional Commits specification with package/area prefixes:
 **Scope Naming Rules:**
 
 - **Apps**: Use the app directory name
-  - `feat(better-ccusage):` - Changes to apps/better-ccusage
+  - `feat(zccusage):` - Changes to apps/zccusage
   - `fix(mcp):` - Fixes in apps/mcp
   - `feat(codex):` - Features for apps/codex (if exists)
-  - `feat(better-ccusage):` - Changes to better-ccusage core functionality
+  - `feat(zccusage):` - Changes to zccusage core functionality
 
 - **Packages**: Use the package directory name
   - `feat(terminal):` - Changes to packages/terminal
@@ -294,11 +294,11 @@ Follow the Conventional Commits specification with package/area prefixes:
 **Examples:**
 
 ```markdown
-feat(better-ccusage): add support for GLM-xx, kat-coder models
+feat(zccusage): add support for GLM-xx, kat-coder models
 fix(mcp): resolve connection timeout issues
 docs(guide): update installation instructions
-refactor(better-ccusage): extract cost calculation to separate module
-feat(better-ccusage): add Zai provider integration
+refactor(zccusage): extract cost calculation to separate module
+feat(zccusage): add Zai provider integration
 test(mcp): add integration tests for HTTP transport
 chore: update dependencies
 ```
@@ -308,7 +308,7 @@ chore: update dependencies
 PR titles should follow the same format as commit messages. When a PR contains multiple commits, the title should describe the main change:
 
 ```markdown
-feat(better-ccusage): implement session-based usage reports
+feat(zccusage): implement session-based usage reports
 fix(mcp): handle edge cases in data aggregation
 docs: comprehensive API documentation update
 ```
@@ -365,7 +365,7 @@ This ensures code quality and catches issues immediately after changes.
 - **Placement**: Always place screenshots immediately after the main heading (H1) in documentation pages
 - **Purpose**: Provide immediate visual context to users before textual explanations
 - **Guides with Screenshots**:
-  - `/docs/guide/index.md` (What is better-ccusage) - Main usage screenshot
+  - `/docs/guide/index.md` (What is zccusage) - Main usage screenshot
   - `/docs/guide/daily-reports.md` - Daily report output screenshot
   - `/docs/guide/live-monitoring.md` - Live monitoring dashboard screenshot
   - `/docs/guide/mcp-server.md` - Claude Desktop integration screenshot

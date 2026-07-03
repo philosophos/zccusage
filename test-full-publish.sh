@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "🔍 TEST DE PUBLICATION COMPLETE - better-ccusage"
+echo "🔍 TEST DE PUBLICATION COMPLETE - zccusage"
 echo "================================================"
 echo ""
 
 # 1. Nettoyer les anciens build
 echo "1️⃣  Nettoyage des anciens builds..."
 echo "==================================="
-cd apps/better-ccusage
+cd apps/zccusage
 rm -rf dist node_modules/.tsbuildinfo
 
 cd ../..
@@ -17,7 +17,7 @@ cd ../..
 echo ""
 echo "2️⃣  Vérification des imports avec tsx..."
 echo "========================================"
-cd apps/better-ccusage
+cd apps/zccusage
 
 # Tester l'import principal pour vérifier les dépendances
 echo "Test d'import principal..."
@@ -29,7 +29,7 @@ cd ../..
 echo ""
 echo "3️⃣  Simulation du prepack..."
 echo "============================"
-cd apps/better-ccusage
+cd apps/zccusage
 
 echo "Génération du schema..."
 pnpm run generate:schema || exit 1
@@ -50,7 +50,7 @@ pnpm pack --pack-destination /tmp || exit 1
 echo ""
 echo "5️⃣  Nettoyage..."
 echo "================"
-rm -f /tmp/better-ccusage-*.tgz
+rm -f /tmp/zccusage-*.tgz
 
 echo ""
 echo "✅ TOUS LES TESTS ONT RÉUSSI !"

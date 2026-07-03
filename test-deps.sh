@@ -1,12 +1,12 @@
 #!/bin/bash
 set -e
 
-echo "🔍 VÉRIFICATION DES DÉPENDANCES - better-ccusage"
+echo "🔍 VÉRIFICATION DES DÉPENDANCES - zccusage"
 echo "================================================="
 echo ""
 
 # Vérifier que chaque import a sa dépendance correspondante
-cd apps/better-ccusage
+cd apps/zccusage
 
 # Lister toutes les imports depuis les fichiers source
 echo "📋 Vérification des imports dans le code source..."

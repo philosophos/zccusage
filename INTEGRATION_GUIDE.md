@@ -1,6 +1,6 @@
-# Upstream Integration Guide for better-ccusage
+# Upstream Integration Guide for zccusage
 
-This guide helps manage integrations from the upstream ccusage project while preserving better-ccusage custom features.
+This guide helps manage integrations from the upstream ccusage project while preserving zccusage custom features.
 
 ## Key Integration Areas
 
@@ -106,9 +106,9 @@ npx vitest --run --filter="internal" pricing
 
 ```bash
 # Preserve your custom flags and modes
-git checkout --ours apps/better-ccusage/src/commands/
-git checkout --ours apps/better-ccusage/src/_pricing-fetcher.ts
-git add apps/better-ccusage/src/commands/ apps/better-ccusage/src/_pricing-fetcher.ts
+git checkout --ours apps/zccusage/src/commands/
+git checkout --ours apps/zccusage/src/_pricing-fetcher.ts
+git add apps/zccusage/src/commands/ apps/zccusage/src/_pricing-fetcher.ts
 ```
 
 ### 3. **Dependency Conflicts**
