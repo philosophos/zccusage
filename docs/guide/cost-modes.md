@@ -338,3 +338,44 @@ After understanding cost modes:
 - Explore [Configuration](/guide/configuration) for environment setup
 - Learn about [Custom Paths](/guide/custom-paths) for multiple data sources
 - Try [Live Monitoring](/guide/live-monitoring) with different cost modes
+
+## Billing Display Behavior
+
+Beyond the cost-calculation mode, zccusage applies a few display behaviors to billing output.
+
+### Grayscale Tiers
+
+In `table` and `tree-table` output (when color is supported), zccusage dims secondary digits so the most significant figures stand out:
+
+- **Mid-gray**: currency symbols (`$`, `¥`, `CN¥`) and token digits 4–6 (thousands group).
+- **Low-gray**: token last 3 digits and billing decimal fractions.
+
+Hierarchy: low-gray < mid-gray < default. Each token's thousands-groups are split: the last (digits 1–3) is low-gray, the 2nd-last (digits 4–6) is mid-gray, earlier groups are default.
+
+```
+1,234,567,890
+      ^^^ ^^^
+      mid low
+```
+
+```
+CN¥21.71
+^^^  ^^^
+mid  low
+```
+
+### Multi-Currency Billing
+
+When a report spans providers with different billing currencies, zccusage outputs each currency as-is and joins them with ` + `, sorted alphabetically for stable order:
+
+```
+CN¥152.30 + $4.50
+```
+
+### `mode=auto` No Longer Prefers `cost_usd`
+
+Previously, `mode=auto` would prefer `cc-switch`'s `total_cost_usd` (a USD figure) when present. This was misleading for non-USD providers. Now `mode=auto` uses the provider's pricing currency (from structured pricing or bundled pricing), not the cc-switch USD column.
+
+### Pricing-Error Surfacing
+
+If `zccusage-pricing.json` fails to load (e.g. malformed JSON, conflicting rules), zccusage logs the error details via `logger.error`, then falls back to the bundled static pricing. The error is surfaced rather than silently swallowed.
