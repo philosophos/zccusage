@@ -549,6 +549,13 @@ export async function querySessionUsage(options?: QueryOptions): Promise<Session
 				if (row == null) {
 					continue;
 				}
+				// lastActivity must be tracked BEFORE skipping <synthetic> rows — the
+				// placeholder's timestamp is real even though its tokens are zero.
+				// Without this, a session whose rows are all <synthetic> leaves
+				// lastActivity='' and crashes createActivityDate() below.
+				if (row.last_activity != null && row.last_activity > lastActivity) {
+					lastActivity = row.last_activity;
+				}
 				// Skip synthetic model (zero-token placeholder, never billed)
 				if (row.model === '<synthetic>') {
 					continue;
@@ -570,9 +577,6 @@ export async function querySessionUsage(options?: QueryOptions): Promise<Session
 				cacheReadTokens += row.cache_read_tokens ?? 0;
 				totalCost += cost.amount;
 				addCostToMap(costByCurrency, cost);
-				if (row.last_activity != null && row.last_activity > lastActivity) {
-					lastActivity = row.last_activity;
-				}
 
 				const bdKey = `${row.model ?? 'unknown'}\x00${row.provider_id ?? ''}`;
 				const existing = breakdownMap.get(bdKey);
